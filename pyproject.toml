@@ -1,0 +1,14 @@
+[project]
+name = "a1c"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "agno>=1.8.0",
+    "colored>=2.3.1",
+    "exa-py>=1.15.3",
+    "neo4j>=5.28.2",
+    "owlready2>=0.48",
+    "rdflib>=7.1.4",
+]
