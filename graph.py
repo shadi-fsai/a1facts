@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 URI = os.getenv("NEO4J_URI")
-AUTH = ("neo4j", os.getenv("NEO4J_PASSWORD"))
+AUTH = ("neo4j", os.getenv("NEO4J_AUTH"))
 
 class Neo4jGraph:
     """
@@ -16,7 +16,7 @@ class Neo4jGraph:
     based on a predefined ontology.
     """
 
-    def __init__(self, uri, user, password):
+    def __init__(self):
         """
         Initializes the Neo4jGraph class and connects to the database.
 
@@ -26,7 +26,7 @@ class Neo4jGraph:
             password (str): The password for authentication.
         """
         try:
-            self.driver = GraphDatabase.driver(uri, auth=(user, password))
+            self.driver = GraphDatabase.driver(URI, auth=(AUTH[0], AUTH[1]))
             print("Successfully connected to Neo4j database.")
         except Exception as e:
             print(f"Failed to connect to Neo4j database: {e}")
@@ -212,12 +212,9 @@ class Neo4jGraph:
 if __name__ == "__main__":
     # --- Configuration ---
     # IMPORTANT: Replace with your Neo4j database credentials.
-    NEO4J_URI = URI
-    NEO4J_USER = AUTH[0]
-    NEO4J_PASSWORD = AUTH[1]
-
+    
     # Initialize the graph connection
-    graph = Neo4jGraph(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+    graph = Neo4jGraph()
 
     # --- Main Execution Logic ---
     if graph.driver:

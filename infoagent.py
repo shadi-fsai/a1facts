@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from company_ontology import onto
 from colored import cprint
 from agno.tools import tool
+from graph import Neo4jGraph
 
 load_dotenv()
 
@@ -85,34 +86,86 @@ def get_ontology_description():
     except Exception as e:
         return f"Error reading company_ontology.py: {str(e)}"
 
-def get_knowledge_instantiation_example():
-    try:
-        with open('test.py', 'r') as file:
-            return file.read()
-    except FileNotFoundError:
-        return "Error: test.py file not found"
-    except Exception as e:
-        return f"Error reading test.py: {str(e)}"
-
 @tool(show_result=False, stop_after_tool_call=False)
-def add_to_knowledge_base(knowledge):
+def add_entity_to_graph(entity):
     """
-    Add knowledge to the knowledge base.
-    knowledge is a string of text.
+    Add entity to the graph.
+    entity is a dictionary of properties.
+    Args:
+        entity (dict): A dictionary containing entity information with the following structure:
+            - label (str): The type/label of the entity (e.g., "Company", "Person", "Stock")
+            - primary_key_field (str): The field name that serves as the unique identifier
+            - properties (dict): Key-value pairs of entity properties and their values
+    
+    Returns:
+        str: Success message indicating the entity was added to the graph
+
+    Examples:
+        # Example 1: Adding a Company entity
+        entity_example1 = {
+            "label": "Company",
+            "primary_key_field": "name",
+            "properties": {
+                "name": "Apple Inc.",
+                "ticker": "AAPL",
+                "sector": "Technology",
+                "market_cap": 3000000000000,
+                "founded": 1976,
+                "headquarters": "Cupertino, CA"
+            }
+        }
+        
+        # Example 2: Adding a Person entity
+        entity_example2 = {
+            "label": "Person",
+            "primary_key_field": "full_name",
+            "properties": {
+                "full_name": "Tim Cook",
+                "position": "CEO",
+                "age": 63,
+                "nationality": "American"
+            }
+        }
+        
+        # Example 3: Adding a Stock entity
+        entity_example3 = {
+            "label": "Stock",
+            "primary_key_field": "ticker",
+            "properties": {
+                "ticker": "AAPL",
+                "current_price": 185.50,
+                "currency": "USD",
+                "exchange": "NASDAQ"
+            }
+        }
     """
     # Save knowledge to file with timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"knowledge_base_{timestamp}.txt"
+    graph = Neo4jGraph()
+    graph.add_or_update_entity(entity["label"], entity["primary_key_field"], entity["properties"])
+    return "Entity added to graph"
+
+@tool(show_result=False, stop_after_tool_call=False)
+def add_relationship_to_graph(relationship):
+    """
+    Add relationship to the graph.
     
-    with open(filename, 'w') as f:
-        f.write(f"Knowledge Entry - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write("="*80 + "\n")
-        f.write(knowledge)
-        f.write("\n" + "="*80 + "\n\n")
+    Args:
+        relationship (dict): A dictionary containing relationship properties with the following structure:
+            - start_node_label (str): Label of the starting node
+            - start_node_pk_val: Primary key value of the starting node
+            - end_node_label (str): Label of the ending node
+            - end_node_pk_val: Primary key value of the ending node
+            - relationship_type (str): Type/name of the relationship
+            - properties (dict): Additional properties for the relationship
     
-    print(f"Knowledge saved to {filename}")
-    print(knowledge)
-    #onto.add_to_knowledge_base(knowledge)
+    Returns:
+        str: Success message indicating the relationship was added to the graph
+    """
+    # Save knowledge to file with timestamp
+    graph = Neo4jGraph()
+    graph.add_relationship(relationship["start_node_label"], relationship["start_node_pk_val"], relationship["end_node_label"], relationship["end_node_pk_val"], relationship["relationship_type"], relationship["properties"])
+    return "Entity added to graph"
+      
 
 onto_analysis = Agent(
     name="Ontology translation Agent",
@@ -120,17 +173,18 @@ onto_analysis = Agent(
     model=my_cheap_model,
     tools=[
         ExaTools(num_results=1, summary=True),
- #       add_to_knowledge_base,
+        add_entity_to_graph,
+        add_relationship_to_graph,
     ],
     instructions=dedent(f""" 
     The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
     Ontology:[{get_ontology_description()}]
-    Write the results of the instances in OWL format.
+    Return the results in RDFS format.
+    When you are done, add every entity and relationship to the graph using the add_entity_to_graph and add_relationship_to_graph tools 
     Today is {datetime.now().strftime("%Y-%m-%d")}
 """),
     show_tool_calls=True,
     markdown=True,
-
 )
 query = "Who is the CEO of united health?"
 print("*"*150)
