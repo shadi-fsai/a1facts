@@ -1,5 +1,5 @@
 from owlready2 import *
-onto = get_ontology("http://www.example.com/financial-ontology#")
+onto = get_ontology("http://fortusight.ai/company-ontology#")
 
 with onto:
     #///////////////////////////////////////////////////////////////////////////////////////
@@ -260,3 +260,4 @@ with onto:
         """The maturity date of a financial instrument."""
         domain = [Financial_Instrument]
         range = [datetime.date]
+
