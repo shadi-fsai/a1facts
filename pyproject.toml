@@ -8,6 +8,7 @@ dependencies = [
     "agno>=1.8.0",
     "colored>=2.3.1",
     "exa-py>=1.15.3",
+    "google-genai>=1.32.0",
     "neo4j>=5.28.2",
     "owlready2>=0.48",
     "rdflib>=7.1.4",
