@@ -120,26 +120,24 @@ onto_analysis = Agent(
     model=my_cheap_model,
     tools=[
         ExaTools(num_results=1, summary=True),
-        add_to_knowledge_base,
+ #       add_to_knowledge_base,
     ],
     instructions=dedent(f""" 
     The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
-    Ontology:{get_ontology_description()}
-    If necessary suggest extensions to the ontology.
-    When done call the tool add_to_knowledge_base with the knowledge.
-    Example of knowledge: {get_knowledge_instantiation_example()}
+    Ontology:[{get_ontology_description()}]
+    Write the results of the instances in OWL format.
     Today is {datetime.now().strftime("%Y-%m-%d")}
 """),
     show_tool_calls=True,
     markdown=True,
 
 )
-query = "who is the CEO of united health?"
+query = "Who is the CEO of united health?"
 print("*"*150)
 
-websearchresponse = web_search_agent.run(query)
-cprint(websearchresponse.content, 'green')
-print("*"*150)
+#websearchresponse = web_search_agent.run(query)
+#cprint(websearchresponse.content, 'green')
+#print("*"*150)
 financeresponse = finance_info_agent.run(query)
 cprint(financeresponse.content, 'blue')
 print("*"*150)
