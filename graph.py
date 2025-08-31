@@ -153,9 +153,8 @@ class Neo4jGraph:
         """
         # Determine the primary key field based on the label, assuming 'name' as a default.
         # This could be made more robust if different labels use different primary keys.
-        start_pk_field = "name" if start_node_label in ["Organization", "Market", "Person"] else "role_title"
-        end_pk_field = "name" if end_node_label in ["Organization", "Market", "Person"] else "role_title"
-
+        start_pk_field = "name" 
+        end_pk_field = "name" 
 
         query = (
             f"MATCH (a:{start_node_label} {{{start_pk_field}: $start_val}}), "
@@ -172,7 +171,12 @@ class Neo4jGraph:
             "props": properties or {}
         }
 
-        self._execute_query(query, parameters)
+        try:
+            self._execute_query(query, parameters)
+        except Exception as e:
+            print(f"Error creating relationship: {e}")
+            return False
+        
         print(f"Successfully created relationship: ({start_node_pk_val})-[{relationship_type}]->({end_node_pk_val})")
 
     def _get_primary_key_field(self, label):
@@ -234,7 +238,7 @@ class Neo4jGraph:
             f"WHERE {where_clause} "
             "OPTIONAL MATCH (n)-[r]-(related) "
             "RETURN properties(n) AS properties, "
-            "collect({relationship: type(r), related_entity: coalesce(related.name, related.role_title)}) AS relationships"
+            "collect({relationship: type(r), properties: properties(r), related_entity: coalesce(related.name, related.role_title)}) AS relationships"
         )
         parameters = {"identifier": entity_identifier}
         records = self._execute_read_query(query, parameters)
@@ -255,30 +259,29 @@ class Neo4jGraph:
 
     def get_all_entities_by_label(self, label):
         """
-        Retrieves all entity identifiers (primary key values) with a specific label.
+        Retrieves all entities (nodes) with a specific label.
 
         Args:
             label (str): The label to search for (e.g., "Organization").
 
         Returns:
-            list: A list of entity identifiers (primary key values).
+            list: A list of dictionaries, where each dictionary represents the properties of an entity.
         """
-        pk_field = self._get_primary_key_field(label)
-        query = f"MATCH (n:{label}) RETURN n.{pk_field} AS identifier"
+        query = f"MATCH (n:{label}) RETURN properties(n) AS properties"
         records = self._execute_read_query(query)
 
         if not records:
             print(f"No entities found with label '{label}'.")
             return []
         
-        return [record["identifier"] for record in records if record["identifier"] is not None]
+        return [record["properties"] for record in records]
 
 
 if __name__ == "__main__":
     graph = Neo4jGraph()
     # Example: Find info for an organization with fuzzy search (default)
     # The label "Organization" is now required.
-    results = graph.get_entity_info("Organization", "UnitedHealth")
+    results = graph.get_entity_info("Person", "Stephen J. Hemsley")
     import json
     if results:
         print(f"Found {len(results)} match(es) for 'UnitedHealth' in 'Organization':")
@@ -288,7 +291,8 @@ if __name__ == "__main__":
             print("Relationships:")
             if entity_info["relationships"]:
                 for rel in entity_info["relationships"]:
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']})")
+                    rel_props = json.dumps(rel.get('properties', {}))
+                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
             else:
                 print("  No relationships found.")
     else:
@@ -363,7 +367,8 @@ if __name__ == "__main__2":
                 print("Properties:", json.dumps(apple_info[0]["properties"], indent=2))
                 print("Relationships:")
                 for rel in apple_info[0]["relationships"]:
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']})")
+                    rel_props = json.dumps(rel.get('properties', {}))
+                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
 
             print("\n--- Querying for 'CEO' role ---")
             ceo_info = graph.get_entity_info("Role", "CEO", exact_match=True)
@@ -372,7 +377,8 @@ if __name__ == "__main__2":
                 print("Properties:", json.dumps(ceo_info[0]["properties"], indent=2))
                 print("Relationships:")
                 for rel in ceo_info[0]["relationships"]:
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']})")
+                    rel_props = json.dumps(rel.get('properties', {}))
+                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
 
         finally:
             # Ensure the connection is closed

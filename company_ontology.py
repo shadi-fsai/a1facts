@@ -1,4 +1,5 @@
 from owlready2 import *
+from owlready2 import Thing, ObjectProperty, DataProperty, FunctionalProperty
 onto = get_ontology("http://fortusight.ai/company-ontology#")
 
 with onto:
