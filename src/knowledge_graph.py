@@ -131,18 +131,6 @@ class KnowledgeGraph:
         """
         Adds a new entity (node) or updates an existing one.
         It uses MERGE to prevent creating duplicate nodes based on the primary key.
-
-        Args:
-            label (str): The label for the node (e.g., "Organization").
-            primary_key_field (str): The property name to use as a unique identifier (e.g., "name").
-            properties (dict): A dictionary of properties for the node. Must include the primary_key_field.
-        Example:
-            # Based on the company ontology, this could represent entities like:
-            # Organization: "name": "Apple Inc.", "ticker_symbol": "AAPL", "organization_type": "Public Company"
-            # Market: "name": "Consumer Electronics", "projected_growth_rate_CAGR": 0.05
-            # Person: "name": "Tim Cook"
-            # Role: "role_title": "CEO", "start_date": date(2011, 8, 24)
-            # Corporate_Event: "name": "Apple Q4 2023 Earnings", "event_type": "Earnings Report", "event_date": date(2023, 10, 26)
         """
         if primary_key_field not in properties:
             print(f"Error: Primary key '{primary_key_field}' not found in properties.")

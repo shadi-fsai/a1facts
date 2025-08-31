@@ -8,9 +8,9 @@ entity_classes:
     properties:
       - name: name
         type: str
-        primary_key: true
+        primary_key: true        
         description: A str representing the name of a company.
-      - name: ticker_symbol
+      - name: ticker
         type: str
         description: The stock market ticker symbol for a public company. (Optional)
       - name: company_type
