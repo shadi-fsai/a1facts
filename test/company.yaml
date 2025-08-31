@@ -3,38 +3,28 @@ world:
   description: Financial and Market Intelligence knowledge graph.
 
 entity_classes:
-  Organization:
-    description: A business, governmental, or regulatory entity.
+  Company:
+    description: A business entity.
     properties:
       - name: name
         type: string
-        description: A string representing the name of an entity.
+        description: A string representing the name of a company.
       - name: ticker_symbol
         type: string
-        description: The stock market ticker symbol for a public company.
-      - name: organization_type
+        description: The stock market ticker symbol for a public company. (Optional)
+      - name: company_type
         type: string
-        description: The type of organization (e.g., Public Company, Regulatory Body).
-      - name: source
-        type: string
-        description: The source of the information (e.g., a URL to a press release).
-
-  Regulatory_Body:
-    description: A government agency that exercises a regulatory function.
-    properties:
-      - name: name
-        type: string
-        description: A string representing the name of an entity.
+        description: The type of company (e.g., Public Company, Private Company).
       - name: source
         type: string
         description: The source of the information (e.g., a URL to a press release).
 
   Product_Service:
-    description: An offering commercialized by an Organization.
+    description: An offering (product or service) commercialized by a Company.
     properties:
       - name: name
         type: string
-        description: A string representing the name of an entity.
+        description: A string representing the name of a product or service.
       - name: business_segment
         type: string
         description: The business segment a product or service belongs to.
@@ -43,11 +33,11 @@ entity_classes:
         description: The source of the information (e.g., a URL to a press release).
 
   Market:
-    description: The industry or economic sector where organizations compete.
+    description: The industry or economic sector where companies compete.
     properties:
       - name: name
         type: string
-        description: A string representing the name of an entity.
+        description: A string representing the name of a market.
       - name: projected_growth_rate_CAGR
         type: float
         description: The projected Compound Annual Growth Rate for a market.
@@ -72,7 +62,7 @@ entity_classes:
         description: The source of the information (e.g., a URL to a press release).
 
   Corporate_Event:
-    description: A significant occurrence or announcement involving an Organization.
+    description: A significant occurrence or announcement involving a Company.
     properties:
       - name: event_type
         type: string
@@ -87,12 +77,12 @@ entity_classes:
         type: string
         description: The source of the information (e.g., a URL to a press release).
 
-  Person:
+  Leader:
     description: An individual in a leadership or governance role.
     properties:
       - name: name
         type: string
-        description: A string representing the name of an entity.
+        description: A string representing the name of a leader.
       - name: source
         type: string
         description: The source of the information (e.g., a URL to a press release).
@@ -108,7 +98,7 @@ entity_classes:
         description: The source of the information (e.g., a URL to a press release).
 
   Risk_Factor:
-    description: A potential threat to an Organization's performance or valuation.
+    description: A potential threat to a Company's performance or valuation.
     properties:
       - name: risk_type
         type: string
@@ -118,7 +108,7 @@ entity_classes:
         description: The source of the information (e.g., a URL to a press release).
 
   Capital_Allocation_Policy:
-    description: An Organization's stated strategy for deploying capital.
+    description: A Company's stated strategy for deploying capital.
     properties:
       - name: dividend_policy
         type: string
@@ -140,43 +130,43 @@ entity_classes:
         type: string
         description: The source of the information (e.g., a URL to a press release).
 
-  Role:
-    description: An association class representing a Person holding a position at an Organization.
+  Leadership_Role:
+    description: An association class representing a Leader holding a position at a Company.
     properties:
-      - name: role_title
+      - name: leadership_role_title
         type: string
-        description: The title of a role (e.g., 'CEO', 'CFO').
+        description: The title of a leadership role (e.g., 'CEO', 'CFO').
       - name: start_date
         type: date
-        description: The date a role became effective.
+        description: The date a leadership role became effective.
       - name: end_date
         type: date
-        description: The date a role concluded.
+        description: The date a leadership role concluded (if applicable).
       - name: source
         type: string
         description: The source of the information (e.g., a URL to a press release).
 
 relationships:
   operates_in:
-    domain: Organization
+    domain: Company
     range: Market
-    description: Connects an Organization to a Market it operates within.
+    description: Connects a Company to a Market it operates within.
     properties: []
   competes_with:
-    domain: Organization
-    range: Organization
-    description: A symmetric relationship between two competing Organizations.
+    domain: Company
+    range: Company
+    description: A symmetric relationship between two competing Companies.
     symmetric: true
     properties: []
   produces:
-    domain: Organization
+    domain: Company
     range: Product_Service
-    description: Links an Organization to a Product or Service it offers.
+    description: Links a Company to a Product or Service it offers.
     properties: []
   is_subject_of:
-    domain: Organization
+    domain: Company
     range: Corporate_Event
-    description: Links an Organization to an event concerning it.
+    description: Links a Company to an event concerning it.
     properties: []
   reports:
     domain: Corporate_Event
@@ -184,57 +174,57 @@ relationships:
     description: Connects an event (like an earnings call) to the financial metrics disclosed.
     properties: []
   is_led_by:
-    domain: Organization
-    range: Person
-    description: Connects an Organization to a Person in a leadership role.
+    domain: Company
+    range: Leader
+    description: Connects a Company to a Leader in a leadership role.
     properties: []
   has_role:
-    domain: Person
-    range: Role
-    description: Connects a Person to their various roles (past and present).
+    domain: Leader
+    range: Leadership_Role
+    description: Connects a Leader to their various roles (past and present).
     properties: []
   held_at:
-    domain: Role
-    range: Organization
-    description: Connects a Role to the Organization where it is held.
+    domain: Leadership_Role
+    range: Company
+    description: Connects a Leadership_Role to the Company where it is held.
     properties: []
   possesses:
-    domain: Organization
+    domain: Company
     range: Competitive_Advantage
-    description: Links an Organization to its Competitive Advantage (Moat).
+    description: Links a Company to its Competitive Advantage (Moat).
     properties: []
   is_exposed_to:
-    domain: Organization
+    domain: Company
     range: Risk_Factor
-    description: Connects an Organization to a Risk Factor.
+    description: Connects a Company to a Risk Factor.
     properties: []
   acquires:
-    domain: Organization
-    range: Organization
-    description: Relates an acquiring Organization to a target Organization.
+    domain: Company
+    range: Company
+    description: Relates an acquiring Company to a target Company.
     properties: []
   divests:
-    domain: Organization
+    domain: Company
     range: Product_Service
-    description: Relates an Organization to a Product or Service it has sold off.
+    description: Relates a Company to a Product or Service it has sold off.
     properties: []
   has_policy:
-    domain: Organization
+    domain: Company
     range: Capital_Allocation_Policy
-    description: Links an Organization to its capital deployment strategy.
+    description: Links a Company to its capital deployment strategy.
     properties: []
   utilizes:
-    domain: Organization
+    domain: Company
     range: Financial_Instrument
-    description: Connects an Organization to a financial instrument like debt.
+    description: Connects a Company to a financial instrument like debt.
     properties: []
   has_adviser:
-    domain: Organization
-    range: Person
-    description: Connects an Organization to a Person serving as an adviser.
+    domain: Company
+    range: Leader
+    description: Connects a Company to a Leader serving as an adviser.
     properties: []
-  involves_person:
+  involves_leader:
     domain: Corporate_Event
-    range: Person
-    description: Connects a Corporate_Event to a Person involved in it.
+    range: Leader
+    description: Connects a Corporate_Event to a Leader involved in it.
     properties: []
