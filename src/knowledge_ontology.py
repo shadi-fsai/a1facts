@@ -134,6 +134,18 @@ class RelationshipClass:
             "func": func
         }
 
+    def get_get_relationship_entities_tool(self, get_relationship_entities_func):
+        description = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship. \n"
+        def func(domain_primary_key_value: str):
+            return get_relationship_entities_func( self.domain_entity_class, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
+
+        return {
+            "name": "get_"+self.range_entity_class+"s_"+self.domain_entity_class+"_"+self.relationship_name,
+            "description": description,
+            "func": func
+        }
+
+
 class KnowledgeOntology:
     def __init__(self, ontology_file: str):
         self.ontology_file = ontology_file
@@ -194,24 +206,23 @@ class KnowledgeOntology:
             tools.append(relationship_class.get_get_relationship_properties_tool(get_relationship_properties_func))
         return tools
 
+    def get_relationship_get_relationship_entities_tools(self, get_relationship_entities_func):
+        tools = []
+        for relationship_class in self.relationship_classes:
+            tools.append(relationship_class.get_get_relationship_entities_tool(get_relationship_entities_func))
+        return tools
+
     def get_add_or_update_tools(self, add_entity_func, add_relationship_func):
         tools = []
         tools.extend(self.get_entity_add_or_update_tools(add_entity_func))
         tools.extend(self.get_relationship_add_or_update_tools(add_relationship_func))
         return tools
 
-    def get_get_tools(self, get_entity_func, get_relationship_func):
+    def get_get_tools(self, get_entity_properties_func, get_relationship_properties_func, get_relationship_entities_func):
         tools = []
-        tools.extend(self.get_entity_get_tools(get_entity_func))
-        tools.extend(self.get_relationship_get_tools(get_relationship_func))
-        return tools
-
-    def get_tools(self, get_entity_func, get_relationship_func, add_entity_func, add_relationship_func):
-        tools = []
-        tools.extend(self.get_entity_get_tools(get_entity_func))
-        tools.extend(self.get_relationship_get_tools(get_relationship_func))
-        tools.extend(self.get_entity_add_or_update_tools(add_entity_func))
-        tools.extend(self.get_relationship_add_or_update_tools(add_relationship_func))
+        tools.extend(self.get_entity_get_entity_properties_tools(get_entity_properties_func))
+        tools.extend(self.get_relationship_get_relationship_properties_tools(get_relationship_properties_func))
+        tools.extend(self.get_relationship_get_relationship_entities_tools(get_relationship_entities_func))
         return tools
 
     def __str__(self):
