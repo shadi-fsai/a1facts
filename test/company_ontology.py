@@ -262,3 +262,4 @@ with onto:
         domain = [Financial_Instrument]
         range = [datetime.date]
 
+print(onto.Organization.__doc__)

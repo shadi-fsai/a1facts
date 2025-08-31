@@ -7,7 +7,7 @@ from agno.models.openai import OpenAIChat
 from dotenv import load_dotenv
 from colored import cprint
 from agno.tools import tool
-from graph import Neo4jGraph
+from graph import KnowledgeGraph
 #from agno.models.google import Gemini
 import time
 
@@ -16,7 +16,7 @@ load_dotenv()
 my_model = OpenAIChat(id="gpt-4.1")
 #my_query_model = Gemini(id="gemini-2.5-flash")#OpenAIChat(id="gpt-4.1-mini")
 
-graph = Neo4jGraph()
+graph = KnowledgeGraph()
 
 def get_ontology_description():
     try:

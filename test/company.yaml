@@ -1,0 +1,240 @@
+world:
+  name: Company Knowledge Graph
+  description: Financial and Market Intelligence knowledge graph.
+
+entity_classes:
+  Organization:
+    description: A business, governmental, or regulatory entity.
+    properties:
+      - name: name
+        type: string
+        description: A string representing the name of an entity.
+      - name: ticker_symbol
+        type: string
+        description: The stock market ticker symbol for a public company.
+      - name: organization_type
+        type: string
+        description: The type of organization (e.g., Public Company, Regulatory Body).
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Regulatory_Body:
+    description: A government agency that exercises a regulatory function.
+    properties:
+      - name: name
+        type: string
+        description: A string representing the name of an entity.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Product_Service:
+    description: An offering commercialized by an Organization.
+    properties:
+      - name: name
+        type: string
+        description: A string representing the name of an entity.
+      - name: business_segment
+        type: string
+        description: The business segment a product or service belongs to.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Market:
+    description: The industry or economic sector where organizations compete.
+    properties:
+      - name: name
+        type: string
+        description: A string representing the name of an entity.
+      - name: projected_growth_rate_CAGR
+        type: float
+        description: The projected Compound Annual Growth Rate for a market.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Financial_Metric:
+    description: A quantitative data point on financial performance, valuation, or efficiency.
+    properties:
+      - name: metric_name
+        type: string
+        description: The name of the financial metric (e.g., Revenue, P/E Ratio).
+      - name: metric_value
+        type: float
+        description: The numerical value of the financial metric.
+      - name: fiscal_period
+        type: string
+        description: The fiscal period the metric applies to (e.g., Q2 2025).
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Corporate_Event:
+    description: A significant occurrence or announcement involving an Organization.
+    properties:
+      - name: event_type
+        type: string
+        description: The type of event (e.g., Acquisition, Divestiture, Earnings Report).
+      - name: event_date
+        type: date
+        description: The date of a corporate event.
+      - name: reason
+        type: string
+        description: The reason for a corporate event (e.g., 'personal reasons', 'retirement').
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Person:
+    description: An individual in a leadership or governance role.
+    properties:
+      - name: name
+        type: string
+        description: A string representing the name of an entity.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Competitive_Advantage:
+    description: A factor providing a long-term advantage over competitors (Moat).
+    properties:
+      - name: advantage_type
+        type: string
+        description: The type of competitive advantage (e.g., Network Effects).
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Risk_Factor:
+    description: A potential threat to an Organization's performance or valuation.
+    properties:
+      - name: risk_type
+        type: string
+        description: The category of risk (e.g., Operational, Legal, Macroeconomic).
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Capital_Allocation_Policy:
+    description: An Organization's stated strategy for deploying capital.
+    properties:
+      - name: dividend_policy
+        type: string
+        description: Description of the organization's dividend policy.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Financial_Instrument:
+    description: A contract giving rise to a financial liability, such as debt.
+    properties:
+      - name: interest_rate_terms
+        type: string
+        description: Terms of the interest rate (e.g., 4.625% Fixed).
+      - name: maturity_date
+        type: date
+        description: The maturity date of a financial instrument.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+  Role:
+    description: An association class representing a Person holding a position at an Organization.
+    properties:
+      - name: role_title
+        type: string
+        description: The title of a role (e.g., 'CEO', 'CFO').
+      - name: start_date
+        type: date
+        description: The date a role became effective.
+      - name: end_date
+        type: date
+        description: The date a role concluded.
+      - name: source
+        type: string
+        description: The source of the information (e.g., a URL to a press release).
+
+relationships:
+  operates_in:
+    domain: Organization
+    range: Market
+    description: Connects an Organization to a Market it operates within.
+    properties: []
+  competes_with:
+    domain: Organization
+    range: Organization
+    description: A symmetric relationship between two competing Organizations.
+    symmetric: true
+    properties: []
+  produces:
+    domain: Organization
+    range: Product_Service
+    description: Links an Organization to a Product or Service it offers.
+    properties: []
+  is_subject_of:
+    domain: Organization
+    range: Corporate_Event
+    description: Links an Organization to an event concerning it.
+    properties: []
+  reports:
+    domain: Corporate_Event
+    range: Financial_Metric
+    description: Connects an event (like an earnings call) to the financial metrics disclosed.
+    properties: []
+  is_led_by:
+    domain: Organization
+    range: Person
+    description: Connects an Organization to a Person in a leadership role.
+    properties: []
+  has_role:
+    domain: Person
+    range: Role
+    description: Connects a Person to their various roles (past and present).
+    properties: []
+  held_at:
+    domain: Role
+    range: Organization
+    description: Connects a Role to the Organization where it is held.
+    properties: []
+  possesses:
+    domain: Organization
+    range: Competitive_Advantage
+    description: Links an Organization to its Competitive Advantage (Moat).
+    properties: []
+  is_exposed_to:
+    domain: Organization
+    range: Risk_Factor
+    description: Connects an Organization to a Risk Factor.
+    properties: []
+  acquires:
+    domain: Organization
+    range: Organization
+    description: Relates an acquiring Organization to a target Organization.
+    properties: []
+  divests:
+    domain: Organization
+    range: Product_Service
+    description: Relates an Organization to a Product or Service it has sold off.
+    properties: []
+  has_policy:
+    domain: Organization
+    range: Capital_Allocation_Policy
+    description: Links an Organization to its capital deployment strategy.
+    properties: []
+  utilizes:
+    domain: Organization
+    range: Financial_Instrument
+    description: Connects an Organization to a financial instrument like debt.
+    properties: []
+  has_adviser:
+    domain: Organization
+    range: Person
+    description: Connects an Organization to a Person serving as an adviser.
+    properties: []
+  involves_person:
+    domain: Corporate_Event
+    range: Person
+    description: Connects a Corporate_Event to a Person involved in it.
+    properties: []

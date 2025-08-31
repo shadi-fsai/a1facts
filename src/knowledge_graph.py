@@ -2,35 +2,83 @@ from neo4j import GraphDatabase
 from datetime import date
 from dotenv import load_dotenv
 import os
-
+from knowledge_ontology import KnowledgeOntology
+from modelconfig import my_model
+from agno.tools import tool
+from agno.agent import Agent
+from textwrap import dedent
+from datetime import datetime
 # Load environment variables from .env file
 load_dotenv()
 
 URI = os.getenv("NEO4J_URI")
 AUTH = ("neo4j", os.getenv("NEO4J_AUTH"))
 
-class Neo4jGraph:
+class KnowledgeGraph:
     """
     A class to interact with a Neo4j graph database.
     It provides methods to add/update entities (nodes) and relationships
     based on a predefined ontology.
     """
 
-    def __init__(self):
+    def __init__(self, ontology: KnowledgeOntology):
         """
-        Initializes the Neo4jGraph class and connects to the database.
+        Initializes the KnowledgeGraph class and connects to the database.
 
         Args:
             uri (str): The URI for the Neo4j database (e.g., "bolt://localhost:7687").
             user (str): The username for authentication.
             password (str): The password for authentication.
         """
+        self.ontology = ontology
         try:
             self.driver = GraphDatabase.driver(URI, auth=(AUTH[0], AUTH[1]))
             print("Successfully connected to Neo4j database.")
         except Exception as e:
             print(f"Failed to connect to Neo4j database: {e}")
             self.driver = None
+        self.model = my_model
+        self.query_agent = Agent(
+            name="Knowledge Graph Agent",
+            role="Interact with the knowledge graph",
+            model=self.model,
+            tools=[self.get_entity_from_graph,
+            self.get_all_entities_by_label],
+            instructions=dedent(f"""
+                Get information from the knowledge base.
+                Use the get_entity_from_graph tool to get information from the graph.
+                If you can't find the information in the graph, use the get_all_entities_by_label tool to get all entity identifiers by label.
+                The ontology on which this knowledge base is based is [{self.ontology}]
+                Today is {datetime.now().strftime("%Y-%m-%d")}
+                """),
+                show_tool_calls=True,
+                markdown=True,
+            )
+        self.update_agent = Agent(
+            name="Knowledge Graph Update Agent",
+            role="Update the knowledge graph",
+            model=self.model,
+            tools=[self.add_entity_to_graph,
+            self.add_relationship_to_graph],
+            instructions=dedent(f"""
+                The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
+                Ontology:[{self.ontology}]
+                Return the results in RDFS format.
+                When you are done, add every entity and relationship to the graph using the add_entity_to_graph and add_relationship_to_graph tools 
+                Today is {datetime.now().strftime("%Y-%m-%d")}
+            """),
+            show_tool_calls=True,
+            markdown=True,
+            debug_mode=True,
+            )
+
+    def query(self, query: str):
+        result = self.query_agent.run(query)
+        return result.content        
+
+    def update_knowledge(self, knowledge: str):
+        result = self.update_agent.run(knowledge)
+        return result.content
 
     def close(self):
         """Closes the database connection."""
@@ -277,109 +325,142 @@ class Neo4jGraph:
         return [record["properties"] for record in records]
 
 
-if __name__ == "__main__":
-    graph = Neo4jGraph()
-    # Example: Find info for an organization with fuzzy search (default)
-    # The label "Organization" is now required.
-    results = graph.get_entity_info("Person", "Stephen J. Hemsley")
-    import json
-    if results:
-        print(f"Found {len(results)} match(es) for 'UnitedHealth' in 'Organization':")
-        for entity_info in results:
-            print("\n--- Entity Found ---")
-            print("Properties:", json.dumps(entity_info["properties"], indent=2))
-            print("Relationships:")
-            if entity_info["relationships"]:
-                for rel in entity_info["relationships"]:
-                    rel_props = json.dumps(rel.get('properties', {}))
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
-            else:
-                print("  No relationships found.")
-    else:
-         print("No information found for 'UnitedHealth' in 'Organization'.")
 
-    # Example: Get all entities with the label "Organization"
-    print("\n--- Getting all organizations ---")
-    all_orgs = graph.get_all_entities_by_label("Organization")
-    if all_orgs:
-        print(f"Found {len(all_orgs)} organizations:")
-        for org in all_orgs:
-            print(f"  - {org.get('name', 'N/A')}")
+    @tool(show_result=False, stop_after_tool_call=False)
+    def add_entity_to_graph(self, entity: dict) -> str:
+        """
+        Add entity to the graph.
+        entity is a dictionary of properties.
+        Args:
+            entity (dict): A dictionary containing entity information with the following structure:
+                - label (str): The type/label of the entity (e.g., "Company", "Person", "Stock")
+                - primary_key_field (str): The field name that serves as the unique identifier
+                - properties (dict): Key-value pairs of entity properties and their values
+        
+        Returns:
+            str: Success message indicating the entity was added to the graph
+
+        Examples:
+            # Example 1: Adding a Company entity
+            entity_example1 = {
+                "label": "Company",
+                "primary_key_field": "name",
+                "properties": {
+                    "name": "Apple Inc.",
+                    "ticker": "AAPL",
+                    "sector": "Technology",
+                    "market_cap": 3000000000000,
+                    "founded": 1976,
+                    "headquarters": "Cupertino, CA"
+                }
+            }
+            
+            # Example 2: Adding a Person entity
+            entity_example2 = {
+                "label": "Person",
+                "primary_key_field": "full_name",
+                "properties": {
+                    "full_name": "Tim Cook",
+                    "position": "CEO",
+                    "age": 63,
+                    "nationality": "American"
+                }
+            }
+            
+            # Example 3: Adding a Stock entity
+            entity_example3 = {
+                "label": "Stock",
+                "primary_key_field": "ticker",
+                "properties": {
+                    "ticker": "AAPL",
+                    "current_price": 185.50,
+                    "currency": "USD",
+                    "exchange": "NASDAQ"
+                }
+            }
+        """
+        # Save knowledge to file with timestamp
+        self.add_or_update_entity(entity["label"], entity["primary_key_field"], entity["properties"])
+        return "Entity added to graph"
+
+    @tool(show_result=False, stop_after_tool_call=False)
+    def add_relationship_to_graph(self, relationship: dict) -> str:
+        """
+        Add relationship to the graph.
+        
+        Args:
+            relationship (dict): A dictionary containing relationship properties with the following structure:
+                - start_node_label (str): Label of the starting node
+                - start_node_pk_val: Primary key value of the starting node
+                - end_node_label (str): Label of the ending node
+                - end_node_pk_val: Primary key value of the ending node
+                - relationship_type (str): Type/name of the relationship
+                - properties (dict): Additional properties for the relationship
+        
+        Returns:
+            str: Success message indicating the relationship was added to the graph
+        """
+        # Save knowledge to file with timestamp    
+        self.add_relationship(relationship["start_node_label"], relationship["start_node_pk_val"], relationship["end_node_label"], relationship["end_node_pk_val"], relationship["relationship_type"], relationship["properties"])
+        return "Entity added to graph"
+        
+    @tool(show_result=False, stop_after_tool_call=False)
+    def get_entity_from_graph(self, entity_label: str, entity_pk_val: str) -> dict:
+        """
+        Get entity from the graph.
+        Args:
+            entity_label (str): The label of the entity to get
+            entity_pk_val (str): The primary key value of the entity to get
+        Returns:
+            dict: A dictionary containing the entity's properties and its relationships
+
+        Examples:
+            # Example 1: Getting an Organization entity
+            entity_example1 = {
+                "entity_label": "Organization",
+                "entity_pk_val": "Apple Inc."
+            }
+            # Example 2: Getting a Person entity  
+            entity_example2 = {
+                "entity_label": "Person",
+                "entity_pk_val": "Tim Cook"
+            }
+        """
+        import time
+        start_time = time.time()
+        entity_info = self.get_entity_info(entity_label, entity_pk_val)
+        end_time = time.time()
+        print(f"get_entity_info took {end_time - start_time:.4f} seconds")
+
+        
+        if entity_info:
+            return entity_info
+        else:
+            return "No entity found with label '{entity_label}' and primary key value '{entity_pk_val}'"
 
 
-if __name__ == "__main__2":
-    # --- Configuration ---
-    # IMPORTANT: Replace with your Neo4j database credentials.
-    
-    # Initialize the graph connection
-    graph = Neo4jGraph()
+    @tool(show_result=False, stop_after_tool_call=False)
+    def get_all_entities_by_label(self, entity_label: str) -> list:
+        """
+        Get all entities by label from the graph.
+        Args:
+            entity_label (str): The label of the entities to get
+        Returns:
+            list: A list of entity identifiers (primary key values).
 
-    # --- Main Execution Logic ---
-    if graph.driver:
-        try:
-            # 1. Add Organizations and a Market
-            graph.add_or_update_entity("Organization", "name", {
-                "name": "Apple Inc.",
-                "ticker_symbol": "AAPL",
-                "organization_type": "Public Company"
-            })
-            graph.add_or_update_entity("Organization", "name", {
-                "name": "Samsung Electronics",
-                "ticker_symbol": "005930.KS",
-                "organization_type": "Public Company"
-            })
-            graph.add_or_update_entity("Market", "name", {
-                "name": "Consumer Electronics",
-                "projected_growth_rate_CAGR": 0.05
-            })
+        Examples:
+            # Example 1: Getting all Organizations
+            entity_example1 = {
+                "entity_label": "Organization"
+            }
+            # Example 2: Getting all People
+            entity_example2 = {
+                "entity_label": "Person"
+            }
+        """
 
-            # 2. Add Relationships between Organizations and Market
-            graph.add_relationship("Organization", "Apple Inc.", "Market", "Consumer Electronics", "OPERATES_IN")
-            graph.add_relationship("Organization", "Samsung Electronics", "Market", "Consumer Electronics", "OPERATES_IN")
-            graph.add_relationship("Organization", "Apple Inc.", "Organization", "Samsung Electronics", "COMPETES_WITH")
-
-            # 3. Add a Person, a Role, and an Event
-            graph.add_or_update_entity("Person", "name", {"name": "Tim Cook"})
-            graph.add_or_update_entity("Role", "role_title", {
-                "role_title": "CEO",
-                "start_date": date(2011, 8, 24)
-            })
-            graph.add_or_update_entity("Corporate_Event", "name", {
-                "name": "Apple Q4 2023 Earnings",
-                "event_type": "Earnings Report",
-                "event_date": date(2023, 10, 26)
-            })
-
-            # 4. Connect the Person, Role, and Organization
-            graph.add_relationship("Organization", "Apple Inc.", "Person", "Tim Cook", "IS_LED_BY")
-            graph.add_relationship("Person", "Tim Cook", "Role", "CEO", "HAS_ROLE")
-            graph.add_relationship("Role", "CEO", "Organization", "Apple Inc.", "HELD_AT")
-
-            # 5. Connect the Event to the Organization and Person
-            graph.add_relationship("Organization", "Apple Inc.", "Corporate_Event", "Apple Q4 2023 Earnings", "IS_SUBJECT_OF")
-            graph.add_relationship("Corporate_Event", "Apple Q4 2023 Earnings", "Person", "Tim Cook", "INVOLVES_PERSON")
-
-            # 6. Query for entity information
-            print("\n--- Querying for 'Apple Inc.' ---")
-            apple_info = graph.get_entity_info("Organization", "Apple Inc.")
-            if apple_info:
-                import json
-                print("Properties:", json.dumps(apple_info[0]["properties"], indent=2))
-                print("Relationships:")
-                for rel in apple_info[0]["relationships"]:
-                    rel_props = json.dumps(rel.get('properties', {}))
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
-
-            print("\n--- Querying for 'CEO' role ---")
-            ceo_info = graph.get_entity_info("Role", "CEO", exact_match=True)
-            if ceo_info:
-                import json
-                print("Properties:", json.dumps(ceo_info[0]["properties"], indent=2))
-                print("Relationships:")
-                for rel in ceo_info[0]["relationships"]:
-                    rel_props = json.dumps(rel.get('properties', {}))
-                    print(f"  - [{rel['relationship']}]->({rel['related_entity']}) | Properties: {rel_props}")
-
-        finally:
-            # Ensure the connection is closed
-            graph.close()
+        all_entities = self.get_all_entities_by_label(entity_label)
+        if all_entities:
+            return all_entities
+        else:
+            return "No entities found with label '{entity_label}'" 
