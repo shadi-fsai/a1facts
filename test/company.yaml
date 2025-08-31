@@ -7,135 +7,162 @@ entity_classes:
     description: A business entity.
     properties:
       - name: name
-        type: string
-        description: A string representing the name of a company.
+        type: str
+        primary_key: true
+        description: A str representing the name of a company.
       - name: ticker_symbol
-        type: string
+        type: str
         description: The stock market ticker symbol for a public company. (Optional)
       - name: company_type
-        type: string
+        type: str
         description: The type of company (e.g., Public Company, Private Company).
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Product_Service:
     description: An offering (product or service) commercialized by a Company.
     properties:
       - name: name
-        type: string
-        description: A string representing the name of a product or service.
+        type: str
+        primary_key: true
+        description: A str representing the name of a product or service.
       - name: business_segment
-        type: string
+        type: str
         description: The business segment a product or service belongs to.
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Market:
     description: The industry or economic sector where companies compete.
     properties:
       - name: name
-        type: string
-        description: A string representing the name of a market.
+        type: str
+        primary_key: true
+        description: A str representing the name of a market.
       - name: projected_growth_rate_CAGR
         type: float
         description: The projected Compound Annual Growth Rate for a market.
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Financial_Metric:
     description: A quantitative data point on financial performance, valuation, or efficiency.
     properties:
       - name: metric_name
-        type: string
-        description: The name of the financial metric (e.g., Revenue, P/E Ratio).
+        type: str
+        primary_key: true
+        description: The name of the financial metric (e.g., IBM Q42024 Revenue, UPS FY2023 P/E Ratio).
       - name: metric_value
         type: float
         description: The numerical value of the financial metric.
       - name: fiscal_period
-        type: string
+        type: str
         description: The fiscal period the metric applies to (e.g., Q2 2025).
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Corporate_Event:
     description: A significant occurrence or announcement involving a Company.
     properties:
       - name: event_type
-        type: string
-        description: The type of event (e.g., Acquisition, Divestiture, Earnings Report).
+        type: str
+        primary_key: true
+        description: The type of event (e.g., IBM Acquisition of Red Hat, UPS Divestiture of Consumables, META Q42024 Earnings Report).
       - name: event_date
         type: date
         description: The date of a corporate event.
       - name: reason
-        type: string
+        type: str
         description: The reason for a corporate event (e.g., 'personal reasons', 'retirement').
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Leader:
     description: An individual in a leadership or governance role.
     properties:
       - name: name
-        type: string
-        description: A string representing the name of a leader.
+        type: str
+        primary_key: true
+        description: A str representing the name of a leader.
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Competitive_Advantage:
     description: A factor providing a long-term advantage over competitors (Moat).
     properties:
+      - name: competitive_advantage_name
+        type: str
+        primary_key: true
+        description: The name of a competitive advantage (e.g., 'APPLE Network Effects', 'UPS Supply Chain Efficiency').
       - name: advantage_type
-        type: string
-        description: The type of competitive advantage (e.g., Network Effects).
+        type: str
+        description: The type of competitive advantage (e.g., Network Effects, Supply Chain Efficiency).
+      - name: advantage_description
+        type: str
+        description: A description of the competitive advantage (e.g., 'Provides a competitive edge by leveraging its network to create a barrier to entry').
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Risk_Factor:
     description: A potential threat to a Company's performance or valuation.
     properties:
+      - name: risk_factor_name
+        type: str
+        primary_key: true
+        description: The name of a risk factor (e.g., 'APPLE Risk Factor', 'UPS Risk Factor').
       - name: risk_type
-        type: string
+        type: str
+        primary_key: true
         description: The category of risk (e.g., Operational, Legal, Macroeconomic).
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Capital_Allocation_Policy:
     description: A Company's stated strategy for deploying capital.
     properties:
+      - name: capital_allocation_policy_name
+        type: str
+        primary_key: true
+        description: The name of a capital allocation policy (e.g., 'APPLE Capital Allocation Policy', 'UPS Capital Allocation Policy').
       - name: dividend_policy
-        type: string
+        type: str
         description: Description of the organization's dividend policy.
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Financial_Instrument:
     description: A contract giving rise to a financial liability, such as debt.
     properties:
+      - name: financial_instrument_name
+        type: str
+        primary_key: true
+        description: The name of a financial instrument (e.g., 'APPLE 2024 Bond', 'UPS 2023 Treasury Note').
       - name: interest_rate_terms
-        type: string
+        type: str
         description: Terms of the interest rate (e.g., 4.625% Fixed).
       - name: maturity_date
         type: date
         description: The maturity date of a financial instrument.
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
   Leadership_Role:
     description: An association class representing a Leader holding a position at a Company.
     properties:
       - name: leadership_role_title
-        type: string
-        description: The title of a leadership role (e.g., 'CEO', 'CFO').
+        type: str
+        description: The title of a leadership role (e.g., 'APPLE CEO', 'UPS CFO').
+        primary_key: true
       - name: start_date
         type: date
         description: The date a leadership role became effective.
@@ -143,7 +170,7 @@ entity_classes:
         type: date
         description: The date a leadership role concluded (if applicable).
       - name: source
-        type: string
+        type: str
         description: The source of the information (e.g., a URL to a press release).
 
 relationships:
