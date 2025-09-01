@@ -2,6 +2,7 @@ from neo4j import GraphDatabase
 from ontology.knowledge_ontology import KnowledgeOntology
 from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
+from graph.rewrite_agent import RewriteAgent
 from datetime import date
 from dotenv import load_dotenv
 import os
@@ -36,6 +37,21 @@ class KnowledgeGraph:
         self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.add_or_update_entity, self.add_relationship)        
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
         self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
+        self.rewrite_agent = RewriteAgent(self.ontology,[])
+        self.class_entity_pairs = {}
+
+    def get_class_entity_pairs(self):
+        for entity_class in self.ontology.entity_classes:
+            self.class_entity_pairs[entity_class.entity_class_name] = []
+            entities = self.get_all_entities_by_label(entity_class.entity_class_name)
+            for entity in entities:
+                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])
+            
+
+    def rewrite_query(self, query: str):
+        self.get_class_entity_pairs()
+        return self.rewrite_agent.rewrite_query(query, self.class_entity_pairs)
+
 
     def query(self, query: str):
         """
@@ -47,6 +63,7 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+        query = self.rewrite_query(query)
         return self.query_agent.query(query)
 
     def update_knowledge(self, knowledge: str):
@@ -59,7 +76,8 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        result = self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + knowledge)
+        rewrite_knowledge = self.rewrite_query(knowledge)
+        result = self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + rewrite_knowledge)
         return result.content
 
     def close(self):
