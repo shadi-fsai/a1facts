@@ -63,8 +63,8 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        query = self.rewrite_query(query)
-        return self.query_agent.query(query)
+        rewritten_query = self.rewrite_query(query)
+        return self.query_agent.query(rewritten_query)
 
     def update_knowledge(self, knowledge: str):
         """

@@ -16,7 +16,7 @@ def main():
     ontology = KnowledgeOntology("test/company.yaml")
     graph = KnowledgeGraph(ontology)
     finance_info_agent = KnowledgeAcquirer(graph, ontology, "test/knowledge_sources.yaml")
-    query = "what do you know about how UnitedHealth group competes with CVS?"
+    query = "what do you know about how UnitedHealth competes with CVS?"
     #financeresponse = finance_info_agent.acquire(query)
     #cprint(financeresponse, 'blue')
     #exit()
