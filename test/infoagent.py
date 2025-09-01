@@ -48,10 +48,10 @@ Below is a table of UnitedHealth Group’s major competitors:
 - [Yahoo Finance - UnitedHealth Competitors] (Confirmed)
 - [Morningstar Sector Analysis] (Confirmed)"""
 
-ontoresponse = graph.update_knowledge(financeresponse)
-cprint(ontoresponse, 'green')
+#ontoresponse = graph.update_knowledge(financeresponse)
+#cprint(ontoresponse, 'green')
 
-exit()  
+#exit()  
 
 
 import time
@@ -61,6 +61,7 @@ end_time = time.time()
 cprint(f"Knowledge base query took {end_time - start_time:.2f} seconds", 'red')
 cprint(knowledge_base_response, 'yellow')
 print("*"*150)
+exit()
 
 start_time = time.time()
 financeresponse = finance_info_agent.acquire(query)

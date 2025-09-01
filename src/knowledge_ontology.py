@@ -217,10 +217,15 @@ class RelationshipClass:
             range_primary_key_value = properties.get(range_param_name)
             return get_relationship_properties_func( self.domain_entity_class, domain_primary_key_value, self.range_entity_class, range_primary_key_value,self.relationship_name)
 
-        func.__name__ = f"get_relationship_properties_{self.domain_entity_class}_{self.relationship_name}_{self.range_entity_class}"
-        func.__doc__ = f"Get a {self.relationship_name} relationship properties."
-        
         domain_param_name, range_param_name = self._get_param_names()
+
+
+        func.__name__ = f"get_{self.relationship_name}_properties"
+        func.__doc__ = f"Get a {self.relationship_name} relationship properties between _{self.domain_entity_class}_{self.range_entity_class}.\n"+\
+            f"Domain Primary Key: from_{self.domain_entity_class}_{self.domain_primary_key_prop}\n"+\
+            f"Range Primary Key: to_{self.range_entity_class}_{self.range_primary_key_prop}"+\
+            (f"Returns properties of the relationship: {self.properties}" if self.properties else "")
+        
             
         func.__parameters__ = {
             "type": "object",
@@ -240,8 +245,10 @@ class RelationshipClass:
             return get_relationship_entities_func( self.domain_entity_class, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
 
         func.__name__ = f"get_{self.range_entity_class}s_{self.domain_entity_class}_{self.relationship_name}"
-        func.__doc__ = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship."
-
+        func.__doc__ = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship.\n"+\
+            f"Domain Primary Key: from_{self.domain_entity_class}_{self.domain_primary_key_prop}\n"+\
+                "Returns a list of {self.range_entity_class}s"
+ 
         domain_param_name, _ = self._get_param_names()
 
         func.__parameters__ = {
