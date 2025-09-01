@@ -1,14 +1,11 @@
 from neo4j import GraphDatabase
+from ontology.knowledge_ontology import KnowledgeOntology
+from graph.query_agent import QueryAgent
+from graph.update_agent import UpdateAgent
 from datetime import date
 from dotenv import load_dotenv
 import os
-from ontology.knowledge_ontology import KnowledgeOntology
-from utils.modelconfig import my_model
-from agno.tools import tool
-from agno.agent import Agent
-from textwrap import dedent
-from datetime import datetime
-# Load environment variables from .env file
+
 load_dotenv()
 
 URI = os.getenv("NEO4J_URI")
@@ -35,43 +32,10 @@ class KnowledgeGraph:
         except Exception as e:
             print(f"Failed to connect to Neo4j database: {e}")
             self.driver = None
-        self.model = my_model
-        self.get_tools = self.ontology.get_get_tools(self.get_all_entities_by_label, 
-            self.get_entity_properties, 
-            self.get_relationship_properties, 
-            self.get_relationship_entities)
-        self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.add_or_update_entity, self.add_relationship)
-        
-        self.query_agent = Agent(
-            name="Knowledge Graph Agent",
-            role="Interact with the knowledge graph",
-            model=self.model,
-            tools=self.get_tools,
-            instructions=dedent(f"""
-                Get information from the knowledge base.
-                Use the tools to get information from the graph.
-                The ontology on which this knowledge base is based is [{self.ontology}]
-                Today is {datetime.now().strftime("%Y-%m-%d")}
-                """),
-                show_tool_calls=True,
-                markdown=True,
-            )
-        self.update_agent = Agent(
-            name="Knowledge Graph Update Agent",
-            role="Update the knowledge graph",
-            model=self.model,
-            tools=self.add_or_update_tools,
-            instructions=dedent(f"""
-                The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
-                Ontology:[{self.ontology}]
-                Return the results in RDFS format.
-                When you are done, add every entity and relationship to the graph using the tools available to you 
-                Today is {datetime.now().strftime("%Y-%m-%d")}
-            """),
-            show_tool_calls=True,
-            markdown=True,
-            debug_mode=True,
-            )
+        self.get_tools = self.ontology.get_get_tools(self.get_all_entities_by_label, self.get_entity_properties, self.get_relationship_properties, self.get_relationship_entities)
+        self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.add_or_update_entity, self.add_relationship)        
+        self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
+        self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
 
     def query(self, query: str):
         """
@@ -83,8 +47,7 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        result = self.query_agent.run(query)
-        return result.content        
+        return self.query_agent.query(query)
 
     def update_knowledge(self, knowledge: str):
         """
@@ -160,7 +123,6 @@ class KnowledgeGraph:
             print(f"Error: Primary key '{primary_key_field}' not found in properties.")
             return
 
-        # Sanitize properties to handle different data types like datetime.date
         sanitized_props = {}
         for key, value in properties.items():
             if isinstance(value, date):

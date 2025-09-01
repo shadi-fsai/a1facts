@@ -10,6 +10,7 @@ dependencies = [
     { name = "colored" },
     { name = "exa-py" },
     { name = "google-genai" },
+    { name = "groq" },
     { name = "litellm" },
     { name = "neo4j" },
     { name = "rdflib" },
@@ -21,6 +22,7 @@ requires-dist = [
     { name = "colored", specifier = ">=2.3.1" },
     { name = "exa-py", specifier = ">=1.15.3" },
     { name = "google-genai", specifier = ">=1.32.0" },
+    { name = "groq", specifier = ">=0.31.0" },
     { name = "litellm", specifier = ">=1.76.1" },
     { name = "neo4j", specifier = ">=5.28.2" },
     { name = "rdflib", specifier = ">=7.1.4" },
@@ -377,6 +379,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/03/ab/e6cdd8fa957c647ef00c4da7c59d0e734354bd49ed8d98c860732d8e1944/google_genai-1.32.0.tar.gz", hash = "sha256:349da3f5ff0e981066bd508585fcdd308d28fc4646f318c8f6d1aa6041f4c7e3", size = 240802 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/59/55/be09472f7a656af1208196d2ef9a3d2710f3cbcf695f51acbcbe28b9472b/google_genai-1.32.0-py3-none-any.whl", hash = "sha256:c0c4b1d45adf3aa99501050dd73da2f0dea09374002231052d81a6765d15e7f6", size = 241680 },
+]
+
+[[package]]
+name = "groq"
+version = "0.31.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/a2/77fd1460e7d55859219223719aa44ae8902a3a1ad333cd5faf330eb0b894/groq-0.31.0.tar.gz", hash = "sha256:182252e9bf0d696df607c137cbafa851d2c84aaf94bcfe9165c0bc231043490c", size = 136237 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/f8/14672d69a91495f43462c5490067eeafc30346e81bda1a62848e897f9bc3/groq-0.31.0-py3-none-any.whl", hash = "sha256:5e3c7ec9728b7cccf913da982a9b5ebb46dc18a070b35e12a3d6a1e12d6b0f7f", size = 131365 },
 ]
 
 [[package]]

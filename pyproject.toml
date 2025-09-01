@@ -9,6 +9,7 @@ dependencies = [
     "colored>=2.3.1",
     "exa-py>=1.15.3",
     "google-genai>=1.32.0",
+    "groq>=0.31.0",
     "litellm>=1.76.1",
     "neo4j>=5.28.2",
     "rdflib>=7.1.4",
