@@ -9,7 +9,7 @@ from knowledge_ontology import KnowledgeOntology
 from knowledge_acquirer import KnowledgeAcquirer
 #from agno.models.google import Gemini
 
-ontology = KnowledgeOntology("company_ontology.py")
+ontology = KnowledgeOntology("test/company.yaml")
 graph = KnowledgeGraph(ontology)
 finance_info_agent = KnowledgeAcquirer(graph, ontology, [])
 query = "who are all the competitors of UnitedHealth?"
