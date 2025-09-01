@@ -172,7 +172,7 @@ class RelationshipClass:
             domain_param_name, range_param_name = self._get_param_names()
             domain_primary_key_value = properties.get(domain_param_name)
             range_primary_key_value = properties.get(range_param_name)
-            return get_relationship_properties_func( self.domain_entity_class, domain_primary_key_value, self.range_entity_class, range_primary_key_value,self.relationship_name)
+            return get_relationship_properties_func( self.domain_entity_class, self.domain_primary_key_prop, domain_primary_key_value, self.relationship_name,self.range_entity_class, self.range_primary_key_prop, range_primary_key_value)
 
         domain_param_name, range_param_name = self._get_param_names()
 

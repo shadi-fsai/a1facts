@@ -11,7 +11,7 @@ from enrichment.knowledge_acquirer import KnowledgeAcquirer
 ontology = KnowledgeOntology("test/company.yaml")
 graph = KnowledgeGraph(ontology)
 finance_info_agent = KnowledgeAcquirer(graph, ontology, "test/knowledge_sources.yaml")
-query = "what do you know about UnitedHealth Group?"
+query = "what do you know about how UnitedHealth group competes with CVS?"
 #financeresponse = finance_info_agent.acquire(query)
 #cprint(financeresponse, 'blue')
 #exit()
