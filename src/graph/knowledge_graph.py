@@ -370,12 +370,13 @@ class KnowledgeGraph:
         
         return [record["properties"] for record in records]
 
-    def get_relationship_entities(self, domain_label, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
+    def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
         """
         Gets all range entities connected to a specific domain entity via a relationship.
 
         Args:
             domain_label (str): The label of the domain entity.
+            domain_pk_prop (str): The primary key property of the domain entity.
             domain_primary_key_value (str): The primary key of the domain entity.
             relationship_type (str): The type of the relationship.
             range_label (str): The label of the range entities to retrieve.
@@ -385,44 +386,47 @@ class KnowledgeGraph:
             list: A list of dictionaries, where each represents a range entity's properties.
         """
         # For a given domain, get all the range entities in a relationship
-        query = f"MATCH (n:{domain_label} {{{domain_primary_key_value}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label}) RETURN properties(m) AS properties"
+        query = f"MATCH (n:{domain_label} {{{domain_pk_prop}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label}) RETURN properties(m) AS properties"
         parameters = {"domain_primary_key_value": domain_primary_key_value}
         records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]
     
-    def get_relationship_properties(self, domain_label, domain_primary_key_value, relationship_type, range_label, range_primary_key_value):
+    def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
         """
         Gets the properties of a specific relationship between two entities.
 
         Args:
             domain_label (str): The label of the domain entity.
+            domain_pk_prop (str): The primary key property of the domain entity.
             domain_primary_key_value (str): The primary key of the domain entity.
             relationship_type (str): The type of the relationship.
             range_label (str): The label of the range entity.
+            range_pk_prop (str): The primary key property of the range entity.
             range_primary_key_value (str): The primary key of the range entity.
 
         Returns:
             list: A list containing the properties of the relationship.
         """
         # For a given domain and range, get the properties of the relationship
-        query = f"MATCH (n:{domain_label} {{{domain_primary_key_value}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label} {{{range_primary_key_value}: $range_primary_key_value}}) RETURN properties(r) AS properties"
+        query = f"MATCH (n:{domain_label} {{{domain_pk_prop}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label} {{{range_pk_prop}: $range_primary_key_value}}) RETURN properties(r) AS properties"
         parameters = {"domain_primary_key_value": domain_primary_key_value, "range_primary_key_value": range_primary_key_value}
         records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]
 
-    def get_entity_properties(self, label, primary_key_value):
+    def get_entity_properties(self, label, pk_prop, primary_key_value):
         """
         Gets the properties of a single entity identified by its primary key.
 
         Args:
             label (str): The label of the entity.
+            pk_prop (str): The primary key property of the entity.
             primary_key_value (str): The primary key value of the entity.
 
         Returns:
             list: A list containing the properties of the entity.
         """
         # For a given entity, get the properties
-        query = f"MATCH (n:{label} {{{primary_key_value}: $primary_key_value}}) RETURN properties(n) AS properties"
+        query = f"MATCH (n:{label} {{{pk_prop}: $primary_key_value}}) RETURN properties(n) AS properties"
         parameters = {"primary_key_value": primary_key_value}
         records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]

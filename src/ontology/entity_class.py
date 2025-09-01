@@ -115,9 +115,9 @@ class EntityClass:
         """
         def func(**kwargs):
             properties = kwargs.get('kwargs', kwargs)
-            param_name = f"{self.entity_class_name}_{self.primary_key_prop.property_name}"
+            param_name = f"{self.primary_key_prop.property_name}"
             primary_key_value = properties.get(param_name)
-            return get_entity_properties_func(self.entity_class_name, primary_key_value)
+            return get_entity_properties_func(self.entity_class_name, self.primary_key_prop.property_name, primary_key_value)
 
         func.__name__ = "get_"+self.entity_class_name+"_properties"
         func.__doc__ = f"Get a {self.entity_class_name} properties."

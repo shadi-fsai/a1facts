@@ -208,7 +208,7 @@ class RelationshipClass:
             properties = kwargs.get('kwargs', kwargs)
             domain_param_name, _ = self._get_param_names()
             domain_primary_key_value = properties.get(domain_param_name)
-            return get_relationship_entities_func( self.domain_entity_class, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
+            return get_relationship_entities_func( self.domain_entity_class, self.domain_primary_key_prop, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
 
         func.__name__ = f"get_{self.range_entity_class}s_{self.domain_entity_class}_{self.relationship_name}"
         func.__doc__ = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship.\n"+\
