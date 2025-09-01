@@ -30,47 +30,77 @@ class EntityClass:
 
     def __str__(self):
         entity_str = ""
-        entity_str += f"{self.name} ({self.description})\n"
+        entity_str += f"{self.entity_class_name} ({self.description})\n"
         entity_str += "      Properties:\n"
         for prop in self.properties:
             entity_str += f"      - {prop}\n"
         return entity_str
 
     def get_add_or_update_tool(self, add_or_update_entity_func):
-        if not self.primary_key_prop:
-            raise Exception(f"Primary key property not found for entity: {self.name}")
+        primary_key_prop = next((prop for prop in self.properties if prop.primary_key), self.properties[0] if self.properties else None)
+        if not primary_key_prop:
+            return None
 
-        description = f"Add or update a {self.entity_class_name} entity. \n"
-        description += f"Primary Key: {self.primary_key_prop}\n"
-        description += f"Properties:\n"
+        def func(**kwargs):
+            properties = kwargs.get('kwargs', kwargs)
+            return add_or_update_entity_func(self.entity_class_name, primary_key_prop.property_name, properties)
+
+        func.__name__ = "add_or_update_" + self.entity_class_name + "_information"
+        func.__doc__ = f"Add or update a {self.entity_class_name} entity. Primary key: {primary_key_prop.property_name}"
+        func.__parameters__ = self.get_tool_parameters_schema()
+        return func
+
+    def get_tool_parameters_schema(self):
+        schema = {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
         for prop in self.properties:
-            description += f"      - {prop}\n"
-        
-        parameters = {"properties": {"type": "dict", "description": "The properties of the entity. All properties including primary key must be provided - primary key property: "+self.primary_key_prop.property_name}}
-
-        def func(properties: dict):
-            return add_or_update_entity_func(self.entity_class_name, properties[self.primary_key_prop.name], properties)
-
-        return Function(name="add_or_update_"+self.entity_class_name+"_information", description=description, entrypoint=func, parameters=parameters)
+            prop_type = "string"
+            if prop.type == "float":
+                prop_type = "number"
+            elif prop.type == "integer":
+                prop_type = "integer"
+            
+            schema["properties"][prop.property_name] = {
+                "type": prop_type,
+                "description": prop.description
+            }
+            schema["required"].append(prop.property_name)
+        return schema
     
     def get_get_all_entity_tool(self, get_all_entity_func):
-        description = f"Get all {self.entity_class_name} entities. \n"
         def func():
             return get_all_entity_func(self.entity_class_name)
-        return Function(name="get_all_"+self.entity_class_name+"_entities", description=description, entrypoint=func)
+
+        func.__name__ = "get_all_"+self.entity_class_name+"_entities"
+        func.__doc__ = f"Get all {self.entity_class_name} entities."
+        func.__parameters__ = {"type": "object", "properties": {}}
+        return func
 
     def get_get_entity_properties_tool(self, get_entity_properties_func):
-        description = f"Get a {self.entity_class_name} properties. \n"
-        description = f"Returns a dictionary of properties for the {self.entity_class_name} with: \n"
-        for prop in self.properties:
-            description += f"      - {prop}\n"
-
-        def func(primary_key_value: str):
+        def func(**kwargs):
+            properties = kwargs.get('kwargs', kwargs)
+            param_name = f"{self.entity_class_name}_{self.primary_key_prop.property_name}"
+            primary_key_value = properties.get(param_name)
             return get_entity_properties_func(self.entity_class_name, primary_key_value)
-        paramname = self.entity_class_name+"_"+self.primary_key_prop.property_name
-        parameters = {paramname: {"type": "str", "description": "The "+self.primary_key_prop.property_name+" of the "+self.entity_class_name}}
 
-        return Function(name="get_"+self.entity_class_name+"_properties", description=description, entrypoint=func, parameters=parameters)
+        func.__name__ = "get_"+self.entity_class_name+"_properties"
+        func.__doc__ = f"Get a {self.entity_class_name} properties."
+        
+        param_name = f"{self.entity_class_name}_{self.primary_key_prop.property_name}"
+        func.__parameters__ = {
+            "type": "object",
+            "properties": {
+                param_name: {
+                    "type": "string",
+                    "description": f"The {self.primary_key_prop.property_name} of the {self.entity_class_name}"
+                }
+            },
+            "required": [param_name]
+        }
+        return func
 
 class RelationshipClass:
     def __init__(self, name: str, domain: EntityClass, range: EntityClass, description: str, symmetric: bool = False):
@@ -107,42 +137,121 @@ class RelationshipClass:
                     raise Exception(f"Property {prop.property_name} not found in properties, you need to change the world model")
 
     def get_add_or_update_tool(self, add_or_update_relationship_func):
-        description = f"Add or update a [{self.relationship_name}] relationship. between a [{self.domain_entity_class}] and [{self.range_entity_class}] {'symmetrically' if self.symmetric else 'asymmetrically'}\n"
-        description += f"Args: domain_primary_key_value: [{self.domain_entity_class}]'s [{self.domain_primary_key_prop}]: {self.domain_primary_key_type}\n" 
-        description += f"      range_primary_key_value: [{self.range_entity_class}]'s [{self.range_primary_key_prop}]: {self.range_primary_key_type}\n"
+        def func(**kwargs):
+            properties = kwargs.get('kwargs', kwargs)
+            domain_param_name, range_param_name = self._get_param_names()
+            domain_primary_key_value = properties.get(domain_param_name)
+            range_primary_key_value = properties.get(range_param_name)
+            props = properties.get("properties")
+            self.validate_properties(props)
+            
+            return add_or_update_relationship_func(
+                self.domain_entity_class, 
+                domain_primary_key_value, 
+                self.range_entity_class,  
+                range_primary_key_value, 
+                self.relationship_name, 
+                props, 
+                self.symmetric
+            )
+
+        func.__name__ = f"add_link_{self.domain_entity_class}_{self.relationship_name}_{self.range_entity_class}"
+        func.__doc__ = f"Add or update a [{self.relationship_name}] relationship between a [{self.domain_entity_class}] and [{self.range_entity_class}]\n"+\
+            f"Domain Primary Key: from_{self.domain_entity_class}_{self.domain_primary_key_prop}\n"+\
+            f"Range Primary Key: to_{self.range_entity_class}_{self.range_primary_key_prop}"+\
+            (f"Properties: {self.properties}" if self.properties else "")
+        func.__parameters__ = self.get_tool_parameters_schema()
+        return func
+
+    def _get_param_names(self):
+        domain_param_name = f"from_{self.domain_entity_class}_{self.domain_primary_key_prop}"
+        range_param_name = f"to_{self.range_entity_class}_{self.range_primary_key_prop}"
+        return domain_param_name, range_param_name
+
+    def get_tool_parameters_schema(self):
+        domain_param_name, range_param_name = self._get_param_names()
+
+        schema = {
+            "type": "object",
+            "properties": {
+                domain_param_name: {
+                    "type": "string",
+                    "description": f"The {self.domain_primary_key_prop} of the FROM entity ({self.domain_entity_class})"
+                },
+                range_param_name: {
+                    "type": "string",
+                    "description": f"The {self.range_primary_key_prop} of the TO entity ({self.range_entity_class})"
+                }
+            },
+            "required": [domain_param_name, range_param_name]
+        }
+
         if self.properties:
-            description += f"      properties: dictionary of properties to add to the relationship. \n"
+            props_schema = {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
             for prop in self.properties:
-                description += f"   - {prop.property_name}: {prop.type}\n"
+                prop_type = "string"
+                if prop.type == "float":
+                    prop_type = "number"
+                elif prop.type == "integer":
+                    prop_type = "integer"
+
+                props_schema["properties"][prop.property_name] = {
+                    "type": prop_type,
+                    "description": prop.description
+                }
+                props_schema["required"].append(prop.property_name)
+            
+            schema["properties"]["properties"] = props_schema
         
-        def func(domain_primary_key_value: str, range_primary_key_value: str, properties: dict = None):
-            self.validate_properties(properties)
-            return add_or_update_relationship_func(self.domain_entity_class, domain_primary_key_value, self.range_entity_class,  range_primary_key_value, self.relationship_name, properties, self.symmetric)
-        
-        parameters = {"domain_primary_key_value": {"type": "str", "description": "The "+self.domain_primary_key_prop+" of the "+self.domain_entity_class}, 
-        "range_primary_key_value": {"type": "str", "description": "The "+self.range_primary_key_prop+" of the "+self.range_entity_class}}
-        if self.properties:
-            parameters["properties"] = {"type": "dict", "description": "The properties of the relationship. "}
-        
-        return Function(name="add_link_"+self.domain_entity_class+"_"+self.relationship_name+"_"+self.range_entity_class, description=description, entrypoint=func, parameters=parameters)
+        return schema
 
     def get_get_relationship_properties_tool(self, get_relationship_properties_func):
-        description = f"Get a {self.relationship_name} relationship properties. \n"
-        description += f"Domain: {self.domain_entity_class} - Range: {self.range_entity_class}\n"
-        for prop in self.properties:
-            description += f"   - {prop}\n"
-        def func(domain_primary_key_value: str, range_primary_key_value: str):
+        def func(**kwargs):
+            properties = kwargs.get('kwargs', kwargs)
+            domain_param_name, range_param_name = self._get_param_names()
+            domain_primary_key_value = properties.get(domain_param_name)
+            range_primary_key_value = properties.get(range_param_name)
             return get_relationship_properties_func( self.domain_entity_class, domain_primary_key_value, self.range_entity_class, range_primary_key_value,self.relationship_name)
-        parameters = {"domain_primary_key_value": {"type": "str", "description": "The "+self.domain_primary_key_prop+" of the "+self.domain_entity_class}, 
-        "range_primary_key_value": {"type": "str", "description": "The "+self.range_primary_key_prop+" of the "+self.range_entity_class}}
-        return Function(name="get_relationship_properties_"+self.domain_entity_class+"_"+self.relationship_name+"_"+self.range_entity_class, description=description, entrypoint=func, parameters=parameters)
+
+        func.__name__ = f"get_relationship_properties_{self.domain_entity_class}_{self.relationship_name}_{self.range_entity_class}"
+        func.__doc__ = f"Get a {self.relationship_name} relationship properties."
+        
+        domain_param_name, range_param_name = self._get_param_names()
+            
+        func.__parameters__ = {
+            "type": "object",
+            "properties": {
+                domain_param_name: {"type": "string", "description": f"The {self.domain_primary_key_prop} of the FROM entity ({self.domain_entity_class})"}, 
+                range_param_name: {"type": "string", "description": f"The {self.range_primary_key_prop} of the TO entity ({self.range_entity_class})"}
+            },
+            "required": [domain_param_name, range_param_name]
+        }
+        return func
 
     def get_get_relationship_entities_tool(self, get_relationship_entities_func):
-        description = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship. \n"
-        def func(domain_primary_key_value: str):
+        def func(**kwargs):
+            properties = kwargs.get('kwargs', kwargs)
+            domain_param_name, _ = self._get_param_names()
+            domain_primary_key_value = properties.get(domain_param_name)
             return get_relationship_entities_func( self.domain_entity_class, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
-        parameters = {"domain_primary_key_value": {"type": "str", "description": "The "+self.domain_primary_key_prop+" of the "+self.domain_entity_class}}  
-        return Function(name="get_"+self.range_entity_class+"s_"+self.domain_entity_class+"_"+self.relationship_name, description=description, entrypoint=func, parameters=parameters)
+
+        func.__name__ = f"get_{self.range_entity_class}s_{self.domain_entity_class}_{self.relationship_name}"
+        func.__doc__ = f"Get all {self.range_entity_class}s linked to a {self.domain_entity_class} in a {self.relationship_name} relationship."
+
+        domain_param_name, _ = self._get_param_names()
+
+        func.__parameters__ = {
+            "type": "object",
+            "properties": {
+                domain_param_name: {"type": "string", "description": f"The {self.domain_primary_key_prop} of the FROM entity ({self.domain_entity_class})"}
+            },
+            "required": [domain_param_name]
+        }
+        return func
 
 
 class KnowledgeOntology:
@@ -159,7 +268,7 @@ class KnowledgeOntology:
             if entity_class.entity_class_name == name:
                 return entity_class
         return None   
- 
+
     def load_ontology(self):
         with open(self.ontology_file, 'r') as file:
             ontology = yaml.load(file, Loader=yaml.FullLoader)

@@ -38,16 +38,20 @@ class KnowledgeGraph:
             print(f"Failed to connect to Neo4j database: {e}")
             self.driver = None
         self.model = my_model
+        self.get_tools = self.ontology.get_get_tools(self.get_all_entities_by_label, 
+            self.get_entity_properties, 
+            self.get_relationship_properties, 
+            self.get_relationship_entities)
+        self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.add_or_update_entity, self.add_relationship)
+        
         self.query_agent = Agent(
             name="Knowledge Graph Agent",
             role="Interact with the knowledge graph",
             model=self.model,
-            tools=[self.get_entity_from_graph,
-            self.get_all_entities_by_label],
+            tools=self.get_tools,
             instructions=dedent(f"""
                 Get information from the knowledge base.
-                Use the get_entity_from_graph tool to get information from the graph.
-                If you can't find the information in the graph, use the get_all_entities_by_label tool to get all entity identifiers by label.
+                Use the tools to get information from the graph.
                 The ontology on which this knowledge base is based is [{self.ontology}]
                 Today is {datetime.now().strftime("%Y-%m-%d")}
                 """),
@@ -58,13 +62,12 @@ class KnowledgeGraph:
             name="Knowledge Graph Update Agent",
             role="Update the knowledge graph",
             model=self.model,
-            tools=[self.add_entity_to_graph,
-            self.add_relationship_to_graph],
+            tools=self.add_or_update_tools,
             instructions=dedent(f"""
                 The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]
                 Return the results in RDFS format.
-                When you are done, add every entity and relationship to the graph using the add_entity_to_graph and add_relationship_to_graph tools 
+                When you are done, add every entity and relationship to the graph using the tools available to you 
                 Today is {datetime.now().strftime("%Y-%m-%d")}
             """),
             show_tool_calls=True,
@@ -77,7 +80,7 @@ class KnowledgeGraph:
         return result.content        
 
     def update_knowledge(self, knowledge: str):
-        result = self.update_agent.run(knowledge)
+        result = self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + knowledge)
         return result.content
 
     def close(self):
@@ -163,7 +166,11 @@ class KnowledgeGraph:
         self._execute_query(query, parameters)
         print(f"Successfully added/updated entity: {label} with {primary_key_field} = '{primary_value}'")
 
-    def add_relationship(self, start_node_label, start_node_pk_val, end_node_label, end_node_pk_val, relationship_type, properties=None):
+    def add_relationship(self, start_node_label, start_node_pk_val, end_node_label, end_node_pk_val, relationship_type, properties=None, symmetric=False):
+        print("\nDEBUG: add_relationship called with:")
+        print(f"  start_node_label: {start_node_label}, start_node_pk_val: {start_node_pk_val}")
+        print(f"  end_node_label: {end_node_label}, end_node_pk_val: {end_node_pk_val}")
+        print(f"  relationship_type: {relationship_type}")
         """
         Creates a relationship between two existing nodes.
 
@@ -174,6 +181,7 @@ class KnowledgeGraph:
             end_node_pk_val (str): The primary key value of the ending node.
             relationship_type (str): The type of the relationship (e.g., "OPERATES_IN").
             properties (dict, optional): Properties for the relationship. Defaults to None.
+            symmetric (bool): If True, creates a two-way relationship. Defaults to False.
         Example:
             # Based on the company ontology, this could represent relationships like:
             # Organization -> Market: "OPERATES_IN"
@@ -192,15 +200,25 @@ class KnowledgeGraph:
         start_pk_field = "name" 
         end_pk_field = "name" 
 
+        # Base query for a directional relationship
         query = (
             f"MATCH (a:{start_node_label} {{{start_pk_field}: $start_val}}), "
             f"(b:{end_node_label} {{{end_pk_field}: $end_val}}) "
             f"MERGE (a)-[r:{relationship_type}]->(b) "
         )
-
         if properties:
             query += "SET r += $props"
 
+        # If the relationship is symmetric, create the reverse relationship as well
+        if symmetric:
+            reverse_query = (
+                f"MATCH (a:{start_node_label} {{{start_pk_field}: $start_val}}), "
+                f"(b:{end_node_label} {{{end_pk_field}: $end_val}}) "
+                f"MERGE (b)-[r:{relationship_type}]->(a) "
+            )
+            if properties:
+                reverse_query += "SET r += $props"
+        
         parameters = {
             "start_val": start_node_pk_val,
             "end_val": end_node_pk_val,
@@ -209,6 +227,8 @@ class KnowledgeGraph:
 
         try:
             self._execute_query(query, parameters)
+            if symmetric:
+                self._execute_query(reverse_query, parameters)
         except Exception as e:
             print(f"Error creating relationship: {e}")
             return False
@@ -293,6 +313,7 @@ class KnowledgeGraph:
         return results
 
     def get_all_entities_by_label(self, label):
+
         """
         Retrieves all entities (nodes) with a specific label.
 
@@ -309,5 +330,26 @@ class KnowledgeGraph:
             print(f"No entities found with label '{label}'.")
             return []
         
+        return [record["properties"] for record in records]
+
+    def get_relationship_entities(self, domain_label, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
+        # For a given domain, get all the range entities in a relationship
+        query = f"MATCH (n:{domain_label} {{{domain_primary_key_value}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label}) RETURN properties(m) AS properties"
+        parameters = {"domain_primary_key_value": domain_primary_key_value}
+        records = self._execute_read_query(query, parameters)
+        return [record["properties"] for record in records]
+    
+    def get_relationship_properties(self, domain_label, domain_primary_key_value, relationship_type, range_label, range_primary_key_value):
+        # For a given domain and range, get the properties of the relationship
+        query = f"MATCH (n:{domain_label} {{{domain_primary_key_value}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label} {{{range_primary_key_value}: $range_primary_key_value}}) RETURN properties(r) AS properties"
+        parameters = {"domain_primary_key_value": domain_primary_key_value, "range_primary_key_value": range_primary_key_value}
+        records = self._execute_read_query(query, parameters)
+        return [record["properties"] for record in records]
+
+    def get_entity_properties(self, label, primary_key_value):
+        # For a given entity, get the properties
+        query = f"MATCH (n:{label} {{{primary_key_value}: $primary_key_value}}) RETURN properties(n) AS properties"
+        parameters = {"primary_key_value": primary_key_value}
+        records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]
 
