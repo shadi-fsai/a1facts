@@ -3,14 +3,14 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 from colored import cprint
-from knowledge_graph import KnowledgeGraph
+from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
-from knowledge_acquirer import KnowledgeAcquirer
+from enrichment.knowledge_acquirer import KnowledgeAcquirer
 #from agno.models.google import Gemini
 
 ontology = KnowledgeOntology("test/company.yaml")
 graph = KnowledgeGraph(ontology)
-finance_info_agent = KnowledgeAcquirer(graph, ontology, [])
+finance_info_agent = KnowledgeAcquirer(graph, ontology, "test/knowledge_sources.yaml")
 query = "who are all the competitors of UnitedHealth?"
 #financeresponse = finance_info_agent.acquire(query)
 #cprint(financeresponse, 'blue')

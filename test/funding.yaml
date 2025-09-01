@@ -1,0 +1,149 @@
+world:
+  name: Funding Knowledge Graph
+  description: Funding knowledge graph.
+
+entity_classes:
+  VC:
+    description: "A Venture Capital firm that invests in other companies."
+    properties:
+      - name: name
+        type: str
+        functional: true
+        description: "A string representing the official name of an entity."
+      - name: website
+        type: str
+        functional: true
+        description: "The official website URL of an organization."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+  Portfolio_Company:
+    description: "A company that has received investment from a VC."
+    properties:
+      - name: name
+        type: str
+        functional: true
+        description: "A string representing the official name of an entity."
+      - name: website
+        type: str
+        functional: true
+        description: "The official website URL of an organization."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+  Acquiring_Company:
+    description: "A company that acquires another company."
+    properties:
+      - name: name
+        type: str
+        functional: true
+        description: "A string representing the official name of an entity."
+      - name: website
+        type: str
+        functional: true
+        description: "The official website URL of an organization."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+  Partner:
+    description: "An individual who is a partner at a VC firm."
+    properties:
+      - name: name
+        type: str
+        functional: true
+        description: "A string representing the official name of an entity."
+      - name: website
+        type: str
+        functional: true
+        description: "The official website URL of an organization."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+  Investment:
+    description: "Represents a single investment event from a VC into a Portfolio Company."
+    properties:
+      - name: investment_amount
+        type: float
+        functional: true
+        description: "The monetary value of an investment."
+      - name: investment_date
+        type: date
+        functional: true
+        description: "The date an investment was made."
+      - name: funding_round
+        type: str
+        functional: true
+        description: "The specific funding round of the investment (e.g., Seed, Series A, etc.)."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+  Acquisition:
+    description: "Represents the event of one company acquiring another."
+    properties:
+      - name: acquisition_price
+        type: float
+        functional: true
+        description: "The price for which a company was acquired."
+      - name: acquisition_date
+        type: date
+        functional: true
+        description: "The date an acquisition was completed."
+      - name: description
+        type: str
+        description: "A text description of an entity or event."
+      - name: source
+        type: str
+        description: "The source of the information (e.g., a URL to a press release or article)."
+
+relationships:
+  invests_in:
+    description: "Connects a VC to a Portfolio_Company through an Investment event."
+    domain: VC
+    range: Investment
+  
+  investment_target:
+    description: "Connects an Investment event to the Portfolio_Company that received it."
+    domain: Investment
+    range: Portfolio_Company
+    functional: true
+
+  was_acquired_in:
+    description: "Connects a Portfolio_Company to the Acquisition event in which it was acquired."
+    domain: Portfolio_Company
+    range: Acquisition
+
+  acquired_by:
+    description: "Connects an Acquisition event to the Acquiring_Company."
+    domain: Acquisition
+    range: Acquiring_Company
+
+  has_partner:
+    description: "Connects a VC to a Partner who works there."
+    domain: VC
+    range: Partner
+
+  co_invests_with:
+    description: "A symmetric relationship between two VCs that have invested in the same funding round."
+    domain: VC
+    range: VC
+    symmetric: true

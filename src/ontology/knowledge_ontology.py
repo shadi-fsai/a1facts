@@ -4,9 +4,9 @@ import os
 from agno.tools.function import Function
 
 from colored import cprint
-from property import Property
-from entity_class import EntityClass
-from relationship_class import RelationshipClass
+from ontology.property import Property
+from ontology.entity_class import EntityClass
+from ontology.relationship_class import RelationshipClass
 
 
 class KnowledgeOntology:

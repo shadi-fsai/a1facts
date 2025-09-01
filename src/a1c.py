@@ -1,15 +1,13 @@
-from knowledge_graph import KnowledgeGraph
+from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
-from knowledge_acquirer import KnowledgeAcquirer
-from knowledge_source import KnowledgeSource
+from enrichment.knowledge_acquirer import KnowledgeAcquirer
 
 class a1c:
-    def __init__(self, name: str, ontology_file: str, knowledge_sources: list[KnowledgeSource]):
+    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str):
         self.name = name
-        self.ontology = KnowledgeOntology(ontology_file)
-        self.knowledge_sources = knowledge_sources
+        self.ontology = KnowledgeOntology(ontology_config_file)
         self.graph = KnowledgeGraph(self.ontology)
-        self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, self.knowledge_sources)
+        self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, self.knowledge_sources_config_file)
 
     def query(self, query: str): 
         result = self.graph.query(query)
@@ -25,8 +23,7 @@ class a1c:
         return "No result found"
 
     def __str__(self) -> str:
-        ks_names = [ks.name for ks in self.knowledge_sources]
-        return f"a1c('{self.name}', ontology='{self.ontology}', knowledge_sources={ks_names})"
+        return f"a1c('{self.name}', ontology='{self.ontology}', knowledge_acquirer={self.knowledge_acquirer})"
 
     def __del__(self) -> None:
         """

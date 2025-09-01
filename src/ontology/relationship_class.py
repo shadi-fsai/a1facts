@@ -1,5 +1,5 @@
-from entity_class import EntityClass
-from property import Property
+from ontology.entity_class import EntityClass
+from ontology.property import Property
 
 
 class RelationshipClass:

@@ -12,7 +12,6 @@ dependencies = [
     { name = "google-genai" },
     { name = "litellm" },
     { name = "neo4j" },
-    { name = "owlready2" },
     { name = "rdflib" },
 ]
 
@@ -24,7 +23,6 @@ requires-dist = [
     { name = "google-genai", specifier = ">=1.32.0" },
     { name = "litellm", specifier = ">=1.76.1" },
     { name = "neo4j", specifier = ">=5.28.2" },
-    { name = "owlready2", specifier = ">=0.48" },
     { name = "rdflib", specifier = ">=7.1.4" },
 ]
 
@@ -695,12 +693,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/07/55/da5598ed5c6bdd993
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bd/0d/c9e7016d82c53c5b5e23e2bad36daebb8921ed44f69c0a985c6529a35106/openai-1.102.0-py3-none-any.whl", hash = "sha256:d751a7e95e222b5325306362ad02a7aa96e1fab3ed05b5888ce1c7ca63451345", size = 812015 },
 ]
-
-[[package]]
-name = "owlready2"
-version = "0.48"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8d/79/01daa72fbd07b1d4dd0907356d0ae486a684f0bd4654430f27a3e31206ee/owlready2-0.48.tar.gz", hash = "sha256:86b4d8500d769a674c524b54397fdd738ff5d0a96878432b69f4d606d6a7a4d8", size = 27298462 }
 
 [[package]]
 name = "packaging"

@@ -1,4 +1,4 @@
-from property import Property
+from ontology.property import Property
 
 
 class EntityClass:

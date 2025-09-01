@@ -1,7 +1,7 @@
-from knowledge_graph import KnowledgeGraph
+from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
-from knowledge_source import KnowledgeSource
-from modelconfig import my_model
+from enrichment.knowledge_source import KnowledgeSource
+from utils.modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
 from agno.tools.exa import ExaTools
@@ -9,10 +9,11 @@ from datetime import datetime
 
 
 class KnowledgeAcquirer:
-    def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources: list[KnowledgeSource]):
+    def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str):
         self.ontology = ontology
         self.graph = graph
-        self.knowledge_sources = knowledge_sources
+        self.knowledge_sources_config_file = knowledge_sources_config_file
+        self.knowledge_sources = self.load_knowledge_sources(self.knowledge_sources_config_file)
         self.tools = [ExaTools(num_results=20, summary=True)]
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
@@ -66,3 +67,8 @@ class KnowledgeAcquirer:
     def acquire(self, query: str):
         result = self.agent.run(query)
         return result.content
+
+    def load_knowledge_sources(self, knowledge_sources_config_file: str):
+        return []
+        #TODO YAML to parse different types of knowledge sources and their configurations
+        

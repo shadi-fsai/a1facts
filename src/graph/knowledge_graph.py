@@ -3,7 +3,7 @@ from datetime import date
 from dotenv import load_dotenv
 import os
 from ontology.knowledge_ontology import KnowledgeOntology
-from modelconfig import my_model
+from utils.modelconfig import my_model
 from agno.tools import tool
 from agno.agent import Agent
 from textwrap import dedent

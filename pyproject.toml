@@ -11,6 +11,5 @@ dependencies = [
     "google-genai>=1.32.0",
     "litellm>=1.76.1",
     "neo4j>=5.28.2",
-    "owlready2>=0.48",
     "rdflib>=7.1.4",
 ]
