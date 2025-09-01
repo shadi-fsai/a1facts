@@ -1,16 +1,8 @@
-from neo4j import GraphDatabase
-from datetime import date
-from dotenv import load_dotenv
-import os
 from ontology.knowledge_ontology import KnowledgeOntology
 from utils.modelconfig import my_model
-from utils.modelconfig import my_query_model
-from agno.tools import tool
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
-# Load environment variables from .env file
-load_dotenv()
 
 class UpdateAgent:
     def __init__(self, ontology: KnowledgeOntology, mytools: list):
