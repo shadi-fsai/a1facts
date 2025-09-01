@@ -3,7 +3,7 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-from knowledge_ontology import KnowledgeOntology
+from ontology.knowledge_ontology import KnowledgeOntology
 from knowledge_graph import KnowledgeGraph
 
 

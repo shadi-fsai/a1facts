@@ -2,10 +2,9 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-from a1c import a1c
 from colored import cprint
 from knowledge_graph import KnowledgeGraph
-from knowledge_ontology import KnowledgeOntology
+from ontology.knowledge_ontology import KnowledgeOntology
 from knowledge_acquirer import KnowledgeAcquirer
 #from agno.models.google import Gemini
 

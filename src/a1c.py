@@ -1,7 +1,7 @@
-from knowledge_source import KnowledgeSource
-from knowledge_acquirer import KnowledgeAcquirer
-from knowledge_ontology import KnowledgeOntology
 from knowledge_graph import KnowledgeGraph
+from ontology.knowledge_ontology import KnowledgeOntology
+from knowledge_acquirer import KnowledgeAcquirer
+from knowledge_source import KnowledgeSource
 
 class a1c:
     def __init__(self, name: str, ontology_file: str, knowledge_sources: list[KnowledgeSource]):

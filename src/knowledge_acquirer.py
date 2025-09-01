@@ -1,6 +1,6 @@
 from knowledge_graph import KnowledgeGraph
+from ontology.knowledge_ontology import KnowledgeOntology
 from knowledge_source import KnowledgeSource
-from knowledge_ontology import KnowledgeOntology
 from modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
