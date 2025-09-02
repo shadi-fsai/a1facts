@@ -1,6 +1,6 @@
-# Contributing to a1c
+# Contributing to a1facts
 
-First off, thank you for considering contributing to a1c! It's people like you that make this project great.
+First off, thank you for considering contributing to a1facts! It's people like you that make this project great.
 
 ## How Can I Contribute?
 

@@ -32,12 +32,12 @@ class KnowledgeBase:
         return [query_tool, acquire_tool]
 
     def __str__(self) -> str:
-        return f"a1c('{self.name}', ontology='{self.ontology}', knowledge_acquirer={self.knowledge_acquirer})"
+        return f"a1facts('{self.name}', ontology='{self.ontology}', knowledge_acquirer={self.knowledge_acquirer})"
 
     def __del__(self) -> None:
         """
         Destructor that automatically closes the Neo4j graph connection
-        when the a1c instance is garbage collected.
+        when the a1facts instance is garbage collected.
         """
         if hasattr(self, 'graph') and self.graph:
             self.graph.close()

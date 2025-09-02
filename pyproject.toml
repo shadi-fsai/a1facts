@@ -1,7 +1,7 @@
 [project]
-name = "a1c"
+name = "a1facts"
 version = "0.1.0"
-description = "A1C - precise knowledge for AI agents"
+description = "a1facts - precise knowledge for AI agents"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
