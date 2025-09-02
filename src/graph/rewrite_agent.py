@@ -25,8 +25,8 @@ class RewriteAgent:
             )
     
     def rewrite_query(self, query: str, class_entity_pairs: dict):
-        print(class_entity_pairs)
-        cprint(query, 'yellow')
+        #print(class_entity_pairs)
+        #cprint(query, 'yellow')
         prompt = dedent(f"""
             Rewrite the query to use known entities from the graph, for entities not in the graph keep the entity names as is.
             Here are the known entity pairs: {class_entity_pairs}
@@ -36,5 +36,5 @@ class RewriteAgent:
         )
 
         result = self.agent.run(prompt)
-        cprint(result.content, 'green')
+        #cprint(result.content, 'green')
         return result.content

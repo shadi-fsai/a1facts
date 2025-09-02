@@ -180,10 +180,10 @@ class KnowledgeGraph:
             properties (dict, optional): Properties for the relationship. Defaults to None.
             symmetric (bool): If True, creates a relationship in both directions.
         """
-        print("\nDEBUG: add_relationship called with:")
-        print(f"  start_node_label: {start_node_label}, start_node_pk_val: {start_node_pk_val}")
-        print(f"  end_node_label: {end_node_label}, end_node_pk_val: {end_node_pk_val}")
-        print(f"  relationship_type: {relationship_type}")
+        #print("\nDEBUG: add_relationship called with:")
+        #print(f"  start_node_label: {start_node_label}, start_node_pk_val: {start_node_pk_val}")
+        #print(f"  end_node_label: {end_node_label}, end_node_pk_val: {end_node_pk_val}")
+        #print(f"  relationship_type: {relationship_type}")
         """
         Creates a relationship between two existing nodes.
 

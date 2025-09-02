@@ -12,7 +12,6 @@ class KnowledgeSource:
         self.query_agent = None
 
     def query_tool(self):
-        print(f"Loading functions from {self.functions_file}")
         functions_module = importlib.import_module(f"{self.functions_file[:-3]}")
         for func_name in dir(functions_module):
             if func_name == "load_dotenv":

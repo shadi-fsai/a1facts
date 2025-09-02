@@ -65,9 +65,7 @@ class KnowledgeAcquirer:
         )
 
     def acquire(self, query: str):
-        print(f"Query: {query}")
         result = self.agent.run(query)
-        print(f"Result: {result.content}")
         return result.content
 
     def load_knowledge_sources(self, knowledge_sources_config_file: str):

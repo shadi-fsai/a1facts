@@ -26,5 +26,5 @@ class QueryAgent:
     def query(self, query: str):
 
         result = self.agent.run(query)
-        cprint(result, 'green')
+        #cprint(result, 'green')
         return result.content

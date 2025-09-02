@@ -10,7 +10,7 @@ from textwrap import dedent
 from utils.modelconfig import my_model
 
 def main():
-    a1c = A1C("a1c", "test/company.yaml", "test/sources.yaml")
+    a1c = A1C("a1c", "cookbook/example/company.yaml", "cookbook/example/sources.yaml")
 
     agent = Agent(
         name="finance_info_agent",
@@ -20,7 +20,7 @@ def main():
         instructions=dedent("""get financial information about the company"""),
         show_tool_calls=True,
         markdown=True,
-        debug_mode=True,
+        debug_mode=False,
     )
     query = "what do you know about how UnitedHealth competes with CVS?"
     result = agent.run(query)
