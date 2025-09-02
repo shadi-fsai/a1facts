@@ -7,7 +7,6 @@ from textwrap import dedent
 from agno.tools.exa import ExaTools
 from datetime import datetime
 
-
 class KnowledgeAcquirer:
     def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str):
         self.ontology = ontology
@@ -19,7 +18,7 @@ class KnowledgeAcquirer:
             self.tools.append(source.query_tool())
         self.agent = Agent(
             name="Knowledge Acquirer",
-            role="Get information from the knowledge sources",
+            role="Get high reliability and credibility information from the knowledge sources",
             model=my_model,
             tools=self.tools,
             instructions=dedent(f""" Use tables to display data. 

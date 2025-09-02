@@ -25,4 +25,4 @@ class UpdateAgent:
             )
 
     def update(self, knowledge: str):
-        return self.update_agent.run(knowledge)
+        return self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + knowledge)

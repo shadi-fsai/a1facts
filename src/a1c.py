@@ -16,9 +16,8 @@ class a1c:
 
         result = self.knowledge_acquirer.acquire(query)
         if (result):
+            self.graph.update_knowledge(result)
             return result
-
-        self.graph.update_knowledge(result)
     
         return "No result found"
 

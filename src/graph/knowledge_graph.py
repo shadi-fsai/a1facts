@@ -77,7 +77,7 @@ class KnowledgeGraph:
             str: The content of the agent's response.
         """
         rewrite_knowledge = self.rewrite_query(knowledge)
-        result = self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + rewrite_knowledge)
+        result = self.update_agent.update(rewrite_knowledge)
         return result.content
 
     def close(self):

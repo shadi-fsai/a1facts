@@ -20,24 +20,12 @@ knowledge_sources:
     type: API
     url: https://financialmodelingprep.com
     doc_url: https://financialmodelingprep.com/developer/docs
-    api_key: xrXNUmkxWIszjiFRpVvYaIoJ9rcIizcO
+    api_key: api_key
     api_secret_required: false
     api_secret_name: api_secret
     api_secret_type: string
     api_secret_required: false
-    override_reliability: N
-    override_credibility: N
-
-  SEC:
-    name: SEC
-    type: API
-    url: https://sec.gov
-    doc_url: https://sec.gov/developer/docs
-    api_key: 1234567890
-    api_secret_name: api_secret
-    api_secret_type: string
-    api_secret_required: false
-    override_reliability: N
+    override_reliability: A
     override_credibility: N
 
   Local_database:

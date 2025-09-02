@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 from colored import cprint
@@ -17,11 +18,86 @@ def main():
     graph = KnowledgeGraph(ontology)
     finance_info_agent = KnowledgeAcquirer(graph, ontology, "test/knowledge_sources.yaml")
     query = "what do you know about how UnitedHealth competes with CVS?"
-    #financeresponse = finance_info_agent.acquire(query)
-    #cprint(financeresponse, 'blue')
-    #exit()
+    
+    
+    #ontoresponse = graph.update_knowledge(financeresponse)
+    #cprint(ontoresponse, 'green')
 
-    financeresponse = """
+    #exit()  
+
+
+    directories = [
+        "C:/Users/heluo/Documents/fortusight/mcp/fmp_mcp_server/Analysis_Output/HUM_analysis_output_/",
+        "C:/Users/heluo/Documents/fortusight/mcp/fmp_mcp_server/Analysis_Output/UNH_analysis_output_/",
+    ]
+
+    files = [
+    "capital_allocation.md",   
+    "company_profile_analysis_response.md",
+    "exit_multiplier.md",
+    "financial_score_report.md",
+    "flags_financial_health.md",
+    "flags_macro_market_environment.md",
+    "flags_operational_legal_risks.md", 
+    "industry.md",
+    "management.md",
+    "management_score_report.md",
+    "market_pov.md",
+    "metrics_response.md",
+    "moat_score_report.md",
+    "recent_events.md",
+    "revenue_response.md",
+    ]
+
+    for directory in directories:
+        for file in files:
+            start_time = time.time()
+            with open(directory + file, "r", encoding="utf-8") as f:
+                financeresponse = f.read()
+                ontoresponse = graph.update_knowledge(financeresponse)
+                cprint(ontoresponse, 'green')
+            end_time = time.time()
+            cprint(f"Ontology & knoweldge graph update {end_time - start_time:.2f} seconds", 'red')
+            
+
+    #start_time = time.time()
+    #knowledge_base_response = graph.query(query)
+    #end_time = time.time()
+    #cprint(f"Knowledge base query took {end_time - start_time:.2f} seconds", 'red')
+    #cprint(knowledge_base_response, 'yellow')
+    #print("*"*150)
+    #exit()
+    #return
+
+    start_time = time.time()
+    financeresponse = finance_info_agent.acquire(query)
+    end_time = time.time()
+    cprint(f"Finance info query took {end_time - start_time:.2f} seconds", 'red')
+    cprint(financeresponse, 'blue')
+    print("*"*150)
+    start_time = time.time()
+    ontoresponse = graph.update_knowledge(financeresponse)
+    cprint(ontoresponse, 'green')
+    #cprint(ontoresponse.content, 'green')
+    end_time = time.time()
+    cprint(f"Ontology & knoweldge graph update {end_time - start_time:.2f} seconds", 'red')
+
+    graph.close()
+
+if __name__ == "__main__":
+    profiler = cProfile.Profile()
+    profiler.enable()
+    main()
+    profiler.disable()
+    s = io.StringIO()
+    sortby = pstats.SortKey.CUMULATIVE
+    ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
+    ps.print_stats(50)
+    print(s.getvalue())
+
+
+
+financeresponse = """
     UnitedHealth Group is one of the largest health insurance and managed care companies in the world. Its primary competitors include companies that operate in the health insurance and healthcare services sectors, both in the United States and, in some cases, internationally.
 
     Below is a table of UnitedHealth Group’s major competitors:
@@ -51,44 +127,3 @@ def main():
     - [UnitedHealth Group 2024 Annual Report] (Confirmed)
     - [Yahoo Finance - UnitedHealth Competitors] (Confirmed)
     - [Morningstar Sector Analysis] (Confirmed)"""
-
-    #ontoresponse = graph.update_knowledge(financeresponse)
-    #cprint(ontoresponse, 'green')
-
-    #exit()  
-
-
-    import time
-    start_time = time.time()
-    knowledge_base_response = graph.query(query)
-    end_time = time.time()
-    cprint(f"Knowledge base query took {end_time - start_time:.2f} seconds", 'red')
-    cprint(knowledge_base_response, 'yellow')
-    print("*"*150)
-    #exit()
-    return
-    start_time = time.time()
-    financeresponse = finance_info_agent.acquire(query)
-    end_time = time.time()
-    cprint(f"Finance info query took {end_time - start_time:.2f} seconds", 'red')
-    cprint(financeresponse, 'blue')
-    print("*"*150)
-    start_time = time.time()
-    ontoresponse = graph.update_knowledge(financeresponse)
-    cprint(ontoresponse, 'green')
-    #cprint(ontoresponse.content, 'green')
-    end_time = time.time()
-    cprint(f"Ontology & knoweldge graph update {end_time - start_time:.2f} seconds", 'red')
-
-    graph.close()
-
-if __name__ == "__main__":
-    profiler = cProfile.Profile()
-    profiler.enable()
-    main()
-    profiler.disable()
-    s = io.StringIO()
-    sortby = pstats.SortKey.CUMULATIVE
-    ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
-    ps.print_stats(50)
-    print(s.getvalue())

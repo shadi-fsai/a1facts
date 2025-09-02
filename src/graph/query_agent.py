@@ -3,6 +3,7 @@ from utils.modelconfig import my_query_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
+from colored import cprint
 
 class QueryAgent:
     def __init__(self, ontology: KnowledgeOntology, mytools: list):
@@ -23,5 +24,7 @@ class QueryAgent:
             )
 
     def query(self, query: str):
+
         result = self.agent.run(query)
+        cprint(result, 'green')
         return result.content
