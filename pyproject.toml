@@ -1,16 +1,12 @@
 [project]
 name = "a1c"
 version = "0.1.0"
-description = "Add your description here"
+description = "A1C - precise knowledge for AI agents"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "agno>=1.8.0",
     "colored>=2.3.1",
     "exa-py>=1.15.3",
-    "google-genai>=1.32.0",
-    "groq>=0.31.0",
-    "litellm>=1.76.1",
     "neo4j>=5.28.2",
-    "rdflib>=7.1.4",
 ]

@@ -24,11 +24,11 @@ A1C addresses this problem by grounding your AI agent in a knowledge graph. Here
 
     ![Ontology Example](public/Onto_example.png)
 
-2.  **Populate the Graph**: You then ingest data from reliable sources into the knowledge graph. This could be from internal documents, databases, or external APIs. A1C ensures that this data is structured according to your ontology.
+2.  **Populate the Graph**: You then ingest data from different sources into the knowledge graph. This could be from internal documents, databases, external APIs, or the web. A1C ensures that this data is structured according to your ontology, but also that it's factual by triangulating facts from different sources.
 
     ![Example Knowledge Graph](public/example_KG.png)
 
-3.  **Query with Confidence**: When your AI agent receives a question, it doesn't just rely on its internal training data. Instead, it uses A1C to query the knowledge graph. This means the agent's answers are based on the structured, verified data you've provided.
+3.  **Query with Confidence**: When your AI agent receives a question, it doesn't just rely on its internal training data. Instead, it uses A1C to query the knowledge graph. This means the agent's answers are based on the structured, verified data.
 
     ![Query Example](public/Query_example.jpeg)
 
