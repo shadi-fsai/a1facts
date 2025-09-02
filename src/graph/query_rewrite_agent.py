@@ -8,7 +8,7 @@ from colored import cprint
 
 
 
-class RewriteAgent:
+class QueryRewriteAgent:
     def __init__(self, ontology: KnowledgeOntology, mytools: list):
         self.ontology = ontology        
         self.agent = Agent(
@@ -21,7 +21,7 @@ class RewriteAgent:
                 """),
                 show_tool_calls=True,
                 markdown=True,
-                debug_mode=True,
+                debug_mode=False,
             )
     
     def rewrite_query(self, query: str, class_entity_pairs: dict):

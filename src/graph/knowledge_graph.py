@@ -2,7 +2,7 @@ from neo4j import GraphDatabase
 from ontology.knowledge_ontology import KnowledgeOntology
 from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
-from graph.rewrite_agent import RewriteAgent
+from graph.query_rewrite_agent import QueryRewriteAgent
 from datetime import date
 from dotenv import load_dotenv
 import os
@@ -37,7 +37,7 @@ class KnowledgeGraph:
         self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.add_or_update_entity, self.add_relationship)        
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
         self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
-        self.rewrite_agent = RewriteAgent(self.ontology,[])
+        self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
         self.class_entity_pairs = {}
 
     def get_class_entity_pairs(self):

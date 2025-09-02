@@ -8,23 +8,27 @@ class A1C:
         self.ontology = KnowledgeOntology(ontology_config_file)
         self.graph = KnowledgeGraph(self.ontology)
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file)
-    def get_tool(self):
-        def query(query: str): 
+    def get_tools(self):
+        def query_tool(query: str): 
             result = self.graph.query(query)
-            if (result.found): #!TODO! doesn't return this yet 
-                return result.data
+            return result
 
+        def acquire_tool(query: str): 
             result = self.knowledge_acquirer.acquire(query)
-            if (result):
-                self.graph.update_knowledge(result)
-                return result
+            self.graph.update_knowledge(result)
+            return result
 
-        query.__name__ = "query"
-        query.__doc__ = "Query the knowledge graph and knowledge acquirer\n" + \
+        query_tool.__name__ = "query"
+        query_tool.__doc__ = "Query the knowledge graph and knowledge acquirer\n" + \
             "ARGS: query: str - The query to query the knowledge graph and knowledge acquirer\n" + \
             "RETURNS: str - The result from the knowledge graph and knowledge acquirer"
 
-        return query
+        acquire_tool.__name__ = "acquire"
+        acquire_tool.__doc__ = "Acquire knowledge from the knowledge acquirer and update the knowledge graph\n" + \
+            "ARGS: query: str - The query to acquire knowledge from the knowledge acquirer\n" + \
+            "RETURNS: str - The result from the knowledge acquirer"
+
+        return [query_tool, acquire_tool]
 
     def __str__(self) -> str:
         return f"a1c('{self.name}', ontology='{self.ontology}', knowledge_acquirer={self.knowledge_acquirer})"

@@ -7,6 +7,7 @@ from colored import cprint
 from ontology.property import Property
 from ontology.entity_class import EntityClass
 from ontology.relationship_class import RelationshipClass
+from ontology.ontology_rewrite_agent import OntologyRewriteAgent
 
 
 class KnowledgeOntology:
@@ -27,6 +28,7 @@ class KnowledgeOntology:
         self.name = ""
         self.description = ""
         self.load_ontology()
+        self.rewrite_agent = OntologyRewriteAgent(self.ontology_file, [])
 
     def find_entity_class(self, name):
         """
