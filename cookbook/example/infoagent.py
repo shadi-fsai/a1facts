@@ -4,13 +4,13 @@ import time
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'src')))
 
 from colored import cprint
-from a1c import A1C
+from a1c import KnowledgeBase
 from agno.agent import Agent
 from textwrap import dedent
 from utils.modelconfig import my_model
 
 def main():
-    a1c = A1C("a1c", "cookbook/example/company.yaml", "cookbook/example/sources.yaml")
+    a1c = KnowledgeBase("a1c", "cookbook/example/company.yaml", "cookbook/example/sources.yaml")
 
     agent = Agent(
         name="finance_info_agent",

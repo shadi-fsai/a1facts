@@ -2,7 +2,7 @@ from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
 from enrichment.knowledge_acquirer import KnowledgeAcquirer
 
-class A1C:
+class KnowledgeBase:
     def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str):
         self.name = name
         self.ontology = KnowledgeOntology(ontology_config_file)
