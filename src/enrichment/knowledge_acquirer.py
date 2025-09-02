@@ -6,13 +6,13 @@ from agno.agent import Agent
 from textwrap import dedent
 from agno.tools.exa import ExaTools
 from datetime import datetime
+import yaml
 
 class KnowledgeAcquirer:
     def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str):
         self.ontology = ontology
         self.graph = graph
-        self.knowledge_sources_config_file = knowledge_sources_config_file
-        self.knowledge_sources = self.load_knowledge_sources(self.knowledge_sources_config_file)
+        self.knowledge_sources = self.load_knowledge_sources(knowledge_sources_config_file)
         self.tools = [ExaTools(num_results=20, summary=True)]
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
@@ -61,13 +61,21 @@ class KnowledgeAcquirer:
             Today is {datetime.now().strftime("%Y-%m-%d")}"""),
             show_tool_calls=True,
             markdown=True,
+            debug_mode=True,
         )
 
     def acquire(self, query: str):
+        print(f"Query: {query}")
         result = self.agent.run(query)
+        print(f"Result: {result.content}")
         return result.content
 
     def load_knowledge_sources(self, knowledge_sources_config_file: str):
-        return []
-        #TODO YAML to parse different types of knowledge sources and their configurations
-        
+        knowledge_sources = []
+        with open(knowledge_sources_config_file, 'r') as file:
+            knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
+            for source in knowledge_sources_config['knowledge_sources']:
+                source_config = knowledge_sources_config['knowledge_sources'][source]
+                source = KnowledgeSource(source_config['name'], source_config['description'], source_config['functions_file'], source_config['override_reliability'], source_config['override_credibility'])
+                knowledge_sources.append(source)
+        return knowledge_sources

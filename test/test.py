@@ -8,6 +8,7 @@ from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
 from enrichment.knowledge_acquirer import KnowledgeAcquirer
 #from agno.models.google import Gemini
+from a1c import A1C
 
 import cProfile
 import pstats
@@ -15,9 +16,14 @@ import io
 
 def main():
     start_time = time.time()
-
-    ontology = KnowledgeOntology("test/company.yaml")
-    graph = KnowledgeGraph(ontology)
+    knowledge_sources_config_file = "test/sources.yaml"
+    ontology_file = "test/company.yaml"
+    a1c = A1C("a1c", ontology_file, knowledge_sources_config_file)
+    knowledge_acquirer = a1c.knowledge_acquirer
+    print(knowledge_acquirer.acquire("How many employees does Apple have?"))
+    graph = a1c.graph
+    print(graph.query("How many employees does Apple have?"))
+    exit()
     query = "Do you know who is the CEO of Cigna?"
     knowledge_base_response = graph.query(query)
     cprint(knowledge_base_response, 'yellow')
