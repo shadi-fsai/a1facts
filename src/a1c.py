@@ -19,12 +19,13 @@ class A1C:
             return result
 
         query_tool.__name__ = "query"
-        query_tool.__doc__ = "Query the knowledge graph and knowledge acquirer\n" + \
-            "ARGS: query: str - The query to query the knowledge graph and knowledge acquirer\n" + \
-            "RETURNS: str - The result from the knowledge graph and knowledge acquirer"
+        query_tool.__doc__ = "Query the knowledge graph for precise information for " + self.ontology.description + "\n" + \
+            "ARGS: query: str - The query to query the knowledge graph\n" + \
+            "RETURNS: str - The result from the knowledge graph"
 
         acquire_tool.__name__ = "acquire"
-        acquire_tool.__doc__ = "Acquire knowledge from the knowledge acquirer and update the knowledge graph\n" + \
+        acquire_tool.__doc__ = "Acquire knowledge from the knowledge acquirer and update the knowledge graph for " + self.ontology.description + "\n" + \
+            "Objective: To get high reliability and credibility information from the knowledge sources\n" + \
             "ARGS: query: str - The query to acquire knowledge from the knowledge acquirer\n" + \
             "RETURNS: str - The result from the knowledge acquirer"
 

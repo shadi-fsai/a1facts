@@ -16,6 +16,7 @@ class KnowledgeAcquirer:
         self.tools = [ExaTools(num_results=20, summary=True)]
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
+        self.tools.append(self.graph.get_tools)
         self.agent = Agent(
             name="Knowledge Acquirer",
             role="Get high reliability and credibility information from the knowledge sources",
@@ -24,7 +25,7 @@ class KnowledgeAcquirer:
             instructions=self.ontology.rewrite_agent.rewrite_query(self.get_template()),
             show_tool_calls=True,
             markdown=True,
-            debug_mode=True,
+            debug_mode=False,
         )
 
     def acquire(self, query: str):
