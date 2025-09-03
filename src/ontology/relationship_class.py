@@ -81,9 +81,11 @@ class RelationshipClass:
             self.validate_properties(props)
             
             return add_or_update_relationship_func(
-                self.domain_entity_class, 
+                self.domain_entity_class,
+                self.domain_primary_key_prop,
                 domain_primary_key_value, 
                 self.range_entity_class,  
+                self.range_primary_key_prop,
                 range_primary_key_value, 
                 self.relationship_name, 
                 props, 

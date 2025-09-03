@@ -167,51 +167,22 @@ class KnowledgeGraph:
         self._execute_query(query, parameters)
         print(f"Successfully added/updated entity: {label} with {primary_key_field} = '{primary_value}'")
 
-    def add_relationship(self, start_node_label, start_node_pk_val, end_node_label, end_node_pk_val, relationship_type, properties=None, symmetric=False):
+    def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
         """
         Creates a relationship between two existing nodes in the graph.
 
         Args:
             start_node_label (str): The label of the starting node.
+            start_pk_field (str): The primary key field of the starting node.
             start_node_pk_val (str): The primary key value of the starting node.
+            end_node_label (str): The label of the ending node.
+            end_pk_field (str): The primary key field of the ending node.
             end_node_label (str): The label of the ending node.
             end_node_pk_val (str): The primary key value of the ending node.
             relationship_type (str): The type of the relationship.
             properties (dict, optional): Properties for the relationship. Defaults to None.
             symmetric (bool): If True, creates a relationship in both directions.
         """
-        #print("\nDEBUG: add_relationship called with:")
-        #print(f"  start_node_label: {start_node_label}, start_node_pk_val: {start_node_pk_val}")
-        #print(f"  end_node_label: {end_node_label}, end_node_pk_val: {end_node_pk_val}")
-        #print(f"  relationship_type: {relationship_type}")
-        """
-        Creates a relationship between two existing nodes.
-
-        Args:
-            start_node_label (str): The label of the starting node.
-            start_node_pk_val (str): The primary key value of the starting node.
-            end_node_label (str): The label of the ending node.
-            end_node_pk_val (str): The primary key value of the ending node.
-            relationship_type (str): The type of the relationship (e.g., "OPERATES_IN").
-            properties (dict, optional): Properties for the relationship. Defaults to None.
-            symmetric (bool): If True, creates a two-way relationship. Defaults to False.
-        Example:
-            # Based on the company ontology, this could represent relationships like:
-            # Organization -> Market: "OPERATES_IN"
-            # Organization -> Organization: "COMPETES_WITH" 
-            # Organization -> Person: "IS_LED_BY"
-            # Person -> Role: "HAS_ROLE"
-            # Role -> Organization: "HELD_AT"
-            # Organization -> Product_Service: "PRODUCES"
-            # Organization -> Corporate_Event: "IS_SUBJECT_OF"
-            # Corporate_Event -> Financial_Metric: "REPORTS"
-            # Organization -> Competitive_Advantage: "POSSESSES"
-            # Organization -> Risk_Factor: "IS_EXPOSED_TO"
-        """
-        # Determine the primary key field based on the label, assuming 'name' as a default.
-        # This could be made more robust if different labels use different primary keys.
-        start_pk_field = "name" 
-        end_pk_field = "name" 
 
         # Base query for a directional relationship
         query = (
