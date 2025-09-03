@@ -344,10 +344,11 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         return [record["properties"] for record in records]
 
 class NetworkxGraphDatabase(BaseGraphDatabase):
-    def __init__(self):
+    def __init__(self, graph_file="networkx_graph.pickle"):
         self.graph = nx.DiGraph()
+        self.graph_file = graph_file
         try:
-            with open("networkx_graph.pickle", "rb") as f:
+            with open(self.graph_file, "rb") as f:
                 self.graph = pickle.load(f)
         except FileNotFoundError:
             pass
@@ -404,7 +405,7 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
 
     def save(self):
         try:
-            with open("networkx_graph.pickle", "wb") as f:
+            with open(self.graph_file, "wb") as f:
                 pickle.dump(self.graph, f)
         except Exception as e:
             print(f"Error saving graph: {e}")
