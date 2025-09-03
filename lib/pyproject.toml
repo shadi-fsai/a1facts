@@ -1,7 +1,10 @@
 [project]
 name = "a1facts"
-version = "0.1.4"
-
+version = "0.1.5"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Shadi Copty", email = "shadi@a1facts.ai"}
+]
 description = "a1facts - precise knowledge for AI agents"
 readme = "README.md"
 requires-python = ">=3.13"
