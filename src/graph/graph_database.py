@@ -3,6 +3,7 @@ import networkx as nx
 from dotenv import load_dotenv
 import os
 from datetime import date
+import pickle
 load_dotenv()
 
 URI = os.getenv("NEO4J_URI")
@@ -344,25 +345,51 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
 
 class NetworkxGraphDatabase(BaseGraphDatabase):
     def __init__(self):
-        self.graph = nx.Graph()
+        self.graph = nx.DiGraph()
+        try:
+            with open("networkx_graph.pickle", "rb") as f:
+                self.graph = pickle.load(f)
+        except FileNotFoundError:
+            pass
 
     def add_or_update_entity(self, label, primary_key_field, properties):
-        self.graph.add_node(label, **properties)
+        if primary_key_field not in properties:
+            print(f"Error: Primary key '{primary_key_field}' not found in properties.")
+            return
+
+        primary_key_value = properties[primary_key_field]
+        node_properties = properties.copy()
+        node_properties['label'] = label
+
+        if self.graph.has_node(primary_key_value):
+            self.graph.nodes[primary_key_value].update(node_properties)
+        else:
+            self.graph.add_node(primary_key_value, **node_properties)
 
     def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
-        self.graph.add_edge(start_node_label, end_node_label, relationship_type, **properties)
+        edge_properties = properties.copy() if properties else {}
+        edge_properties['type'] = relationship_type
+
+        self.graph.add_edge(start_node_pk_val, end_node_pk_val, **edge_properties)
+        if symmetric:
+            self.graph.add_edge(end_node_pk_val, start_node_pk_val, **edge_properties)
 
     def get_all_entities_by_label(self, label):
-        return self.graph.nodes(data=True, label=label)
+        return [data for node, data in self.graph.nodes(data=True) if data.get('label') == label]
 
     def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
-        return self.graph.edges(data=True, relationship_type=relationship_type, domain_label=domain_label, domain_pk_prop=domain_pk_prop, domain_primary_key_value=domain_primary_key_value, range_label=range_label, range_primary_key_prop=range_primary_key_prop)
+        # This is a simplified implementation. A more robust version would check labels and properties.
+        return [self.graph.nodes[neighbor] for neighbor in self.graph.successors(domain_primary_key_value)]
 
     def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
-        return self.graph.edges(data=True, relationship_type=relationship_type, domain_label=domain_label, domain_pk_prop=domain_pk_prop, domain_primary_key_value=domain_primary_key_value, range_label=range_label, range_pk_prop=range_pk_prop, range_primary_key_value=range_primary_key_value)
+        if self.graph.has_edge(domain_primary_key_value, range_primary_key_value):
+            return self.graph.get_edge_data(domain_primary_key_value, range_primary_key_value)
+        return None
 
     def get_entity_properties(self, label, pk_prop, primary_key_value):
-        return self.graph.nodes(data=True, label=label, pk_prop=pk_prop, primary_key_value=primary_key_value)
+        if self.graph.has_node(primary_key_value):
+            return self.graph.nodes[primary_key_value]
+        return None
 
     def close(self):
         print("All nodes in the graph:")
@@ -372,6 +399,12 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         print("\nAll relationships in the graph:")
         for start, end, data in self.graph.edges(data=True):
             print(f"  Edge: {start} -> {end}, Data: {data}")
+        self.save()
         self.graph.clear()
 
-
+    def save(self):
+        try:
+            with open("networkx_graph.pickle", "wb") as f:
+                pickle.dump(self.graph, f)
+        except Exception as e:
+            print(f"Error saving graph: {e}")
