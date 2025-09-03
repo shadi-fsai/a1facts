@@ -1,4 +1,5 @@
 from neo4j import GraphDatabase
+import networkx as nx
 from dotenv import load_dotenv
 import os
 from datetime import date
@@ -341,5 +342,36 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]
 
+class NetworkxGraphDatabase(BaseGraphDatabase):
+    def __init__(self):
+        self.graph = nx.Graph()
+
+    def add_or_update_entity(self, label, primary_key_field, properties):
+        self.graph.add_node(label, **properties)
+
+    def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
+        self.graph.add_edge(start_node_label, end_node_label, relationship_type, **properties)
+
+    def get_all_entities_by_label(self, label):
+        return self.graph.nodes(data=True, label=label)
+
+    def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
+        return self.graph.edges(data=True, relationship_type=relationship_type, domain_label=domain_label, domain_pk_prop=domain_pk_prop, domain_primary_key_value=domain_primary_key_value, range_label=range_label, range_primary_key_prop=range_primary_key_prop)
+
+    def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
+        return self.graph.edges(data=True, relationship_type=relationship_type, domain_label=domain_label, domain_pk_prop=domain_pk_prop, domain_primary_key_value=domain_primary_key_value, range_label=range_label, range_pk_prop=range_pk_prop, range_primary_key_value=range_primary_key_value)
+
+    def get_entity_properties(self, label, pk_prop, primary_key_value):
+        return self.graph.nodes(data=True, label=label, pk_prop=pk_prop, primary_key_value=primary_key_value)
+
+    def close(self):
+        print("All nodes in the graph:")
+        for node, data in self.graph.nodes(data=True):
+            print(f"  Node: {node}, Data: {data}")
+        
+        print("\nAll relationships in the graph:")
+        for start, end, data in self.graph.edges(data=True):
+            print(f"  Edge: {start} -> {end}, Data: {data}")
+        self.graph.clear()
 
 

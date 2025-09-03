@@ -1,4 +1,4 @@
-from graph.graph_database import Neo4jGraphDatabase, BaseGraphDatabase
+from graph.graph_database import Neo4jGraphDatabase, BaseGraphDatabase, NetworkxGraphDatabase
 from ontology.knowledge_ontology import KnowledgeOntology
 from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
