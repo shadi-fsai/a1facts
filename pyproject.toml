@@ -9,4 +9,5 @@ dependencies = [
     "colored>=2.3.1",
     "exa-py>=1.15.3",
     "neo4j>=5.28.2",
+    "posthog>=6.7.1",
 ]
