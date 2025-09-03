@@ -25,7 +25,7 @@ def main():
         markdown=True,
         debug_mode=False,
     )
-    query = "what do you know about how UnitedHealth competes with CVS?"
+    query = "what do you know about how AMN Healthcare makes money?"
     result = agent.run(query)
     print(result.content)
     

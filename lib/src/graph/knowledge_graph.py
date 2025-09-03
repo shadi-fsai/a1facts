@@ -54,9 +54,6 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        cprint(f"Querying knowledge graph", "green")
-        truncated_query = query[:70] + "..." if len(query) > 70 else query
-        cprint(f"Query: {truncated_query}", "yellow")
         rewritten_query = self.rewrite_query(query)
         return self.query_agent.query(rewritten_query)
 
@@ -70,9 +67,6 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        cprint(f"Updating knowledge graph", "green")
-        truncated_knowledge = knowledge[:70] + "..." if len(knowledge) > 70 else knowledge
-        cprint(f"Knowledge: {truncated_knowledge}", "yellow")
         rewrite_knowledge = self.rewrite_query(knowledge)
         result = self.update_agent.update(rewrite_knowledge)
         return result.content

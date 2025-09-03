@@ -1,6 +1,6 @@
 [project]
 name = "a1facts"
-version = "0.1.0"
+version = "0.1.1"
 description = "a1facts - precise knowledge for AI agents"
 readme = "README.md"
 requires-python = ">=3.13"

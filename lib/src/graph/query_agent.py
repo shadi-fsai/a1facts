@@ -17,14 +17,13 @@ class QueryAgent:
                 Get information from the knowledge base.
                 Use the tools to get information from the graph.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
+                Every time you return a response add a section at the end called "Wish I could find" and state what knowledge you didn't find and wish you could find
                 """),
                 show_tool_calls=True,
                 markdown=True,
-                debug_mode=True,
+                debug_mode=False,
             )
 
     def query(self, query: str):
-
         result = self.agent.run(query)
-        #cprint(result, 'green')
         return result.content
