@@ -17,6 +17,7 @@ class QueryAgent:
                 Get information from the knowledge base.
                 Use the tools to get information from the graph.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
+                Only use information from the knowledge graph to answer the question. If you don't know the answer, say so.
                 Every time you return a response add a section at the end called "Wish I could find" and state what knowledge you didn't find and wish you could find
                 """),
                 show_tool_calls=True,

@@ -127,7 +127,7 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         }
 
         self._execute_query(query, parameters)
-        print(f"Successfully added/updated entity: {label} with {primary_key_field} = '{primary_value}'")
+        #print(f"Successfully added/updated entity: {label} with {primary_key_field} = '{primary_value}'")
 
     def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
         """
@@ -179,7 +179,7 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
             print(f"Error creating relationship: {e}")
             return False
         
-        print(f"Successfully created relationship: ({start_node_pk_val})-[{relationship_type}]->({end_node_pk_val})")
+        #print(f"Successfully created relationship: ({start_node_pk_val})-[{relationship_type}]->({end_node_pk_val})")
 
     def _get_primary_key_field(self, label):
         """

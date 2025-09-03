@@ -31,9 +31,6 @@ class KnowledgeAcquirer:
         cprint(f"KnowledgeAcquirer initialized", "green")
 
     def acquire(self, query: str):
-        cprint(f"Acquiring knowledge", "green")
-        truncated_query = query[:70] + "..." if len(query) > 70 else query
-        cprint(f"Query: {truncated_query}", "yellow")
         result = self.agent.run(query)
         return result.content
 
