@@ -1,0 +1,12 @@
+[project]
+name = "example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "a1facts",
+]
+
+[tool.uv.sources]
+a1facts = { path = "../../lib/dist/a1facts-0.1.0-py3-none-any.whl" }
