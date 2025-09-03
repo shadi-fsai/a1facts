@@ -12,7 +12,7 @@ class KnowledgeGraph:
     and querying entities and relationships based on a provided ontology.
     """
 
-    def __init__(self, ontology: KnowledgeOntology):
+    def __init__(self, ontology: KnowledgeOntology, graph_database: str = "networkx"):
         """
         Initializes the KnowledgeGraph, connects to the Neo4j database, and sets up
         the query and update agents with tools derived from the ontology.
@@ -21,7 +21,7 @@ class KnowledgeGraph:
             ontology (KnowledgeOntology): The ontology defining the graph's structure.
         """
         self.ontology = ontology
-        self.graph_database = Neo4jGraphDatabase()
+        self.graph_database = NetworkxGraphDatabase() if graph_database == "networkx" else Neo4jGraphDatabase()
         self.get_tools = self.ontology.get_get_tools(self.graph_database.get_all_entities_by_label, 
             self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        

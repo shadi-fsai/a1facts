@@ -4,10 +4,10 @@ from enrichment.knowledge_acquirer import KnowledgeAcquirer
 from colored import cprint
 
 class KnowledgeBase:
-    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str):
+    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, graph_database: str = "networkx"):
         self.name = name
         self.ontology = KnowledgeOntology(ontology_config_file)
-        self.graph = KnowledgeGraph(self.ontology)
+        self.graph = KnowledgeGraph(self.ontology, graph_database)
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file)
  
     def get_tools(self):        

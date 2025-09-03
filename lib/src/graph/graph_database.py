@@ -353,6 +353,7 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
                 self.graph = pickle.load(f)
         except FileNotFoundError:
             pass
+        cprint("Successfully initialized Networkx database.", "green")
 
     def add_or_update_entity(self, label, primary_key_field, properties):
         if primary_key_field not in properties:
@@ -394,13 +395,14 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         return None
 
     def close(self):
-        print("All nodes in the graph:")
+
+        """print("All nodes in the graph:")
         for node, data in self.graph.nodes(data=True):
             print(f"  Node: {node}, Data: {data}")
         
         print("\nAll relationships in the graph:")
         for start, end, data in self.graph.edges(data=True):
-            print(f"  Edge: {start} -> {end}, Data: {data}")
+            print(f"  Edge: {start} -> {end}, Data: {data}")"""
         self.save()
         self.graph.clear()
 
