@@ -1,5 +1,6 @@
 from neo4j import GraphDatabase
 import networkx as nx
+from networkx.exception import NetworkXError
 from dotenv import load_dotenv
 import os
 from datetime import date
@@ -353,7 +354,9 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
                 self.graph = pickle.load(f)
         except FileNotFoundError:
             pass
-        cprint("Successfully initialized Networkx database.", "green")
+        num_nodes = self.graph.number_of_nodes()
+        num_edges = self.graph.number_of_edges()
+        cprint(f"Successfully initialized Networkx database with {num_nodes} nodes, {num_edges} relationships.", "green")
 
     def add_or_update_entity(self, label, primary_key_field, properties):
         if primary_key_field not in properties:
@@ -378,21 +381,29 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
             self.graph.add_edge(end_node_pk_val, start_node_pk_val, **edge_properties)
 
     def get_all_entities_by_label(self, label):
-        return [data for node, data in self.graph.nodes(data=True) if data.get('label') == label]
+        if self.graph.has_node(label):
+            return [data for node, data in self.graph.nodes(data=True) if data.get('label') == label]
+        else:
+            return []
 
     def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
         # This is a simplified implementation. A more robust version would check labels and properties.
-        return [self.graph.nodes[neighbor] for neighbor in self.graph.successors(domain_primary_key_value)]
+        if self.graph.has_node(domain_primary_key_value):
+            return [self.graph.nodes[neighbor] for neighbor in self.graph.successors(domain_primary_key_value)]
+        else:
+            return []
 
     def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
         if self.graph.has_edge(domain_primary_key_value, range_primary_key_value):
             return self.graph.get_edge_data(domain_primary_key_value, range_primary_key_value)
-        return None
+        else:
+            return None
 
     def get_entity_properties(self, label, pk_prop, primary_key_value):
         if self.graph.has_node(primary_key_value):
             return self.graph.nodes[primary_key_value]
-        return None
+        else:
+            return None
 
     def close(self):
 

@@ -26,7 +26,7 @@ class KnowledgeAcquirer:
             instructions=self.ontology.rewrite_agent.rewrite_query(self.get_template()),
             show_tool_calls=True,
             markdown=True,
-            debug_mode=False,
+            debug_mode=True,
         )
         cprint(f"KnowledgeAcquirer initialized", "green")
 

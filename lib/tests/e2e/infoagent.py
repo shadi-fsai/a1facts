@@ -13,7 +13,7 @@ from textwrap import dedent
 from utils.modelconfig import my_model
 
 def main():
-    a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml")
+    a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml", use_neo4j=False)
     
     agent = Agent(
         name="finance_info_agent",
