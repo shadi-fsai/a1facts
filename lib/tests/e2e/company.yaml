@@ -1,0 +1,257 @@
+world:
+  name: Company Knowledge Graph
+  description: Financial and Market Intelligence knowledge graph.
+
+entity_classes:
+  Company:
+    description: A business entity.
+    properties:
+      - name: name
+        type: str
+        primary_key: true        
+        description: A str representing the name of a company.
+      - name: ticker
+        type: str
+        description: The stock market ticker symbol for a public company. (Optional)
+      - name: company_type
+        type: str
+        description: The type of company (e.g., Public Company, Private Company).
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Product_Service:
+    description: An offering (product or service) commercialized by a Company.
+    properties:
+      - name: name
+        type: str
+        primary_key: true
+        description: A str representing the name of a product or service.
+      - name: business_segment
+        type: str
+        description: The business segment a product or service belongs to.
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Market:
+    description: The industry or economic sector where companies compete.
+    properties:
+      - name: name
+        type: str
+        primary_key: true
+        description: A str representing the name of a market.
+      - name: projected_growth_rate_CAGR
+        type: float
+        description: The projected Compound Annual Growth Rate for a market.
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Financial_Metric:
+    description: A quantitative data point on financial performance, valuation, or efficiency.
+    properties:
+      - name: metric_name
+        type: str
+        primary_key: true
+        description: The name of the financial metric (e.g., IBM Q42024 Revenue, UPS FY2023 P/E Ratio).
+      - name: metric_value
+        type: float
+        description: The numerical value of the financial metric.
+      - name: fiscal_period
+        type: str
+        description: The fiscal period the metric applies to (e.g., Q2 2025).
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Corporate_Event:
+    description: A significant occurrence or announcement involving a Company.
+    properties:
+      - name: event_type
+        type: str
+        primary_key: true
+        description: The type of event (e.g., IBM Acquisition of Red Hat, UPS Divestiture of Consumables, META Q42024 Earnings Report).
+      - name: event_date
+        type: date
+        description: The date of a corporate event.
+      - name: reason
+        type: str
+        description: The reason for a corporate event (e.g., 'personal reasons', 'retirement').
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Leader:
+    description: An individual in a leadership or governance role.
+    properties:
+      - name: name
+        type: str
+        primary_key: true
+        description: A str representing the name of a leader.
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Competitive_Advantage:
+    description: A factor providing a long-term advantage over competitors (Moat).
+    properties:
+      - name: competitive_advantage_name
+        type: str
+        primary_key: true
+        description: The name of a competitive advantage (e.g., 'APPLE Network Effects', 'UPS Supply Chain Efficiency').
+      - name: advantage_type
+        type: str
+        description: The type of competitive advantage (e.g., Network Effects, Supply Chain Efficiency).
+      - name: advantage_description
+        type: str
+        description: A description of the competitive advantage (e.g., 'Provides a competitive edge by leveraging its network to create a barrier to entry').
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Risk_Factor:
+    description: A potential threat to a Company's performance or valuation.
+    properties:
+      - name: risk_factor_name
+        type: str
+        primary_key: true
+        description: The name of a risk factor (e.g., 'APPLE Risk Factor', 'UPS Risk Factor').
+      - name: risk_type
+        type: str
+        primary_key: true
+        description: The category of risk (e.g., Operational, Legal, Macroeconomic).
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Capital_Allocation_Policy:
+    description: A Company's stated strategy for deploying capital.
+    properties:
+      - name: capital_allocation_policy_name
+        type: str
+        primary_key: true
+        description: The name of a capital allocation policy (e.g., 'APPLE Capital Allocation Policy', 'UPS Capital Allocation Policy').
+      - name: dividend_policy
+        type: str
+        description: Description of the organization's dividend policy.
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Financial_Instrument:
+    description: A contract giving rise to a financial liability, such as debt.
+    properties:
+      - name: financial_instrument_name
+        type: str
+        primary_key: true
+        description: The name of a financial instrument (e.g., 'APPLE 2024 Bond', 'UPS 2023 Treasury Note').
+      - name: interest_rate_terms
+        type: str
+        description: Terms of the interest rate (e.g., 4.625% Fixed).
+      - name: maturity_date
+        type: date
+        description: The maturity date of a financial instrument.
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+  Leadership_Role:
+    description: An association class representing a Leader holding a position at a Company.
+    properties:
+      - name: leadership_role_title
+        type: str
+        description: The title of a leadership role (e.g., 'APPLE CEO', 'UPS CFO').
+        primary_key: true
+      - name: start_date
+        type: date
+        description: The date a leadership role became effective.
+      - name: end_date
+        type: date
+        description: The date a leadership role concluded (if applicable).
+      - name: source
+        type: str
+        description: The source of the information (e.g., a URL to a press release).
+
+relationships:
+  operates_in:
+    domain: Company
+    range: Market
+    description: Connects a Company to a Market it operates within.
+    properties: []
+  competes_with:
+    domain: Company
+    range: Company
+    description: A symmetric relationship between two competing Companies.
+    symmetric: true
+    properties: []
+  produces:
+    domain: Company
+    range: Product_Service
+    description: Links a Company to a Product or Service it offers.
+    properties: []
+  is_subject_of:
+    domain: Company
+    range: Corporate_Event
+    description: Links a Company to an event concerning it.
+    properties: []
+  reports:
+    domain: Corporate_Event
+    range: Financial_Metric
+    description: Connects an event (like an earnings call) to the financial metrics disclosed.
+    properties: []
+  is_led_by:
+    domain: Company
+    range: Leader
+    description: Connects a Company to a Leader in a leadership role.
+    properties: []
+  has_role:
+    domain: Leader
+    range: Leadership_Role
+    description: Connects a Leader to their various roles (past and present).
+    properties: []
+  held_at:
+    domain: Leadership_Role
+    range: Company
+    description: Connects a Leadership_Role to the Company where it is held.
+    properties: []
+  possesses:
+    domain: Company
+    range: Competitive_Advantage
+    description: Links a Company to its Competitive Advantage (Moat).
+    properties: []
+  is_exposed_to:
+    domain: Company
+    range: Risk_Factor
+    description: Connects a Company to a Risk Factor.
+    properties: []
+  acquires:
+    domain: Company
+    range: Company
+    description: Relates an acquiring Company to a target Company.
+    properties: []
+  divests:
+    domain: Company
+    range: Product_Service
+    description: Relates a Company to a Product or Service it has sold off.
+    properties: []
+  has_policy:
+    domain: Company
+    range: Capital_Allocation_Policy
+    description: Links a Company to its capital deployment strategy.
+    properties: []
+  utilizes:
+    domain: Company
+    range: Financial_Instrument
+    description: Connects a Company to a financial instrument like debt.
+    properties: []
+  has_adviser:
+    domain: Company
+    range: Leader
+    description: Connects a Company to a Leader serving as an adviser.
+    properties: []
+  involves_leader:
+    domain: Corporate_Event
+    range: Leader
+    description: Connects a Corporate_Event to a Leader involved in it.
+    properties: []

@@ -4,7 +4,7 @@ from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
 from graph.query_rewrite_agent import QueryRewriteAgent
 from datetime import date
-
+from colored import cprint
 
 class KnowledgeGraph:
     """
@@ -29,11 +29,12 @@ class KnowledgeGraph:
         self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
         self.class_entity_pairs = {}
+        cprint(f"KnowledgeGraph initialized", "green")
 
     def get_class_entity_pairs(self):
         for entity_class in self.ontology.entity_classes:
             self.class_entity_pairs[entity_class.entity_class_name] = []
-            entities = self.get_all_entities_by_label(entity_class.entity_class_name)
+            entities = self.graph_database.get_all_entities_by_label(entity_class.entity_class_name)
             for entity in entities:
                 self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])
             
@@ -53,6 +54,9 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+        cprint(f"Querying knowledge graph", "green")
+        truncated_query = query[:70] + "..." if len(query) > 70 else query
+        cprint(f"Query: {truncated_query}", "yellow")
         rewritten_query = self.rewrite_query(query)
         return self.query_agent.query(rewritten_query)
 
@@ -66,6 +70,9 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+        cprint(f"Updating knowledge graph", "green")
+        truncated_knowledge = knowledge[:70] + "..." if len(knowledge) > 70 else knowledge
+        cprint(f"Knowledge: {truncated_knowledge}", "yellow")
         rewrite_knowledge = self.rewrite_query(knowledge)
         result = self.update_agent.update(rewrite_knowledge)
         return result.content

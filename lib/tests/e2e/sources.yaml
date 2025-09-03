@@ -1,0 +1,7 @@
+knowledge_sources:
+  FMP:
+    name: financial_modeling_prop
+    description: Financial Modeling Prep provides financial data for companies.
+    functions_file: fmp_functions.py
+    override_reliability: A
+    override_credibility: "1"

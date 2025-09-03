@@ -7,6 +7,7 @@ from textwrap import dedent
 from agno.tools.exa import ExaTools
 from datetime import datetime
 import yaml
+from colored import cprint
 
 class KnowledgeAcquirer:
     def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str):
@@ -27,8 +28,12 @@ class KnowledgeAcquirer:
             markdown=True,
             debug_mode=False,
         )
+        cprint(f"KnowledgeAcquirer initialized", "green")
 
     def acquire(self, query: str):
+        cprint(f"Acquiring knowledge", "green")
+        truncated_query = query[:70] + "..." if len(query) > 70 else query
+        cprint(f"Query: {truncated_query}", "yellow")
         result = self.agent.run(query)
         return result.content
 

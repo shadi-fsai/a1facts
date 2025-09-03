@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from datetime import date
 import pickle
+from colored import cprint
 load_dotenv()
 
 URI = os.getenv("NEO4J_URI")
@@ -39,7 +40,7 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
     def __init__(self):
         try:
             self.driver = GraphDatabase.driver(URI, auth=(AUTH[0], AUTH[1]))
-            print("Successfully connected to Neo4j database.")
+            cprint("Successfully connected to Neo4j database.", "green")
         except Exception as e:
             print(f"Failed to connect to Neo4j database: {e}")
             self.driver = None

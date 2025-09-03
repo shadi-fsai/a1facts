@@ -30,6 +30,7 @@ class KnowledgeOntology:
         self.load_ontology()
         self.rewrite_agent = OntologyRewriteAgent(self.ontology_file, [])
         nonblocking_send_telemetry_ping()
+        cprint(f"Ontology loaded: {self.ontology_file}", "green")
 
     def find_entity_class(self, name):
         """
