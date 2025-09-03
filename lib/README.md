@@ -4,7 +4,7 @@ a1facts is a powerful Python framework for building and interacting with knowled
 
 This project uses a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
 
-![Architecture](public/Architecture.png)
+![Architecture](https://github.com/shadi-fsai/a1facts/blob/main/public/Architecture.png)
 
 ## Key Features
 
@@ -22,15 +22,15 @@ a1facts addresses this problem by grounding your AI agent in a knowledge graph. 
 
 1.  **Define Your Domain**: You start by creating an ontology that describes the key concepts and relationships in your specific domain. For example, in finance, you might define entities like `Company`, `Product`, and `Market`, and relationships like `competes_with` or `operates_in`.
 
-    ![Ontology Example](public/Onto_example.png)
+    ![Ontology Example](https://github.com/shadi-fsai/a1facts/blob/main/public/Onto_example.png)
 
 2.  **Populate the Graph**: You then ingest data from different sources into the knowledge graph. This could be from internal documents, databases, external APIs, or the web. a1facts ensures that this data is structured according to your ontology, but also that it's factual by triangulating facts from different sources.
 
-    ![Example Knowledge Graph](public/example_KG.png)
+    ![Example Knowledge Graph](https://github.com/shadi-fsai/a1facts/blob/main/public/example_KG.png)
 
 3.  **Query with Confidence**: When your AI agent receives a question, it doesn't just rely on its internal training data. Instead, it uses a1facts to query the knowledge graph. This means the agent's answers are based on the structured, verified data.
 
-    ![Query Example](public/Query_example.jpeg)
+    ![Query Example](https://github.com/shadi-fsai/a1facts/blob/main/public/Query_example.jpeg)
 
 By using a1facts, you can build an AI agent that is not only intelligent but also trustworthy, providing precise and reliable answers every time.
 
