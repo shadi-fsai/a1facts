@@ -90,3 +90,8 @@ python cookbook/example/infoagent.py
 ```
 
 You can modify this script to experiment with different data, queries, or other functionalities of the knowledge graph.
+
+## Privacy Notice
+
+We collect minimal usage statistics (number of times the library is run) to help improve the project. You can opt-out by setting the environment variable `A1FACTS_TELEMETRY_DISABLED=1`.
+

@@ -8,7 +8,7 @@ from ontology.property import Property
 from ontology.entity_class import EntityClass
 from ontology.relationship_class import RelationshipClass
 from ontology.ontology_rewrite_agent import OntologyRewriteAgent
-
+from utils.telemetry import nonblocking_send_telemetry_ping
 
 class KnowledgeOntology:
     """
@@ -29,6 +29,7 @@ class KnowledgeOntology:
         self.description = ""
         self.load_ontology()
         self.rewrite_agent = OntologyRewriteAgent(self.ontology_file, [])
+        nonblocking_send_telemetry_ping()
 
     def find_entity_class(self, name):
         """
