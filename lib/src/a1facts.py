@@ -13,21 +13,15 @@ class KnowledgeBase:
     def get_tools(self):
         cprint(f"Getting tools", "green")
         def query_tool(query: str): 
-            cprint(f"Querying knowledge graph", "green")
-            truncated_query = query[:70] + "..." if len(query) > 70 else query
-            cprint(f"Query: {truncated_query}", "yellow")
             result = self.graph.query(query)
             return result
 
         def acquire_tool(query: str): 
-            cprint(f"Acquiring knowledge", "green")
-            truncated_query = query[:70] + "..." if len(query) > 70 else query
-            cprint(f"Query: {truncated_query}", "yellow")
             result = self.knowledge_acquirer.acquire(query)
             self.graph.update_knowledge(result)
             return result
 
-#        query_tool.__name__ = "query"
+#        query_tool.__name__ = "query" 
         query_tool.__doc__ = f"""Query the knowledge graph for precise information for {self.ontology.description}
 ARGS: query: str - The query to query the knowledge graph
 RETURNS: str - The result from the knowledge graph"""

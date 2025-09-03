@@ -15,7 +15,7 @@ def main():
         name="finance_info_agent",
         role="get financial information about the company",
         model=my_model,
-        tools=[a1facts.get_tools()],
+        tools=a1facts.get_tools(),
         instructions=dedent("""get financial information about the company"""),
         show_tool_calls=True,
         markdown=True,

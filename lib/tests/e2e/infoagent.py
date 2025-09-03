@@ -15,21 +15,15 @@ from utils.modelconfig import my_model
 def main():
     a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml")
     
-    tools = a1facts.get_tools()
-    cprint(f"Tools: {tools}", "green")
-    print(tools[0]("hello"))
-    exit()
-    tools
-
     agent = Agent(
         name="finance_info_agent",
         role="get financial information about the company",
         model=my_model,
-        tools=[a1facts.get_tools()],
+        tools=a1facts.get_tools(),
         instructions=dedent("""get financial information about the company"""),
         show_tool_calls=True,
         markdown=True,
-        debug_mode=True,
+        debug_mode=False,
     )
     query = "what do you know about how UnitedHealth competes with CVS?"
     result = agent.run(query)
