@@ -79,6 +79,7 @@ You'll need to provide credentials to connect to your Neo4j database and other s
     EXA_API_KEY="your_exa_api_key"
     ```
 3.  Optionally if you want to use neo4j add the following to the .env file
+```
     NEO4J_URI="bolt://localhost:7687"
     NEO4J_AUTH="your_neo4j_password"
     ```
