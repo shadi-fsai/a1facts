@@ -82,7 +82,7 @@ You'll need to provide credentials to connect to your Neo4j database and other s
 ```
     NEO4J_URI="bolt://localhost:7687"
     NEO4J_AUTH="your_neo4j_password"
-    ```
+```
 
 ## Cookbook
 
