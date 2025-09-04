@@ -1,18 +1,18 @@
-# a1facts: An Ontology-Driven Knowledge Graph System
+# a1facts: An Agentic AI Knowledge Graph System
 
-a1facts is a powerful Python framework for building and interacting with knowledge graphs. It allows you to define a clear structure (ontology) for your data, ingest information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
+a1facts is a powerful Python framework for building and interacting with knowledge graphs. It allows you to define a clear structure (ontology) for your knowledge, intelligently ingest information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
 
-This project uses a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
+This project supports a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
 
 ![Architecture](public/Architecture.png)
 
 ## Key Features
 
 -   **Ontology-Driven**: Define your knowledge domain with simple YAML files. a1facts uses this ontology to automatically create the tools and structures needed to interact with your data.
--   **Structured Data Ingestion**: Convert unstructured text into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
+-   **Structured Data Ingestion and cross validation**: Convert unstructured text into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
 -   **Natural Language Queries**: Ask questions in plain English. a1facts translates your queries into precise graph traversals to retrieve the information you need.
 -   **Reliable AI Agents**: Build AI agents that can provide accurate and trustworthy answers by grounding them in the factual data of the knowledge graph.
--   **Neo4j Backend**: Utilizes the power of Neo4j for efficient storage and complex querying of your knowledge base.
+-   **Neo4j Backend**: Supports Neo4j for efficient storage and complex querying of your knowledge base.
 
 ## Usage Scenario: Building AI Agents with Precise Answers
 
@@ -34,6 +34,8 @@ a1facts addresses this problem by grounding your AI agent in a knowledge graph. 
 
 By using a1facts, you can build an AI agent that is not only intelligent but also trustworthy, providing precise and reliable answers every time.
 
+a1facts is a work in progress, we'd love to hear from you on how you're using it and what you need it to do next.
+
 ## Getting Started
 
 Follow these steps to get the a1facts Knowledge Graph running on your local machine.
@@ -42,14 +44,14 @@ Follow these steps to get the a1facts Knowledge Graph running on your local mach
 
 -   Python 3.13+
 -   [uv](https://github.com/astral-sh/uv) - An extremely fast Python package installer.
--   A running Neo4j Database instance.
+-   Optional: A running Neo4j Database instance.
 
 ### Installation
 
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/shadi-fsai/a1facts.git
-    cd a1facts
+    cd a1facts/lib
     ```
 
 2.  **Create a virtual environment and install dependencies:**
@@ -71,10 +73,12 @@ Follow these steps to get the a1facts Knowledge Graph running on your local mach
 You'll need to provide credentials to connect to your Neo4j database and other services.
 
 1.  Create a `.env` file in the root of the project.
-2.  Add your API keys and Neo4j credentials to the file:
+2.  Add your API keys to the file:
     ```
     OPENAI_API_KEY="your_openai_api_key"
     EXA_API_KEY="your_exa_api_key"
+    ```
+3.  Optionally if you want to use neo4j add the following to the .env file
     NEO4J_URI="bolt://localhost:7687"
     NEO4J_AUTH="your_neo4j_password"
     ```
@@ -86,10 +90,12 @@ The `cookbook/` directory contains practical examples of how to use a1facts.
 The `cookbook/example/` directory shows how to build a financial analyst agent that can answer questions about companies. To run this example, navigate to the directory and run:
 
 ```bash
-python cookbook/example/infoagent.py
+cd cookbook/example
+uv add a1facts
+uv run infoagent.py
 ```
 
-You can modify this script to experiment with different data, queries, or other functionalities of the knowledge graph.
+You can modify this script to experiment with different data, queries, or other functionalities of the knowledge graph - see README.md in cookbook/ for more.
 
 ## Privacy Notice
 
