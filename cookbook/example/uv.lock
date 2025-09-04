@@ -3,7 +3,7 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "a1facts"
-version = "0.1.5"
+version = "0.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agno" },
@@ -13,9 +13,9 @@ dependencies = [
     { name = "networkx" },
     { name = "posthog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/99/b8/34b5afcf30e268f8f8c33fcfe42d70a7d5719035a391ce4b4543ba7a4fbe/a1facts-0.1.5.tar.gz", hash = "sha256:cefecabede93b6a4d445a27f64519b9b66126a80abb12bbfd25a88f13c0dae3e", size = 25780 }
+sdist = { url = "https://files.pythonhosted.org/packages/80/6a/4f075447578f526838922b1b68534f1a21f85bcf13b766e3a40ed23118bc/a1facts-0.1.6.tar.gz", hash = "sha256:761dca1ac30ae282ff80138cb1cd7bcbe3c70d3e87665655523f045fc25d21c8", size = 25798 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/49/8dd65affa7b478f7a881928b68ed916f953b2c7a57213e5ac810e5374540/a1facts-0.1.5-py3-none-any.whl", hash = "sha256:16880b178663ea770274fe6e6f5c078cc595ee31b2782702cdf67d4506ec904d", size = 31158 },
+    { url = "https://files.pythonhosted.org/packages/dd/eb/346a2169b9e92b11e49e06279fe188f82e5821dff964c0381a010ec26dfc/a1facts-0.1.6-py3-none-any.whl", hash = "sha256:9af5c9d6b53242449af8c31a7c8c8f9ec5f67186aa355f55fd475709d3378f1d", size = 31164 },
 ]
 
 [[package]]
