@@ -18,10 +18,10 @@ class KnowledgeAcquirer:
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
         self.tools.append(self.graph.get_tools)
-        #todo reconcile with query_agent.py???
+        #todo separate acquirer agent???
         self.agent = Agent(
             name="Knowledge Acquirer",
-            role="Get high reliability and credibility information from the knowledge sources",
+            role="Enrich and update the knowledge graph with validated information from the knowledge sources",
             model=my_model,
             tools=self.tools,
             #todo why calling rewrite agent twice?
