@@ -18,13 +18,13 @@ class KnowledgeAcquirer:
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
         self.tools.append(self.graph.get_tools)
-        #todo separate acquirer agent???
+        #TODO separate acquirer agent???
         self.agent = Agent(
             name="Knowledge Acquirer",
             role="Enrich and update the knowledge graph with validated information from the knowledge sources",
             model=my_model,
             tools=self.tools,
-            #todo why calling rewrite agent twice?
+            #TODO why calling rewrite agent twice?
             instructions=self.ontology.rewrite_agent.rewrite_query(self.get_template()),
             show_tool_calls=True,
             markdown=True,
@@ -45,7 +45,7 @@ class KnowledgeAcquirer:
                     source_config = knowledge_sources_config['knowledge_sources'][source]
                     source = KnowledgeSource(source_config['name'], source_config['description'], source_config['functions_file'], source_config['override_reliability'], source_config['override_credibility'])
                     knowledge_sources.append(source)
-                else: #todo log warning
+                else: #TODO log warning
                     pass
         return knowledge_sources
 

@@ -60,7 +60,7 @@ class RelationshipClass:
             for prop in self.properties:
                 if prop.property_name not in properties:
                     raise Exception(f"Property {prop.property_name} not found in properties, you need to change the world model")
-#todo add relationship to the name
+#TODO add relationship to the name
     def get_add_or_update_tool(self, add_or_update_relationship_func):
         """
         Creates a tool function for adding or updating a relationship of this class.

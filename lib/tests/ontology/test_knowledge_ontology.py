@@ -1,18 +1,13 @@
 import pytest
 import os
-import sys
-
-# Add the project's 'src' directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
 from ontology.knowledge_ontology import KnowledgeOntology
-
 
 @pytest.fixture
 def ontology():
     """Fixture to create a KnowledgeOntology instance for testing."""
     # Use a real ontology file from the cookbook for a realistic test
-    ontology_file = os.path.join(os.path.dirname(__file__), '..', '..', 'cookbook', 'example', 'company.yaml')
+    ontology_file = os.path.join(os.path.dirname(__file__),  'company.yaml')
     return KnowledgeOntology(ontology_file)
 
 def test_ontology_loading(ontology):

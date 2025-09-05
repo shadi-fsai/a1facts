@@ -11,7 +11,7 @@ class KnowledgeBase:
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file)
  
 
-    #todo create external functions that can be used for non agent use case
+    #TODO create external functions that can be used for non agent use case
     
     def get_tools(self):        
         def query_tool(query: str):

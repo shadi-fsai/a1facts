@@ -12,7 +12,7 @@ class UpdateAgent:
             role="Update the knowledge graph",
             model=my_model,
             tools=mytools,
-            #todo use ontology rewrite agent here
+            #TODO use ontology rewrite agent here
             instructions=dedent(f"""
                 The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]

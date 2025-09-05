@@ -18,6 +18,12 @@ dependencies = [
     "pytest>=8.4.2",
 ]
 
+[tool.setuptools]
+include-package-data = true # This can stay
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project.urls]
 Homepage = "https://github.com/shadi-fsai/a1facts"
 Issues = "https://github.com/shadi-fsai/a1facts/issues"

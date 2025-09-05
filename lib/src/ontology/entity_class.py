@@ -35,8 +35,8 @@ class EntityClass:
         for prop in self.properties:
             entity_str += f"      - {prop}\n"
         return entity_str
-#todo change to get_tool_... instead
-#todo improve tool documentation
+#TODO change to get_tool_... instead
+#TODO improve tool documentation
     def get_add_or_update_tool(self, add_or_update_entity_func):
         """
         Creates a tool function for adding or updating an entity of this class.
