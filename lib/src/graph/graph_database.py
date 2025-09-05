@@ -25,13 +25,13 @@ class BaseGraphDatabase:
     def get_all_entities_by_label(self, label):
         pass
 
+    def get_entity_properties(self, label, pk_prop, primary_key_value):
+        pass
+
     def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
         pass
 
     def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
-        pass
-
-    def get_entity_properties(self, label, pk_prop, primary_key_value):
         pass
 
     def close(self):

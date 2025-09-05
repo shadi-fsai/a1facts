@@ -35,7 +35,8 @@ class EntityClass:
         for prop in self.properties:
             entity_str += f"      - {prop}\n"
         return entity_str
-
+#todo change to get_tool_... instead
+#todo improve tool documentation
     def get_add_or_update_tool(self, add_or_update_entity_func):
         """
         Creates a tool function for adding or updating an entity of this class.
@@ -56,10 +57,10 @@ class EntityClass:
 
         func.__name__ = "add_or_update_" + self.entity_class_name + "_information"
         func.__doc__ = f"Add or update a {self.entity_class_name} entity. Primary key: {primary_key_prop.property_name}"
-        func.__parameters__ = self.get_tool_parameters_schema()
+        func.__parameters__ = self._get_tool_parameters_schema()
         return func
 
-    def get_tool_parameters_schema(self):
+    def _get_tool_parameters_schema(self):
         """
         Builds the JSON schema for the parameters of the add/update tool.
 

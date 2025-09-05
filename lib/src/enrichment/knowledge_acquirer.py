@@ -18,11 +18,13 @@ class KnowledgeAcquirer:
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
         self.tools.append(self.graph.get_tools)
+        #todo reconcile with query_agent.py???
         self.agent = Agent(
             name="Knowledge Acquirer",
             role="Get high reliability and credibility information from the knowledge sources",
             model=my_model,
             tools=self.tools,
+            #todo why calling rewrite agent twice?
             instructions=self.ontology.rewrite_agent.rewrite_query(self.get_template()),
             show_tool_calls=True,
             markdown=True,
@@ -38,10 +40,13 @@ class KnowledgeAcquirer:
         knowledge_sources = []
         with open(knowledge_sources_config_file, 'r') as file:
             knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
-            for source in knowledge_sources_config['knowledge_sources']:
-                source_config = knowledge_sources_config['knowledge_sources'][source]
-                source = KnowledgeSource(source_config['name'], source_config['description'], source_config['functions_file'], source_config['override_reliability'], source_config['override_credibility'])
-                knowledge_sources.append(source)
+            if knowledge_sources_config['knowledge_sources']: 
+                for source in knowledge_sources_config['knowledge_sources']:
+                    source_config = knowledge_sources_config['knowledge_sources'][source]
+                    source = KnowledgeSource(source_config['name'], source_config['description'], source_config['functions_file'], source_config['override_reliability'], source_config['override_credibility'])
+                    knowledge_sources.append(source)
+                else: #todo log warning
+                    pass
         return knowledge_sources
 
     def get_template(self):

@@ -31,18 +31,16 @@ class KnowledgeGraph:
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")
 
-    def get_class_entity_pairs(self):
+    def _get_class_entity_pairs(self):
         for entity_class in self.ontology.entity_classes:
             self.class_entity_pairs[entity_class.entity_class_name] = []
             entities = self.graph_database.get_all_entities_by_label(entity_class.entity_class_name)
             for entity in entities:
-                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])
-            
+                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])      
 
-    def rewrite_query(self, query: str):
-        self.get_class_entity_pairs()
+    def _rewrite_query(self, query: str):
+        self._get_class_entity_pairs()
         return self.rewrite_agent.rewrite_query(query, self.class_entity_pairs)
-
 
     def query(self, query: str):
         """
@@ -54,7 +52,7 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        rewritten_query = self.rewrite_query(query)
+        rewritten_query = self._rewrite_query(query)
         return self.query_agent.query(rewritten_query)
 
     def update_knowledge(self, knowledge: str):
@@ -67,7 +65,7 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
-        rewrite_knowledge = self.rewrite_query(knowledge)
+        rewrite_knowledge = self._rewrite_query(knowledge)
         result = self.update_agent.update(rewrite_knowledge)
         return result.content
 

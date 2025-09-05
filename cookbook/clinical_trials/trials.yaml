@@ -1,0 +1,144 @@
+{
+  "world": {
+    "name": "Clinical Trials Knowledge Graph",
+    "description": "An ontology for tracking clinical trial information, including drugs, targets, sponsors, and outcomes."
+  },
+  "entity_classes": {
+    "ClinicalTrial": {
+      "description": "A research study involving human participants to evaluate a medical intervention.",
+      "properties": [
+        {
+          "name": "trial_id",
+          "type": "str",
+          "primary_key": true,
+          "description": "A unique identifier for the trial (e.g., NCT number)."
+        },
+        {
+          "name": "phase",
+          "type": "str",
+          "description": "The phase of the clinical trial (e.g., 'Phase I', 'Phase II', 'Phase III')."
+        },
+        {
+          "name": "primary_endpoint_status",
+          "type": "str",
+          "description": "The reporting status of the trial's primary endpoint (e.g., 'Reported', 'Not Reported')."
+        },
+        {
+          "name": "primary_endpoint_report_date",
+          "type": "date",
+          "description": "The date when primary endpoint data was publicly reported."
+        },
+        {
+          "name": "source",
+          "type": "str",
+          "description": "The source of the information (e.g., a URL to the trial registry)."
+        }
+      ]
+    },
+    "Drug": {
+      "description": "A chemical substance used in the treatment, cure, prevention, or diagnosis of disease.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "str",
+          "primary_key": true,
+          "description": "The name of the drug or investigational compound."
+        },
+        {
+          "name": "source",
+          "type": "str",
+          "description": "The source of the information (e.g., a URL to a drug database)."
+        }
+      ]
+    },
+    "BiologicalTarget": {
+      "description": "A molecule in the body, usually a protein, that is associated with a particular disease process and that could be addressed by a drug.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "str",
+          "primary_key": true,
+          "description": "The name of the biological target (e.g., 'GLP-1', 'EGFR')."
+        },
+        {
+          "name": "source",
+          "type": "str",
+          "description": "The source of the information (e.g., a URL to a bioinformatics database)."
+        }
+      ]
+    },
+    "AdverseEvent": {
+      "description": "Any untoward medical occurrence in a patient or clinical investigation subject administered a pharmaceutical product.",
+      "properties": [
+        {
+          "name": "event_id",
+          "type": "str",
+          "primary_key": true,
+          "description": "A unique identifier for the adverse event record."
+        },
+        {
+          "name": "event_type",
+          "type": "str",
+          "description": "The category of the adverse event (e.g., 'Cardiovascular', 'Gastrointestinal', 'Neurological')."
+        },
+        {
+          "name": "description",
+          "type": "str",
+          "description": "A description of the specific adverse event."
+        },
+        {
+          "name": "source",
+          "type": "str",
+          "description": "The source of the information (e.g., a URL to a safety report)."
+        }
+      ]
+    },
+    "Sponsor": {
+      "description": "An individual, company, institution, or organization that takes responsibility for the initiation, management, and/or financing of a clinical trial.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "str",
+          "primary_key": true,
+          "description": "The name of the sponsoring organization."
+        },
+        {
+          "name": "sponsor_type",
+          "type": "str",
+          "description": "The type of sponsor (e.g., 'Pharmaceutical', 'Academic', 'Government')."
+        },
+        {
+          "name": "source",
+          "type": "str",
+          "description": "The source of the information."
+        }
+      ]
+    }
+  },
+  "relationships": {
+    "investigates": {
+      "domain": "ClinicalTrial",
+      "range": "Drug",
+      "description": "Connects a ClinicalTrial to the Drug it is studying.",
+      "properties": []
+    },
+    "targets": {
+      "domain": "Drug",
+      "range": "BiologicalTarget",
+      "description": "Links a Drug to the BiologicalTarget it is designed to act on.",
+      "properties": []
+    },
+    "had_event": {
+      "domain": "ClinicalTrial",
+      "range": "AdverseEvent",
+      "description": "Connects a ClinicalTrial to an AdverseEvent observed during the study.",
+      "properties": []
+    },
+    "is_sponsored_by": {
+      "domain": "ClinicalTrial",
+      "range": "Sponsor",
+      "description": "Links a ClinicalTrial to its Sponsor.",
+      "properties": []
+    }
+  }
+}

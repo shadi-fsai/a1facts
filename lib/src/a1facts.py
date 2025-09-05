@@ -10,6 +10,9 @@ class KnowledgeBase:
         self.graph = KnowledgeGraph(self.ontology, use_neo4j)
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file)
  
+
+    #todo create external functions that can be used for non agent use case
+    
     def get_tools(self):        
         def query_tool(query: str):
             cprint(f"Querying knowledge graph", "green")
@@ -26,7 +29,6 @@ class KnowledgeBase:
             self.graph.update_knowledge(result)
             return result
 
-#        query_tool.__name__ = "query" 
         query_tool.__doc__ = f"""Query the knowledge graph for precise information for {self.ontology.description}
 ARGS: query: str - The query to query the knowledge graph
 RETURNS: str - The result from the knowledge graph"""
@@ -41,7 +43,6 @@ RETURNS: str - The result from the knowledge graph"""
             "required": ["query"]
         }
 
-#        acquire_tool.__name__ = "acquire"
         acquire_tool.__doc__ = f"""Acquire knowledge from the knowledge acquirer and update the knowledge graph for {self.ontology.description}
 Objective: To get high reliability and credibility information from the knowledge sources
 ARGS: query: str - The query to acquire knowledge from the knowledge acquirer

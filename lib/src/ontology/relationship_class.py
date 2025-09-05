@@ -49,7 +49,7 @@ class RelationshipClass:
         """Returns True if the relationship is symmetric."""
         return self.symmetric
 
-    def validate_properties(self, properties):
+    def _validate_properties(self, properties):
         """
         Validates that all required properties are present.
 
@@ -60,7 +60,7 @@ class RelationshipClass:
             for prop in self.properties:
                 if prop.property_name not in properties:
                     raise Exception(f"Property {prop.property_name} not found in properties, you need to change the world model")
-
+#todo add relationship to the name
     def get_add_or_update_tool(self, add_or_update_relationship_func):
         """
         Creates a tool function for adding or updating a relationship of this class.
@@ -78,7 +78,7 @@ class RelationshipClass:
             domain_primary_key_value = properties.get(domain_param_name)
             range_primary_key_value = properties.get(range_param_name)
             props = properties.get("properties")
-            self.validate_properties(props)
+            self._validate_properties(props)
             
             return add_or_update_relationship_func(
                 self.domain_entity_class,

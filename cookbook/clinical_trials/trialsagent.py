@@ -9,20 +9,20 @@ from textwrap import dedent
 from utils.modelconfig import my_model
 
 def main():
-    a1facts = KnowledgeBase("finance_info_agent", "company.yaml", "sources.yaml")
+    a1facts = KnowledgeBase("clinical_trials_agent", "trials.yaml", "sources.yaml")
 
     agent = Agent(
-        name="finance_info_agent",
-        role="get financial information about the company",
+        name="clinical_trials_agent",
+        role="get clinical trials information",
         model=my_model,
-        tools=a1facts.get_tools(),
-        instructions=dedent("""get financial information about the company, always start with query tool, if you don't get a satisfactory answer use the acquire tool to get new knowledge.
+        tools=[],#a1facts.get_tools(),
+        instructions=dedent("""get clinical trials information, always start with query tool, if you don't get a satisfactory answer use the acquire tool to get new knowledge.
         never use your internal knowledge to answer the question, only use the tools to get information from the knowledge graph and the knowledge sources. - never make up information"""),
         show_tool_calls=True,
         markdown=True,
         debug_mode=False,
     )
-    query = "what do you know about how UnitedHealth competes with CVS?"
+    query = "List all Phase II clinical trials for drugs targeting GLP-1 that have reported primary endpoint data in the last 6 months, excluding those with known cardiovascular adverse events"
     result = agent.run(query)
     print(result.content)
     

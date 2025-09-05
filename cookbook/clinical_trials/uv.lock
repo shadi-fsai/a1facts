@@ -4,7 +4,7 @@ requires-python = ">=3.13"
 [[package]]
 name = "a1facts"
 version = "0.1.8"
-source = { virtual = "." }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agno" },
     { name = "colored" },
@@ -14,16 +14,9 @@ dependencies = [
     { name = "posthog" },
     { name = "pytest" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "agno", specifier = ">=1.8.0" },
-    { name = "colored", specifier = ">=2.3.1" },
-    { name = "exa-py", specifier = ">=1.15.3" },
-    { name = "neo4j", specifier = ">=5.28.2" },
-    { name = "networkx", specifier = ">=3.5" },
-    { name = "posthog", specifier = ">=6.7.1" },
-    { name = "pytest", specifier = ">=8.4.2" },
+sdist = { url = "https://files.pythonhosted.org/packages/8d/f0/9578764f1d6b26f9b70fa8dd15ae99d421d48cb4d0507c4295507ed938b2/a1facts-0.1.8.tar.gz", hash = "sha256:2a1425292ecf49dd985f0767b87b1b3a8248fcf8044d18aebafa1a4d6794fff8", size = 26007 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/db/13263b431c6da60764679ec6f51c0d7d4e5cf92a31172cbb2ebbbc01a1fd/a1facts-0.1.8-py3-none-any.whl", hash = "sha256:7bf05d9ae5c00bebd098d19517ae2874ffbf33d8237ddad86e2c0e208c06bfbd", size = 31346 },
 ]
 
 [[package]]
@@ -131,6 +124,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/60/6c/8ca2efa64cf75a977a0d7fac081354553ebe483345c734fb6b6515d96bbc/click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202", size = 286342 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/85/32/10bb5764d90a8eee674e9dc6f4db6a0ab47c8c4d0d83c27f7c39ac415a4d/click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b", size = 102215 },
+]
+
+[[package]]
+name = "clinical-trials"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "a1facts" },
+    { name = "agno" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "a1facts", specifier = ">=0.1.6" },
+    { name = "agno", specifier = ">=1.8.1" },
 ]
 
 [[package]]
@@ -344,7 +352,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.105.0"
+version = "1.106.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -356,9 +364,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/a9/c8c2dea8066a8f3079f69c242f7d0d75aaad4c4c3431da5b0df22a24e75d/openai-1.105.0.tar.gz", hash = "sha256:a68a47adce0506d34def22dd78a42cbb6cfecae1cf6a5fe37f38776d32bbb514", size = 557265 }
+sdist = { url = "https://files.pythonhosted.org/packages/79/b6/1aff7d6b8e9f0c3ac26bfbb57b9861a6711d5d60bd7dd5f7eebbf80509b7/openai-1.106.1.tar.gz", hash = "sha256:5f575967e3a05555825c43829cdcd50be6e49ab6a3e5262f0937a3f791f917f1", size = 561095 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/01/186845829d3a3609bb5b474067959076244dd62540d3e336797319b13924/openai-1.105.0-py3-none-any.whl", hash = "sha256:3ad7635132b0705769ccae31ca7319f59ec0c7d09e94e5e713ce2d130e5b021f", size = 928203 },
+    { url = "https://files.pythonhosted.org/packages/00/e1/47887212baa7bc0532880d33d5eafbdb46fcc4b53789b903282a74a85b5b/openai-1.106.1-py3-none-any.whl", hash = "sha256:bfdef37c949f80396c59f2c17e0eda35414979bc07ef3379596a93c9ed044f3a", size = 930768 },
 ]
 
 [[package]]
@@ -381,7 +389,7 @@ wheels = [
 
 [[package]]
 name = "posthog"
-version = "6.7.1"
+version = "6.7.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
@@ -391,9 +399,9 @@ dependencies = [
     { name = "six" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/72/8a448dc2e7e5d16f52356189b4f3d1014eaa0bccca15353ff1282dba86ed/posthog-6.7.1.tar.gz", hash = "sha256:1011ddda110b65e0d080f2a5f88eb0337547ed6b5a50d0f8f6191e9357b99434", size = 106534 }
+sdist = { url = "https://files.pythonhosted.org/packages/49/f3/650f728d1da777d07730b835605278206eba7be864952ef6b8c15fc5405e/posthog-6.7.3.tar.gz", hash = "sha256:3d03ab7e6328a2407dcafa5615760bd99a4c20b18b7d548160175634ab53e73c", size = 117739 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/cd/bc1e638afa4c119f8350dfbae19fb5c63f6f36ee2a29481637645e514d0f/posthog-6.7.1-py3-none-any.whl", hash = "sha256:57d9a891ddedf690d2b294bb8b7832095c149729a3f123f47b7bcaf7b2b6e1a0", size = 124024 },
+    { url = "https://files.pythonhosted.org/packages/26/8c/448fa7ead69c4e5b5bdb699856813bc39c8415bb58e3ed2868a1d8986fb9/posthog-6.7.3-py3-none-any.whl", hash = "sha256:c669d0a43ddd2c34762fdbfd4d89e453430991e7ff9c2baf8e7c36619525d624", size = 135930 },
 ]
 
 [[package]]
