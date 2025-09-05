@@ -24,7 +24,7 @@ class KnowledgeBase:
         def acquire_tool(query: str): 
             cprint(f"Acquiring knowledge", "green")
             truncated_query = query[:70] + "..." if len(query) > 70 else query
-            cprint(f"Query: {truncated_query}", "yellow")
+            cprint(f"Knowledge seeked: {truncated_query}", "yellow")
             result = self.knowledge_acquirer.acquire(query)
             self.graph.update_knowledge(result)
             return result
