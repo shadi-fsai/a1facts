@@ -1,6 +1,6 @@
-# a1facts: An Agentic AI Knowledge Graph System
+# a1facts: The precision layer for AI
 
-a1facts is a powerful Python framework for building and interacting with knowledge graphs. It allows you to define a clear structure (ontology) for your knowledge, intelligently ingest information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
+a1facts is a powerful Python framework that acts as a verifiable knowledge layer for factual, precise AI. It allows you to define a clear structure (ontology) for your domain, ingest verifiyable information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
 
 This project supports a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
 
@@ -9,7 +9,7 @@ This project supports a Neo4j backend to manage and query the graph data, provid
 ## Key Features
 
 -   **Ontology-Driven**: Define your knowledge domain with simple YAML files. a1facts uses this ontology to automatically create the tools and structures needed to interact with your data.
--   **Structured Data Ingestion and cross validation**: Convert unstructured text into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
+-   **Verifiable Ingestion**: Convert unstructured knowledge into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
 -   **Natural Language Queries**: Ask questions in plain English. a1facts translates your queries into precise graph traversals to retrieve the information you need.
 -   **Reliable AI Agents**: Build AI agents that can provide accurate and trustworthy answers by grounding them in the factual data of the knowledge graph.
 -   **Neo4j Backend**: Supports Neo4j for efficient storage and complex querying of your knowledge base.

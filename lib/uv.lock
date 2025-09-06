@@ -11,6 +11,7 @@ dependencies = [
     { name = "exa-py" },
     { name = "mcp" },
     { name = "neo4j" },
+    { name = "nest-asyncio" },
     { name = "networkx" },
     { name = "posthog" },
 ]
@@ -27,6 +28,7 @@ requires-dist = [
     { name = "exa-py", specifier = ">=1.15.3" },
     { name = "mcp", specifier = ">=1.13.1" },
     { name = "neo4j", specifier = ">=5.28.2" },
+    { name = "nest-asyncio", specifier = ">=1.6.0" },
     { name = "networkx", specifier = ">=3.5" },
     { name = "posthog", specifier = ">=6.7.1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
@@ -404,6 +406,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/50/69/4862fabc082f2447131aada5c91736155349d77ebf443af7f59553b7b789/neo4j-5.28.2.tar.gz", hash = "sha256:7d38e27e4f987a45cc9052500c6ee27325cb23dae6509037fe31dd7ddaed70c7", size = 231874 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/00/1f74089c06aec1fac9390e2300a6a6b2381e0dac281783d64ccca9d681fd/neo4j-5.28.2-py3-none-any.whl", hash = "sha256:5c53b5c3eee6dee7e920c9724391aa38d7135a651e71b766da00533b92a91a94", size = 313156 },
+]
+
+[[package]]
+name = "nest-asyncio"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/f8/51569ac65d696c8ecbee95938f89d4abf00f47d58d48f6fbabfe8f0baefe/nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe", size = 7418 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/c4/c2971a3ba4c6103a3d10c4b0f24f461ddc027f0f09763220cf35ca1401b3/nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c", size = 5195 },
 ]
 
 [[package]]

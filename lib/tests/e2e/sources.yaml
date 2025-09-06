@@ -3,6 +3,13 @@ knowledge_sources:
     name: financial_modeling_prop
     type: mcp
     description: Financial Modeling Prep provides financial data for companies.
-    functions_file: fmp_functions.py
+    all_tools: false
+    run_command: "uv"
+    run_args: ["run", "fmp_mcp_server.py"]
+    run_cwd: "C:\\Users\\heluo\\Documents\\fortusight\\fortusight\\src\\server\\"
+    tools: #todo remove this ^^^^ 
+      - get_historical_daily_price
+      - get_company_profile
+      - get_stock_news
     override_reliability: A
     override_credibility: "1"
