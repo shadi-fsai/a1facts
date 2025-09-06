@@ -12,9 +12,14 @@ dependencies = [
     "agno>=1.8.0",
     "colored>=2.3.1",
     "exa-py>=1.15.3",
+    "mcp>=1.13.1",
     "neo4j>=5.28.2",
     "networkx>=3.5",
     "posthog>=6.7.1",
+]
+
+[project.optional-dependencies]
+dev = [
     "pytest>=8.4.2",
 ]
 
@@ -27,3 +32,8 @@ where = ["src"]
 [project.urls]
 Homepage = "https://github.com/shadi-fsai/a1facts"
 Issues = "https://github.com/shadi-fsai/a1facts/issues"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]

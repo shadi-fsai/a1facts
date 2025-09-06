@@ -1,6 +1,7 @@
 from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
 from enrichment.knowledge_source import KnowledgeSource
+from enrichment.function_knowledge_source.knowledge_source import FunctionKnowledgeSource
 from utils.modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
@@ -43,7 +44,7 @@ class KnowledgeAcquirer:
             if knowledge_sources_config['knowledge_sources']: 
                 for source in knowledge_sources_config['knowledge_sources']:
                     source_config = knowledge_sources_config['knowledge_sources'][source]
-                    source = KnowledgeSource(source_config['name'], source_config['description'], source_config['functions_file'], source_config['override_reliability'], source_config['override_credibility'])
+                    source = FunctionKnowledgeSource(source_config)
                     knowledge_sources.append(source)
                 else: #TODO log warning
                     pass
