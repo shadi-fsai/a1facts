@@ -1,6 +1,7 @@
 knowledge_sources:
   YFINANCE:
     name: yfinance
+    type: function
     description: yfinance provides financial data for companies.
     functions_file: yfinance_functions.py
     override_reliability: A

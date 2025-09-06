@@ -43,9 +43,14 @@ class KnowledgeAcquirer:
             knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
             if knowledge_sources_config['knowledge_sources']: 
                 for source in knowledge_sources_config['knowledge_sources']:
-                    source_config = knowledge_sources_config['knowledge_sources'][source]
-                    source = FunctionKnowledgeSource(source_config)
-                    knowledge_sources.append(source)
+                    if 'type' not in source: #TODO log warning
+                        raise ValueError(f"Your knowledge source config is missing the 'type' field for source: {source}")
+                    if source['type'] == 'function':
+                        source_config = knowledge_sources_config['knowledge_sources'][source]
+                        source = FunctionKnowledgeSource(source_config)
+                        knowledge_sources.append(source)
+                    else: #TODO log warning
+                        pass
                 else: #TODO log warning
                     pass
         return knowledge_sources
