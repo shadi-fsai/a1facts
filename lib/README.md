@@ -1,22 +1,22 @@
-# a1facts: An Ontology-Driven Knowledge Graph System
+# a1facts: The precision layer for AI
 
-a1facts is a powerful Python framework for building and interacting with knowledge graphs. It allows you to define a clear structure (ontology) for your data, ingest information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
+a1facts is a powerful Python framework that acts as a verifiable knowledge layer for factual, precise AI. It allows you to define a clear structure (ontology) for your domain, ingest verifiyable information from various sources, and use natural language to get precise, reliable answers. By grounding your AI agents in a structured knowledge graph, a1facts helps eliminate hallucinations and ensures that your agent's responses are based on verified facts.
 
-This project uses a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
+This project uses AI agents and a Neo4j backend to manage and query the graph data, providing a robust and scalable solution for your knowledge management needs.
 
 ![Architecture](https://github.com/shadi-fsai/a1facts/blob/main/public/Architecture.png)
 
 ## Key Features
 
 -   **Ontology-Driven**: Define your knowledge domain with simple YAML files. a1facts uses this ontology to automatically create the tools and structures needed to interact with your data.
--   **Structured Data Ingestion**: Convert unstructured text into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
+-   **Verifiable Ingestion**: Convert unstructured knowledge into structured entities and relationships within your knowledge graph, ensuring data quality and consistency.
 -   **Natural Language Queries**: Ask questions in plain English. a1facts translates your queries into precise graph traversals to retrieve the information you need.
 -   **Reliable AI Agents**: Build AI agents that can provide accurate and trustworthy answers by grounding them in the factual data of the knowledge graph.
 -   **Neo4j Backend**: Utilizes the power of Neo4j for efficient storage and complex querying of your knowledge base.
 
 ## Usage Scenario: Building AI Agents with Precise Answers
 
-In many applications, it's critical for AI agents to provide answers that are not just plausible but also precise and factually correct. Standard large language models (LLMs) can sometimes "hallucinate" or generate incorrect information, which can be a major issue in domains like finance, legal, or scientific research.
+In many high stakes applications, it's critical for AI agents to provide answers that are not just plausible but also precise and factually correct. Standard large language models (LLMs) can sometimes "hallucinate" or generate incorrect information, which can be a major issue in domains like finance, legal, or scientific research.
 
 a1facts addresses this problem by grounding your AI agent in a knowledge graph. Here's how it works:
 
