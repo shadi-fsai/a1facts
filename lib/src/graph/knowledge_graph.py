@@ -3,7 +3,6 @@ from ontology.knowledge_ontology import KnowledgeOntology
 from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
 from graph.query_rewrite_agent import QueryRewriteAgent
-from datetime import date
 from colored import cprint
 
 class KnowledgeGraph:
