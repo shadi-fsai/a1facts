@@ -2,6 +2,7 @@ from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
 from enrichment.knowledge_source import KnowledgeSource
 from enrichment.function_knowledge_source.knowledge_source import FunctionKnowledgeSource
+from enrichment.mcp_knowledge_source.knowledge_source import MCPKnowledgeSource
 from utils.modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
@@ -41,13 +42,18 @@ class KnowledgeAcquirer:
         knowledge_sources = []
         with open(knowledge_sources_config_file, 'r') as file:
             knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
-            if knowledge_sources_config['knowledge_sources']: 
+            if knowledge_sources_config['knowledge_sources']:
                 for source in knowledge_sources_config['knowledge_sources']:
-                    if 'type' not in source: #TODO log warning
+                    if 'type' not in knowledge_sources_config['knowledge_sources'][source]: #TODO log warning
                         raise ValueError(f"Your knowledge source config is missing the 'type' field for source: {source}")
-                    if source['type'] == 'function':
+                    source_type = knowledge_sources_config['knowledge_sources'][source]['type']
+                    if source_type == 'function':
                         source_config = knowledge_sources_config['knowledge_sources'][source]
                         source = FunctionKnowledgeSource(source_config)
+                        knowledge_sources.append(source)
+                    elif source_type == 'mcp':
+                        source_config = knowledge_sources_config['knowledge_sources'][source]
+                        source = MCPKnowledgeSource(source_config)
                         knowledge_sources.append(source)
                     else: #TODO log warning
                         pass
