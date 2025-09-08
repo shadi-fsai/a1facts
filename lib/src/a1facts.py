@@ -4,11 +4,11 @@ from enrichment.knowledge_acquirer import KnowledgeAcquirer
 from colored import cprint
 
 class KnowledgeBase:
-    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False):
+    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False, disable_exa: bool = False):
         self.name = name
         self.ontology = KnowledgeOntology(ontology_config_file)
         self.graph = KnowledgeGraph(self.ontology, use_neo4j)
-        self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file)
+        self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file, disable_exa)
  
 
     #TODO create external functions that can be used for non agent use case

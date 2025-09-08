@@ -12,11 +12,13 @@ import yaml
 from colored import cprint
 
 class KnowledgeAcquirer:
-    def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str):
+    def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str, disable_exa: bool = False):
         self.ontology = ontology
         self.graph = graph
         self.knowledge_sources = self.load_knowledge_sources(knowledge_sources_config_file)
-        self.tools = [ExaTools(num_results=20, summary=True)]
+        self.tools = []
+        if not disable_exa:
+            self.tools.append(ExaTools(num_results=20, summary=True))
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
         self.tools.append(self.graph.get_tools)
