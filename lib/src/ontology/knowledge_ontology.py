@@ -9,6 +9,7 @@ from ontology.entity_class import EntityClass
 from ontology.relationship_class import RelationshipClass
 from ontology.ontology_rewrite_agent import OntologyRewriteAgent
 from utils.telemetry import nonblocking_send_telemetry_ping
+from utils.logger import logger
 
 class KnowledgeOntology:
     """
@@ -16,6 +17,7 @@ class KnowledgeOntology:
     It loads the ontology from a YAML file and provides methods to access its components.
     """
     def __init__(self, ontology_file: str):
+        logger.system(f"Initializing KnowledgeOntology for {ontology_file}")
         """
         Initializes the KnowledgeOntology object.
 
@@ -27,9 +29,14 @@ class KnowledgeOntology:
         self.relationship_classes = []
         self.name = ""
         self.description = ""
+        logger.system(f"Loading ontology from {ontology_file}")
         self.load_ontology()
+        logger.system(f"Ontology loaded from {ontology_file}")
         self.rewrite_agent = OntologyRewriteAgent(self.ontology_file, [])
+        logger.system(f"Ontology rewrite agent initialized")
         nonblocking_send_telemetry_ping()
+        logger.user(f"Ontology loaded: {self.ontology_file}")
+        logger.user(f"Ontology parsed: {str(self)}")
         cprint(f"Ontology loaded: {self.ontology_file}", "green")
 
     def find_entity_class(self, name):
@@ -42,13 +49,16 @@ class KnowledgeOntology:
         Returns:
             EntityClass or None: The found entity class, or None if not found.
         """
+        logger.system(f"Finding entity class: {name}")
         for entity_class in self.entity_classes:
             if entity_class.entity_class_name == name:
                 return entity_class
+        logger.system(f"Entity class not found: {name}")
         return None   
  
     def load_ontology(self):
         """Loads the ontology from the specified YAML file."""
+        logger.system(f"Loading ontology from {self.ontology_file}")
         with open(self.ontology_file, 'r') as file:
             ontology = yaml.load(file, Loader=yaml.FullLoader)
             self.name = ontology.get('world', {}).get('name', 'N/A')
@@ -68,6 +78,7 @@ class KnowledgeOntology:
                 for prop in details.get('properties', []):
                     relationship_class.add_property(Property(prop.get('property_name', 'N/A'), prop.get('type', 'N/A'), prop.get('description', 'N/A'), prop.get('primary_key', False)))
                 self.relationship_classes.append(relationship_class)
+        logger.system(f"Ontology loaded from {self.ontology_file}")
 
     def get_entity_add_or_update_tools(self, add_entity_func):
         """
@@ -79,9 +90,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting entity add/update tools")
         tools = []
         for entity_class in self.entity_classes:
             tools.append(entity_class.get_add_or_update_tool(add_entity_func))
+        logger.system(f"Entity add/update tools returned")
         return tools
 
     def get_entity_get_entity_properties_tools(self, get_entity_properties_func):
@@ -94,9 +107,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting entity get properties tools")
         tools = []
         for entity_class in self.entity_classes:
             tools.append(entity_class.get_get_entity_properties_tool(get_entity_properties_func))
+        logger.system(f"Entity get properties tools returned")
         return tools
 
     def get_entity_get_all_entity_tool(self, get_all_entity_func):
@@ -109,9 +124,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting entity get all tools")
         tools = []
         for entity_class in self.entity_classes:
             tools.append(entity_class.get_get_all_entity_tool(get_all_entity_func))
+        logger.system(f"Entity get all tools returned")
         return tools
 
     def get_relationship_add_or_update_tools(self, add_relationship_func):
@@ -124,9 +141,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting relationship add/update tools")
         tools = []
         for relationship_class in self.relationship_classes:
             tools.append(relationship_class.get_add_or_update_tool(add_relationship_func))
+        logger.system(f"Relationship add/update tools returned")
         return tools
 
     def get_relationship_get_relationship_properties_tools(self, get_relationship_properties_func):
@@ -139,9 +158,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting relationship get relationship entities tools")
         tools = []
         for relationship_class in self.relationship_classes:
             tools.append(relationship_class.get_get_relationship_properties_tool(get_relationship_properties_func))
+        logger.system(f"Relationship get relationship entities tools returned")
         return tools
 
     def get_relationship_get_relationship_entities_tools(self, get_relationship_entities_func):
@@ -154,9 +175,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of tool functions.
         """
+        logger.system(f"Getting relationship get relationship entities tools")
         tools = []
         for relationship_class in self.relationship_classes:
             tools.append(relationship_class.get_get_relationship_entities_tool(get_relationship_entities_func))
+        logger.system(f"Relationship get relationship entities tools returned")
         return tools
 
     def get_add_or_update_tools(self, add_entity_func, add_relationship_func):
@@ -170,9 +193,11 @@ class KnowledgeOntology:
         Returns:
             list: A list of all add/update tool functions.
         """
+        logger.system(f"Getting add/update tools")
         tools = []
         tools.extend(self.get_entity_add_or_update_tools(add_entity_func))
         tools.extend(self.get_relationship_add_or_update_tools(add_relationship_func))
+        logger.system(f"Add/update tools returned")
         return tools
 
     def get_get_tools(self, get_all_entity_func, get_entity_properties_func, get_relationship_properties_func, get_relationship_entities_func):
@@ -188,15 +213,18 @@ class KnowledgeOntology:
         Returns:
             list: A list of all 'get' tool functions.
         """
+        logger.system(f"Getting get tools")
         tools = []
         tools.extend(self.get_entity_get_all_entity_tool(get_all_entity_func))
         tools.extend(self.get_entity_get_entity_properties_tools(get_entity_properties_func))
         tools.extend(self.get_relationship_get_relationship_properties_tools(get_relationship_properties_func))
         tools.extend(self.get_relationship_get_relationship_entities_tools(get_relationship_entities_func))
+        logger.system(f"Get tools returned")
         return tools
 
     def __str__(self):
         """Returns a string representation of the entire ontology."""
+        logger.system(f"Getting string representation of ontology")
         ontology_str = ""
         ontology_str += f"Ontology Name: {self.name}\n"
         ontology_str += f"Ontology Description: {self.description}\n"
@@ -205,5 +233,5 @@ class KnowledgeOntology:
             ontology_str += f"   {entity_class}\n"
         ontology_str += "Relationship Classes:\n"
         for relationship_class in self.relationship_classes:
-            ontology_str += f"   {relationship_class}\n"
+            ontology_str += f"   {relationship_class}"
         return ontology_str

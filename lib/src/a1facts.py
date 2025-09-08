@@ -2,19 +2,24 @@ from graph.knowledge_graph import KnowledgeGraph
 from ontology.knowledge_ontology import KnowledgeOntology
 from enrichment.knowledge_acquirer import KnowledgeAcquirer
 from colored import cprint
+from utils.logger import logger
+
 
 class KnowledgeBase:
     def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False, disable_exa: bool = False):
+        logger.system(f"Initializing KnowledgeBase for {name}")
         self.name = name
         self.ontology = KnowledgeOntology(ontology_config_file)
         self.graph = KnowledgeGraph(self.ontology, use_neo4j)
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file, disable_exa)
- 
+        logger.system(f"KnowledgeBase initialized for {self.name}")
 
     #TODO create external functions that can be used for non agent use case
     
-    def get_tools(self):        
+    def get_tools(self):
+        logger.system(f"Getting tools for {self.name}")
         def query_tool(query: str):
+            logger.user(f"Querying knowledge graph for {query}")
             cprint(f"Querying knowledge graph", "green")
             truncated_query = query[:70] + "..." if len(query) > 70 else query
             cprint(f"Query: {truncated_query}", "yellow")
@@ -22,6 +27,7 @@ class KnowledgeBase:
             return result
 
         def acquire_tool(query: str): 
+            logger.user(f"Acquiring knowledge for {query}")
             cprint(f"Acquiring knowledge", "green")
             truncated_query = query[:70] + "..." if len(query) > 70 else query
             cprint(f"Knowledge seeked: {truncated_query}", "yellow")
@@ -57,7 +63,7 @@ RETURNS: str - The result from the knowledge acquirer"""
             },
             "required": ["query"]
         }
-
+        logger.system(f"Tools returned for {self.name}")
         return [query_tool, acquire_tool]
 
     def __str__(self) -> str:
@@ -68,5 +74,7 @@ RETURNS: str - The result from the knowledge acquirer"""
         Destructor that automatically closes the Neo4j graph connection
         when the a1facts instance is garbage collected.
         """
+        logger.system(f"Destroying KnowledgeBase for {self.name}")
         if hasattr(self, 'graph') and self.graph:
             self.graph.close()
+            logger.system(f"KnowledgeBase closed for {self.name}")

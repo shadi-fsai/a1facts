@@ -4,6 +4,7 @@ from graph.query_agent import QueryAgent
 from graph.update_agent import UpdateAgent
 from graph.query_rewrite_agent import QueryRewriteAgent
 from colored import cprint
+from utils.logger import logger
 
 class KnowledgeGraph:
     """
@@ -19,14 +20,20 @@ class KnowledgeGraph:
         Args:
             ontology (KnowledgeOntology): The ontology defining the graph's structure.
         """
+        logger.system(f"Initializing KnowledgeGraph: {ontology.ontology_file} with use_neo4j: {use_neo4j}")
         self.ontology = ontology
         self.graph_database = NetworkxGraphDatabase() if not use_neo4j else Neo4jGraphDatabase()
+        logger.system(f"Graph database initialized")
         self.get_tools = self.ontology.get_get_tools(self.graph_database.get_all_entities_by_label, 
             self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
+        logger.system(f"Add/update tools returned")
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
+        logger.system(f"Query agent initialized")
         self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
+        logger.system(f"Update agent initialized")
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
+        logger.system(f"Rewrite agent initialized")
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")
 
@@ -51,6 +58,7 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+        logger.system(f"Querying knowledge graph with query: {query}")
         rewritten_query = self._rewrite_query(query)
         return self.query_agent.query(rewritten_query)
 
@@ -64,11 +72,14 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+        logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
         rewrite_knowledge = self._rewrite_query(knowledge)
+        logger.system(f"Rewritten knowledge: {rewrite_knowledge}")
         result = self.update_agent.update(rewrite_knowledge)
+        logger.system(f"Result: {result.content}")
         return result.content
 
     def close(self):
         if self.graph_database is not None:
             self.graph_database.close()
-
+        logger.system(f"Knowledge graph closed")

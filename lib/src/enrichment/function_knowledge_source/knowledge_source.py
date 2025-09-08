@@ -11,6 +11,20 @@ class FunctionKnowledgeSource(KnowledgeSource):
         self.override_credibility = source_config['override_credibility']
         self.tools = []
         self.query_agent = None
+        self._validate_source_config(source_config)
+
+
+    def _validate_source_config(self, source_config: dict):
+        if 'name' not in source_config:
+            raise ValueError("Your knowledge source config is missing the 'name' field")
+        if 'description' not in source_config:
+            raise ValueError("Your knowledge source config is missing the 'description' field")
+        if 'functions_file' not in source_config:
+            raise ValueError("Your knowledge source config is missing the 'functions_file' field")
+        if 'override_reliability' not in source_config:
+            raise ValueError("Your knowledge source config is missing the 'override_reliability' field")
+        if 'override_credibility' not in source_config:
+            raise ValueError("Your knowledge source config is missing the 'override_credibility' field")
 
     def query_tool(self):
         functions_module = importlib.import_module(f"{self.functions_file[:-3]}")

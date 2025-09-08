@@ -10,17 +10,24 @@ from agno.tools.exa import ExaTools
 from datetime import datetime
 import yaml
 from colored import cprint
+from utils.logger import logger
 
 class KnowledgeAcquirer:
     def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str, disable_exa: bool = False):
+        logger.user(f"Initializing Knowledge Sources for {knowledge_sources_config_file} with disable_exa: {disable_exa}")
         self.ontology = ontology
         self.graph = graph
         self.knowledge_sources = self.load_knowledge_sources(knowledge_sources_config_file)
+        logger.system(f"Knowledge sources loaded")
+        for source in self.knowledge_sources:
+            logger.system(f"Knowledge source loaded: {source.name}")
         self.tools = []
         if not disable_exa:
             self.tools.append(ExaTools(num_results=20, summary=True))
+            logger.system(f"Exa tools loaded")
         for source in self.knowledge_sources:
             self.tools.append(source.query_tool())
+            logger.system(f"Knowledge source query tool loaded: {source.name}")
         self.tools.append(self.graph.get_tools)
         #TODO separate acquirer agent???
         self.agent = Agent(
@@ -34,6 +41,7 @@ class KnowledgeAcquirer:
             markdown=True,
             debug_mode=False,
         )
+        logger.user(f"KnowledgeAcquirer initialized")
         cprint(f"KnowledgeAcquirer initialized", "green")
 
     def acquire(self, query: str):
@@ -42,11 +50,14 @@ class KnowledgeAcquirer:
 
     def load_knowledge_sources(self, knowledge_sources_config_file: str):
         knowledge_sources = []
+        logger.system(f"Loading knowledge sources from {knowledge_sources_config_file}")
         with open(knowledge_sources_config_file, 'r') as file:
             knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
+            logger.system(f"Knowledge sources config loading from {knowledge_sources_config}")
             if knowledge_sources_config['knowledge_sources']:
                 for source in knowledge_sources_config['knowledge_sources']:
-                    if 'type' not in knowledge_sources_config['knowledge_sources'][source]: #TODO log warning
+                    if 'type' not in knowledge_sources_config['knowledge_sources'][source]:
+                        logger.warning(f"Your knowledge source config is missing the 'type' field for source: {source}")
                         raise ValueError(f"Your knowledge source config is missing the 'type' field for source: {source}")
                     source_type = knowledge_sources_config['knowledge_sources'][source]['type']
                     if source_type == 'function':
@@ -57,10 +68,10 @@ class KnowledgeAcquirer:
                         source_config = knowledge_sources_config['knowledge_sources'][source]
                         source = MCPKnowledgeSource(source_config)
                         knowledge_sources.append(source)
-                    else: #TODO log warning
-                        pass
-                else: #TODO log warning
-                    pass
+                    else: 
+                        logger.warning(f"Unknown knowledge source type: {source_type}")
+            else: 
+                logger.warning(f"No knowledge sources found in {knowledge_sources_config_file}")
         return knowledge_sources
 
     def get_template(self):

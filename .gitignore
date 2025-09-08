@@ -10,3 +10,4 @@ wheels/
 .venv
 .env
 networkx_graph.pickle
+a1facts.log
