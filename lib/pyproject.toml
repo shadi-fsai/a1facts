@@ -1,6 +1,6 @@
 [project]
 name = "a1facts"
-version = "0.1.10"
+version = "0.1.12"
 license = {file = "LICENSE"}
 authors = [
   {name = "Shadi Copty", email = "shadi@a1facts.ai"}
@@ -26,6 +26,7 @@ dev = [
 
 [tool.setuptools]
 include-package-data = true # This can stay
+py-modules = ["a1facts"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -3,7 +3,7 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "a1facts"
-version = "0.1.9"
+version = "0.1.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agno" },
@@ -15,14 +15,14 @@ dependencies = [
     { name = "networkx" },
     { name = "posthog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ac/96/fe15513cab654eb50dadab1e2eaf39fe5488014fab134d8c4a43e7910155/a1facts-0.1.9.tar.gz", hash = "sha256:1832796380b30020993b6e76ffb7d4fb3efffdc0b206ceb5d325f967c573e701", size = 28430 }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/fd/430b9021be7aff383793d88ca9bf188ebf5a006c6c45d2555ae0aee00028/a1facts-0.1.12.tar.gz", hash = "sha256:8dcb6c26bd9b657225da659b13ee415ef32043a22cf4ca987df5311b26968542", size = 29938 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/0d/05f4fc2b12da48ccea388af300e5f5abf0d745764f1bc9c3fb9ae89f09ff/a1facts-0.1.9-py3-none-any.whl", hash = "sha256:b34836d37ca7fb3010fb184206cf01bcb2299e8074f72b9c9df344bddf1524af", size = 33127 },
+    { url = "https://files.pythonhosted.org/packages/85/1b/ee4c645b1d0b8d0501f9d4361be04d0ddaf6dd302773f720b7ab3c7bf51a/a1facts-0.1.12-py3-none-any.whl", hash = "sha256:4e2ba55392f678781dd75f152496c843ac162d21bcabba20bbd3becfbe547e5b", size = 35861 },
 ]
 
 [[package]]
 name = "agno"
-version = "1.8.1"
+version = "1.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "docstring-parser" },
@@ -39,9 +39,9 @@ dependencies = [
     { name = "typer" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4a/fc/8e815919fde2104c56091632a39b1b5db4b3ffe01c4b192f57d0252b9a7b/agno-1.8.1.tar.gz", hash = "sha256:ef134860987f7bd3397e028b32ce90e51e0920dc8265e886e76a55651a6384ce", size = 754435 }
+sdist = { url = "https://files.pythonhosted.org/packages/ac/44/b7aa76f7b2e8268bcd986be432ffad35e081c7b1d3c67e19b2ee2748c4b2/agno-1.8.2.tar.gz", hash = "sha256:f8dab74a91cb56d5329d449b236361f1e39d0f1573182cc20912e16db25b6012", size = 754571 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0d/2c/88321406cf5218475859e6f04d1485771d30b02668537890117d12b1f89f/agno-1.8.1-py3-none-any.whl", hash = "sha256:1c16c2cec2b930a6fd8a15859a57da8f497223f041ce87a11b9a29b1b61f35e5", size = 996593 },
+    { url = "https://files.pythonhosted.org/packages/c0/7d/756bc6cb78c5f98f06a1f2be2b354fa115dca9be64bf73b0bbada75d20d1/agno-1.8.2-py3-none-any.whl", hash = "sha256:2a55a80848bcfe448c09ba1eed41c299a84c2f882e7e3aed145d887cbba88de1", size = 997067 },
 ]
 
 [[package]]
@@ -545,7 +545,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.106.1"
+version = "1.107.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -557,9 +557,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/79/b6/1aff7d6b8e9f0c3ac26bfbb57b9861a6711d5d60bd7dd5f7eebbf80509b7/openai-1.106.1.tar.gz", hash = "sha256:5f575967e3a05555825c43829cdcd50be6e49ab6a3e5262f0937a3f791f917f1", size = 561095 }
+sdist = { url = "https://files.pythonhosted.org/packages/88/67/d6498de300f83ff57a79cb7aa96ef3bef8d6f070c3ded0f1b5b45442a6bc/openai-1.107.0.tar.gz", hash = "sha256:43e04927584e57d0e9e640ee0077c78baf8150098be96ebd5c512539b6c4e9a4", size = 566056 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/00/e1/47887212baa7bc0532880d33d5eafbdb46fcc4b53789b903282a74a85b5b/openai-1.106.1-py3-none-any.whl", hash = "sha256:bfdef37c949f80396c59f2c17e0eda35414979bc07ef3379596a93c9ed044f3a", size = 930768 },
+    { url = "https://files.pythonhosted.org/packages/91/ed/e8a4fd20390f2858b95227c288df8fe0c835f7c77625f7583609161684ba/openai-1.107.0-py3-none-any.whl", hash = "sha256:3dcfa3cbb116bd6924b27913b8da28c4a787379ff60049588547a1013e6d6438", size = 950968 },
 ]
 
 [[package]]
