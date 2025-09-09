@@ -61,7 +61,7 @@ class RelationshipClass:
                 if prop.property_name not in properties:
                     raise Exception(f"Property {prop.property_name} not found in properties, you need to change the world model")
 
-    def get_add_or_update_relationship_tool(self, add_or_update_relationship_func):
+    def get_tool_add_or_update_relationship(self, add_or_update_relationship_func):
         """
         Creates a tool function for adding or updating a relationship of this class.
 
@@ -159,7 +159,7 @@ class RelationshipClass:
         
         return schema
 
-    def get_get_relationship_properties_tool(self, get_relationship_properties_func):
+    def get_tool_get_relationship_properties(self, get_relationship_properties_func):
         """
         Creates a tool for getting the properties of a specific relationship instance.
 
@@ -196,7 +196,7 @@ class RelationshipClass:
         }
         return func
 
-    def get_get_relationship_entities_tool(self, get_relationship_entities_func):
+    def get_tool_get_relationship_entities(self, get_relationship_entities_func):
         """
         Creates a tool for getting all entities connected by a specific relationship.
 

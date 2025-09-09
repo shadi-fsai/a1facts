@@ -35,9 +35,8 @@ class EntityClass:
         for prop in self.properties:
             entity_str += f"      - {prop}\n"
         return entity_str
-#TODO change to get_tool_... instead
-#TODO improve tool documentation
-    def get_add_or_update_tool(self, add_or_update_entity_func):
+
+    def get_tool_add_or_update_entity(self, add_or_update_entity_func):
         """
         Creates a tool function for adding or updating an entity of this class.
 
@@ -56,7 +55,7 @@ class EntityClass:
             return add_or_update_entity_func(self.entity_class_name, primary_key_prop.property_name, properties)
 
         func.__name__ = "add_or_update_" + self.entity_class_name + "_information"
-        func.__doc__ = f"Add or update a {self.entity_class_name} entity. Primary key: {primary_key_prop.property_name}"
+        func.__doc__ = f"Add or update a {self.entity_class_name} entity. Primary key: {primary_key_prop.property_name} \n" + (f"Properties: {self.properties}" if self.properties else "") + "\n"
         func.__parameters__ = self._get_tool_parameters_schema()
         return func
 
@@ -86,7 +85,7 @@ class EntityClass:
             schema["required"].append(prop.property_name)
         return schema
     
-    def get_get_all_entity_tool(self, get_all_entity_func):
+    def get_tool_get_all_entity(self, get_all_entity_func):
         """
         Creates a tool function for getting all entities of this class.
 
@@ -104,7 +103,7 @@ class EntityClass:
         func.__parameters__ = {"type": "object", "properties": {}}
         return func
 
-    def get_get_entity_properties_tool(self, get_entity_properties_func):
+    def get_tool_get_entity_properties(self, get_entity_properties_func):
         """
         Creates a tool function for getting the properties of a specific entity.
 
@@ -121,7 +120,7 @@ class EntityClass:
             return get_entity_properties_func(self.entity_class_name, self.primary_key_prop.property_name, primary_key_value)
 
         func.__name__ = "get_"+self.entity_class_name+"_properties"
-        func.__doc__ = f"Get a {self.entity_class_name} properties."
+        func.__doc__ = f"Get a {self.entity_class_name} properties. \n" + (f"Returns properties: {self.properties}" if self.properties else "") + "\n"
         
         param_name = f"{self.entity_class_name}_{self.primary_key_prop.property_name}"
         func.__parameters__ = {

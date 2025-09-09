@@ -80,7 +80,7 @@ class KnowledgeOntology:
                 self.relationship_classes.append(relationship_class)
         logger.system(f"Ontology loaded from {self.ontology_file}")
 
-    def get_entity_add_or_update_tools(self, add_entity_func):
+    def get_tools_add_or_update_entity(self, add_entity_func):
         """
         Gets a list of all add/update tools for all entity classes.
 
@@ -93,11 +93,11 @@ class KnowledgeOntology:
         logger.system(f"Getting entity add/update tools")
         tools = []
         for entity_class in self.entity_classes:
-            tools.append(entity_class.get_add_or_update_tool(add_entity_func))
+            tools.append(entity_class.get_tool_add_or_update_entity(add_entity_func))
         logger.system(f"Entity add/update tools returned")
         return tools
 
-    def get_entity_get_entity_properties_tools(self, get_entity_properties_func):
+    def get_tools_get_entity_properties(self, get_entity_properties_func):
         """
         Gets a list of all 'get properties' tools for all entity classes.
 
@@ -110,11 +110,11 @@ class KnowledgeOntology:
         logger.system(f"Getting entity get properties tools")
         tools = []
         for entity_class in self.entity_classes:
-            tools.append(entity_class.get_get_entity_properties_tool(get_entity_properties_func))
+            tools.append(entity_class.get_tool_get_entity_properties(get_entity_properties_func))
         logger.system(f"Entity get properties tools returned")
         return tools
 
-    def get_entity_get_all_entity_tool(self, get_all_entity_func):
+    def get_tools_get_all_entity(self, get_all_entity_func):
         """
         Gets a list of all 'get all' tools for all entity classes.
 
@@ -127,11 +127,11 @@ class KnowledgeOntology:
         logger.system(f"Getting entity get all tools")
         tools = []
         for entity_class in self.entity_classes:
-            tools.append(entity_class.get_get_all_entity_tool(get_all_entity_func))
+            tools.append(entity_class.get_tool_get_all_entity(get_all_entity_func))
         logger.system(f"Entity get all tools returned")
         return tools
 
-    def get_relationship_add_or_update_tools(self, add_relationship_func):
+    def get_tools_add_or_update_relationship(self, add_relationship_func):
         """
         Gets a list of all add/update tools for all relationship classes.
 
@@ -144,11 +144,11 @@ class KnowledgeOntology:
         logger.system(f"Getting relationship add/update tools")
         tools = []
         for relationship_class in self.relationship_classes:
-            tools.append(relationship_class.get_add_or_update_relationship_tool(add_relationship_func))
+            tools.append(relationship_class.get_tool_add_or_update_relationship(add_relationship_func))
         logger.system(f"Relationship add/update tools returned")
         return tools
 
-    def get_relationship_get_relationship_properties_tools(self, get_relationship_properties_func):
+    def get_tools_get_relationship_properties(self, get_relationship_properties_func):
         """
         Gets a list of all 'get properties' tools for all relationship classes.
 
@@ -161,11 +161,11 @@ class KnowledgeOntology:
         logger.system(f"Getting relationship get relationship entities tools")
         tools = []
         for relationship_class in self.relationship_classes:
-            tools.append(relationship_class.get_get_relationship_properties_tool(get_relationship_properties_func))
+            tools.append(relationship_class.get_tool_get_relationship_properties(get_relationship_properties_func))
         logger.system(f"Relationship get relationship entities tools returned")
         return tools
 
-    def get_relationship_get_relationship_entities_tools(self, get_relationship_entities_func):
+    def get_tools_get_relationship_entities(self, get_relationship_entities_func):
         """
         Gets a list of all 'get related entities' tools for all relationship classes.
 
@@ -178,11 +178,11 @@ class KnowledgeOntology:
         logger.system(f"Getting relationship get relationship entities tools")
         tools = []
         for relationship_class in self.relationship_classes:
-            tools.append(relationship_class.get_get_relationship_entities_tool(get_relationship_entities_func))
+            tools.append(relationship_class.get_tool_get_relationship_entities(get_relationship_entities_func))
         logger.system(f"Relationship get relationship entities tools returned")
         return tools
 
-    def get_add_or_update_tools(self, add_entity_func, add_relationship_func):
+    def get_tools_add_or_update_entity_and_relationship(self, add_entity_func, add_relationship_func):
         """
         Gets a combined list of all add/update tools for both entities and relationships.
 
@@ -195,12 +195,12 @@ class KnowledgeOntology:
         """
         logger.system(f"Getting add/update tools")
         tools = []
-        tools.extend(self.get_entity_add_or_update_tools(add_entity_func))
-        tools.extend(self.get_relationship_add_or_update_tools(add_relationship_func))
+        tools.extend(self.get_tools_add_or_update_entity(add_entity_func))
+        tools.extend(self.get_tools_add_or_update_relationship(add_relationship_func))
         logger.system(f"Add/update tools returned")
         return tools
 
-    def get_get_tools(self, get_all_entity_func, get_entity_properties_func, get_relationship_properties_func, get_relationship_entities_func):
+    def get_tools_get_entity_and_relationship(self, get_all_entity_func, get_entity_properties_func, get_relationship_properties_func, get_relationship_entities_func):
         """
         Gets a combined list of all 'get' tools for both entities and relationships.
 
@@ -215,10 +215,10 @@ class KnowledgeOntology:
         """
         logger.system(f"Getting get tools")
         tools = []
-        tools.extend(self.get_entity_get_all_entity_tool(get_all_entity_func))
-        tools.extend(self.get_entity_get_entity_properties_tools(get_entity_properties_func))
-        tools.extend(self.get_relationship_get_relationship_properties_tools(get_relationship_properties_func))
-        tools.extend(self.get_relationship_get_relationship_entities_tools(get_relationship_entities_func))
+        tools.extend(self.get_tools_get_all_entity(get_all_entity_func))
+        tools.extend(self.get_tools_get_entity_properties(get_entity_properties_func))
+        tools.extend(self.get_tools_get_relationship_properties(get_relationship_properties_func))
+        tools.extend(self.get_tools_get_relationship_entities(get_relationship_entities_func))
         logger.system(f"Get tools returned")
         return tools
 

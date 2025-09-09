@@ -14,25 +14,71 @@ class KnowledgeBase:
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file, disable_exa)
         logger.system(f"KnowledgeBase initialized for {self.name}")
 
-    #TODO create external functions that can be used for non agent use case
+    def query(self, query: str):
+        """
+        Executes a query against the knowledge graph.
+
+        This method allows you to retrieve information stored in the knowledge graph
+        based on its ontological structure.
+
+        Args:
+            query (str): The query to execute against the knowledge graph.
+
+        Returns:
+            str: The result of the query from the knowledge graph.
+        """
+        logger.user(f"Querying knowledge graph for {query}")
+        cprint(f"Querying knowledge graph", "green")
+        truncated_query = query[:70] + "..." if len(query) > 70 else query
+        cprint(f"Query: {truncated_query}", "yellow")
+        return self.graph.query(query)
+
+    def acquire_knowledge_for_query(self, query: str):
+        """
+        Acquires new knowledge based on a query and updates the knowledge graph.
+
+        This method uses the configured knowledge sources to find new information
+        related to the query, which is then integrated into the knowledge graph.
+
+        Args:
+            query (str): The query to guide the knowledge acquisition process.
+
+        Returns:
+            str: The newly acquired knowledge.
+        """
+        logger.user(f"Acquiring knowledge for {query}")
+        cprint(f"Acquiring knowledge", "green")
+        truncated_query = query[:70] + "..." if len(query) > 70 else query
+        cprint(f"Knowledge seeked: {truncated_query}", "yellow")
+        return self.knowledge_acquirer.acquire(query)
     
+    def ingest_knowledge(self, knowledge: str):
+        """
+        Ingests and integrates new knowledge into the knowledge graph.
+
+        This method takes a string of knowledge, processes it, and updates the
+        knowledge graph according to the ontology.
+
+        Args:
+            knowledge (str): The knowledge to be ingested into the knowledge graph.
+
+        Returns:
+            str: The result of the knowledge ingestion operation.
+        """
+        logger.user(f"Ingesting knowledge for {knowledge}")
+        cprint(f"Ingesting knowledge", "green")
+        truncated_knowledge = knowledge[:70] + "..." if len(knowledge) > 70 else knowledge
+        cprint(f"Knowledge to update: {truncated_knowledge}", "yellow")
+        return self.graph.update_knowledge(knowledge)
+
     def get_tools(self):
         logger.system(f"Getting tools for {self.name}")
         def query_tool(query: str):
-            logger.user(f"Querying knowledge graph for {query}")
-            cprint(f"Querying knowledge graph", "green")
-            truncated_query = query[:70] + "..." if len(query) > 70 else query
-            cprint(f"Query: {truncated_query}", "yellow")
-            result = self.graph.query(query)
-            return result
+            return self.query(query)
 
-        def acquire_tool(query: str): 
-            logger.user(f"Acquiring knowledge for {query}")
-            cprint(f"Acquiring knowledge", "green")
-            truncated_query = query[:70] + "..." if len(query) > 70 else query
-            cprint(f"Knowledge seeked: {truncated_query}", "yellow")
-            result = self.knowledge_acquirer.acquire(query)
-            self.graph.update_knowledge(result)
+        def acquire_tool(query: str):
+            result = self.acquire_knowledge_for_query(query)
+            self.ingest_knowledge(result)
             return result
 
         query_tool.__doc__ = f"""Query the knowledge graph for precise information for {self.ontology.description}

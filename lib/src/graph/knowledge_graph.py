@@ -24,9 +24,9 @@ class KnowledgeGraph:
         self.ontology = ontology
         self.graph_database = NetworkxGraphDatabase() if not use_neo4j else Neo4jGraphDatabase()
         logger.system(f"Graph database initialized")
-        self.get_tools = self.ontology.get_get_tools(self.graph_database.get_all_entities_by_label, 
+        self.get_tools = self.ontology.get_tools_get_entity_and_relationship(self.graph_database.get_all_entities_by_label, 
             self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
-        self.add_or_update_tools = self.ontology.get_add_or_update_tools(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
+        self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
         logger.system(f"Add/update tools returned")
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
         logger.system(f"Query agent initialized")
