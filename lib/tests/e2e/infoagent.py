@@ -26,8 +26,8 @@ def main():
 #    a1facts.ingest_knowledge(sources_content)
 
 #    a1facts.ingest_knowledge("Winnibago's revenue in FY 2024 was $100 million based on the SEC filings")
-    print(a1facts.query("get_Financial_Metrics_Company_reports(kwargs={'from_Company_name': 'Winnebago'})"))#what was Winnibago's revenue in FY 2024?"))
-    return
+#    print(a1facts.query("get_Financial_Metrics_Company_reports(kwargs={'from_Company_name': 'Winnebago'})"))#what was Winnibago's revenue in FY 2024?"))
+#    return
     agent = Agent(
         name="finance_info_agent",
         role="get financial information about the company",
