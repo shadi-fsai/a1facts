@@ -405,15 +405,18 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         else:
             return None
 
-    def close(self):
-
-        """print("All nodes in the graph:")
+    def print_graph(self):
+        print("All nodes in the graph:")
         for node, data in self.graph.nodes(data=True):
             print(f"  Node: {node}, Data: {data}")
         
         print("\nAll relationships in the graph:")
         for start, end, data in self.graph.edges(data=True):
-            print(f"  Edge: {start} -> {end}, Data: {data}")"""
+            print(f"  Edge: {start} -> {end}, Data: {data}")
+
+    def close(self):
+
+        #self.print_graph()
         self.save()
         self.graph.clear()
 
