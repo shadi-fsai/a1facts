@@ -144,7 +144,7 @@ class KnowledgeOntology:
         logger.system(f"Getting relationship add/update tools")
         tools = []
         for relationship_class in self.relationship_classes:
-            tools.append(relationship_class.get_add_or_update_tool(add_relationship_func))
+            tools.append(relationship_class.get_add_or_update_relationship_tool(add_relationship_func))
         logger.system(f"Relationship add/update tools returned")
         return tools
 
