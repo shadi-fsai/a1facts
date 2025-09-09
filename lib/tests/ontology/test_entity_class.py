@@ -24,7 +24,7 @@ def test_entity_class_no_properties(entity_class_no_properties):
     assert entity_class_no_properties.primary_key_prop is None
 
     # Test tool creation with no properties
-    assert entity_class_no_properties.get_add_or_update_tool(None) is None
+    assert entity_class_no_properties.get_tool_add_or_update_entity(None) is None
     
     schema = entity_class_no_properties._get_tool_parameters_schema()
     assert schema["properties"] == {}
@@ -72,7 +72,7 @@ def test_get_add_or_update_tool(sample_entity_class):
     def mock_add_or_update(entity_class_name, primary_key_name, properties):
         return f"Updated {entity_class_name} with {primary_key_name}={properties[primary_key_name]}"
 
-    tool = sample_entity_class.get_add_or_update_tool(mock_add_or_update)
+    tool = sample_entity_class.get_tool_add_or_update_entity(mock_add_or_update)
     assert tool.__name__ == "add_or_update_Company_information"
     assert "Primary key: name" in tool.__doc__
     
@@ -88,7 +88,7 @@ def test_get_all_entity_tool(sample_entity_class):
     def mock_get_all(entity_class_name):
         return [f"{entity_class_name}_1", f"{entity_class_name}_2"]
 
-    tool = sample_entity_class.get_get_all_entity_tool(mock_get_all)
+    tool = sample_entity_class.get_tool_get_all_entity(mock_get_all)
     assert tool.__name__ == "get_all_Company_entities"
     assert tool.__doc__ == "Get all Company entities."
     
@@ -103,29 +103,17 @@ def test_get_entity_properties_tool(sample_entity_class):
             return "pk_value was None"
         return {pk_name: pk_value, "ticker": "TC"}
 
-    tool = sample_entity_class.get_get_entity_properties_tool(mock_get_properties)
+    tool = sample_entity_class.get_tool_get_entity_properties(mock_get_properties)
     assert tool.__name__ == "get_Company_properties"
-    assert tool.__doc__ == "Get a Company properties."
+    
+    expected_doc = f"Get a {sample_entity_class.entity_class_name} properties. \n" + (f"Returns properties: {sample_entity_class.properties}" if sample_entity_class.properties else "") + "\n"
+    assert tool.__doc__ == expected_doc
 
     # The tool's defined parameter name in its schema (`__parameters__`)
     param_name_in_schema = f"{sample_entity_class.entity_class_name}_{sample_entity_class.primary_key_prop.property_name}"
-    
-    # The parameter name the tool's implementation actually looks for internally
-    param_name_in_logic = sample_entity_class.primary_key_prop.property_name
 
     assert param_name_in_schema in tool.__parameters__["properties"]
-    assert param_name_in_logic not in tool.__parameters__["properties"]
 
-    # Test 1: Calling the tool as an agent would, using the parameter from the schema.
-    # This exposes the inconsistency: the implementation looks for a different parameter name.
+    # Test calling the tool as an agent would, using the parameter from the schema.
     result_as_agent = tool(**{param_name_in_schema: "TestCorp"})
-    assert result_as_agent == "pk_value was None"
-
-    # Test 2: Calling the tool with the parameter name the implementation expects.
-    # This works but doesn't match the tool's public schema.
-    result_direct_logic = tool(**{param_name_in_logic: "TestCorp"})
-    assert result_direct_logic == {"name": "TestCorp", "ticker": "TC"}
-
-    # Test 3: Calling with the `kwargs` wrapper, which also works.
-    result_with_inner_kwargs = tool(kwargs={param_name_in_logic: 'TestCorp'})
-    assert result_with_inner_kwargs == {"name": "TestCorp", "ticker": "TC"}
+    assert result_as_agent == {"name": "TestCorp", "ticker": "TC"}

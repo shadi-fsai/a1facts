@@ -45,21 +45,21 @@ def test_tool_creation(ontology):
         pass
 
     # Test entity tool creation
-    add_update_tools = ontology.get_entity_add_or_update_tools(dummy_func)
+    add_update_tools = ontology.get_tools_add_or_update_entity(dummy_func)
     assert len(add_update_tools) == len(ontology.entity_classes)
 
-    get_prop_tools = ontology.get_entity_get_entity_properties_tools(dummy_func)
+    get_prop_tools = ontology.get_tools_get_entity_properties(dummy_func)
     assert len(get_prop_tools) == len(ontology.entity_classes)
 
-    get_all_tools = ontology.get_entity_get_all_entity_tool(dummy_func)
+    get_all_tools = ontology.get_tools_get_all_entity(dummy_func)
     assert len(get_all_tools) == len(ontology.entity_classes)
 
     # Test relationship tool creation
-    add_rel_tools = ontology.get_relationship_add_or_update_tools(dummy_func)
+    add_rel_tools = ontology.get_tools_add_or_update_relationship(dummy_func)
     assert len(add_rel_tools) == len(ontology.relationship_classes)
 
-    get_rel_prop_tools = ontology.get_relationship_get_relationship_properties_tools(dummy_func)
+    get_rel_prop_tools = ontology.get_tools_get_relationship_properties(dummy_func)
     assert len(get_rel_prop_tools) == len(ontology.relationship_classes)
     
-    get_rel_entities_tools = ontology.get_relationship_get_relationship_entities_tools(dummy_func)
+    get_rel_entities_tools = ontology.get_tools_get_relationship_entities(dummy_func)
     assert len(get_rel_entities_tools) == len(ontology.relationship_classes)

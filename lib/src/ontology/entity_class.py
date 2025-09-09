@@ -1,5 +1,5 @@
 from ontology.property import Property
-
+from utils.logger import logger
 
 class EntityClass:
     """Represents a class of entities (nodes) in the ontology."""
@@ -51,7 +51,9 @@ class EntityClass:
             return None
 
         def func(**kwargs):
+            logger.system(f"Adding or updating {self.entity_class_name} entity")
             properties = kwargs.get('kwargs', kwargs)
+            logger.system(f"Arguments for add_or_update_entity_func: {self.entity_class_name}, {primary_key_prop.property_name}, {properties}")
             return add_or_update_entity_func(self.entity_class_name, primary_key_prop.property_name, properties)
 
         func.__name__ = "add_or_update_" + self.entity_class_name + "_information"
@@ -96,6 +98,7 @@ class EntityClass:
             function: A tool function that can be used by an agent.
         """
         def func():
+            logger.system(f"Getting all {self.entity_class_name} entities")
             return get_all_entity_func(self.entity_class_name)
 
         func.__name__ = "get_all_"+self.entity_class_name+"_entities"
@@ -114,9 +117,11 @@ class EntityClass:
             function: A tool function that can be used by an agent.
         """
         def func(**kwargs):
+            logger.system(f"Getting {self.entity_class_name} properties")
             properties = kwargs.get('kwargs', kwargs)
-            param_name = f"{self.primary_key_prop.property_name}"
+            param_name = f"{self.entity_class_name}_{self.primary_key_prop.property_name}"
             primary_key_value = properties.get(param_name)
+            logger.system(f"Arguments for get_entity_properties_func: {self.entity_class_name}, {self.primary_key_prop.property_name}, {primary_key_value}")
             return get_entity_properties_func(self.entity_class_name, self.primary_key_prop.property_name, primary_key_value)
 
         func.__name__ = "get_"+self.entity_class_name+"_properties"

@@ -14,6 +14,7 @@ dependencies = [
     { name = "nest-asyncio" },
     { name = "networkx" },
     { name = "posthog" },
+    { name = "pytest" },
 ]
 
 [package.optional-dependencies]
@@ -31,6 +32,7 @@ requires-dist = [
     { name = "nest-asyncio", specifier = ">=1.6.0" },
     { name = "networkx", specifier = ">=3.5" },
     { name = "posthog", specifier = ">=6.7.1" },
+    { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
 ]
 

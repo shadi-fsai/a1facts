@@ -196,9 +196,9 @@ relationships:
     description: Links a Company to an event concerning it.
     properties: []
   reports:
-    domain: Corporate_Event
+    domain: Company
     range: Financial_Metric
-    description: Connects an event (like an earnings call) to the financial metrics disclosed.
+    description: Connects a Company to the financial metrics it has disclosed.
     properties: []
   is_led_by:
     domain: Company

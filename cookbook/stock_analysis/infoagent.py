@@ -2,11 +2,13 @@ import sys
 import os
 import time
 
+
 from colored import cprint
 from a1facts import KnowledgeBase
 from agno.agent import Agent
 from textwrap import dedent
 from utils.modelconfig import my_model
+
 
 def main():
     a1facts = KnowledgeBase("finance_info_agent", "company.yaml", "sources.yaml")

@@ -3,7 +3,7 @@ import os
 import time
 
 # Add the src directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__),  '..', '..', 'src'))
+#sys.path.insert(0, os.path.join(os.path.dirname(__file__),  '..', '..', 'src'))
 
 
 from colored import cprint
@@ -12,9 +12,22 @@ from agno.agent import Agent
 from textwrap import dedent
 from utils.modelconfig import my_model
 
+
+
 def main():
     a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml", use_neo4j=False)
     
+#    a1facts.ingest_knowledge("Winnibago's revenue in FY 2024 was $100 million based on the SEC filings")
+    # Read sources file and ingest the knowledge
+#    sources_file_path = "..\\..\\..\\fortusight\\fortusight\\Analysis_Output\\AAPL_analysis_output_\\memory.md"
+#    with open(sources_file_path, 'r', encoding='utf-8') as file:
+#        sources_content = file.read()
+    
+#    a1facts.ingest_knowledge(sources_content)
+
+#    a1facts.ingest_knowledge("Winnibago's revenue in FY 2024 was $100 million based on the SEC filings")
+    print(a1facts.query("get_Financial_Metrics_Company_reports(kwargs={'from_Company_name': 'Winnebago'})"))#what was Winnibago's revenue in FY 2024?"))
+    return
     agent = Agent(
         name="finance_info_agent",
         role="get financial information about the company",

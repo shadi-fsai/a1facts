@@ -17,13 +17,15 @@ class UpdateAgent:
                 The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]
                 Return the results in RDFS format.
-                When you are done, add every entity and relationship to the graph using the tools available to you 
+                When you are done, add every entity and relationship to the graph using the tools available to you.
+                First add the entities, then add the relationships.
+                Make sure to add every single one of them.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
             """),
             show_tool_calls=True,
             markdown=True,
-            debug_mode=False,
+            debug_mode=True,
             )
 
     def update(self, knowledge: str):
-        return self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and relationship to the graph using the tools available to you.\n\n " + knowledge)
+        return self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and every relationship to the graph using the tools available to you.\n \n " + knowledge)

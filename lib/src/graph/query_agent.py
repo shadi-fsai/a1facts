@@ -22,9 +22,9 @@ class QueryAgent:
                 """),
                 show_tool_calls=True,
                 markdown=True,
-                debug_mode=False,
+                debug_mode=True,
             )
 
     def query(self, query: str):
-        result = self.agent.run(query)
+        result = self.agent.run("Answer the following question, use as many tools as you need to get the information: {" + query + "}")
         return result.content

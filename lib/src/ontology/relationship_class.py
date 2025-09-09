@@ -1,6 +1,6 @@
 from ontology.entity_class import EntityClass
 from ontology.property import Property
-
+from utils.logger import logger
 
 class RelationshipClass:
     """Represents a class of relationships (edges) in the ontology."""
@@ -72,6 +72,7 @@ class RelationshipClass:
             function: A tool function that can be used by an agent.
         """
         def func(**kwargs):
+            logger.system(f"Adding or updating relationship for {self.relationship_name}")
             properties = kwargs.get('kwargs', kwargs)
             
             domain_param_name, range_param_name = self._get_param_names()
@@ -79,7 +80,7 @@ class RelationshipClass:
             range_primary_key_value = properties.get(range_param_name)
             props = properties.get("properties")
             self._validate_properties(props)
-            
+            logger.system(f"Arguments for add_or_update_relationship_func: {self.domain_entity_class}, {self.domain_primary_key_prop}, {domain_primary_key_value}, {self.range_entity_class}, {self.range_primary_key_prop}, {range_primary_key_value}, {self.relationship_name}, {props}, {self.symmetric}")
             return add_or_update_relationship_func(
                 self.domain_entity_class,
                 self.domain_primary_key_prop,
@@ -170,10 +171,12 @@ class RelationshipClass:
             function: A tool function that can be used by an agent.
         """
         def func(**kwargs):
+            logger.system(f"Getting relationship properties for {self.relationship_name}")
             properties = kwargs.get('kwargs', kwargs)
             domain_param_name, range_param_name = self._get_param_names()
             domain_primary_key_value = properties.get(domain_param_name)
             range_primary_key_value = properties.get(range_param_name)
+            logger.system(f"Arguments for get_relationship_properties_func: {self.domain_entity_class}, {self.domain_primary_key_prop}, {domain_primary_key_value}, {self.relationship_name}, {self.range_entity_class}, {self.range_primary_key_prop}, {range_primary_key_value}")
             return get_relationship_properties_func( self.domain_entity_class, self.domain_primary_key_prop, domain_primary_key_value, self.relationship_name,self.range_entity_class, self.range_primary_key_prop, range_primary_key_value)
 
         domain_param_name, range_param_name = self._get_param_names()
@@ -207,9 +210,11 @@ class RelationshipClass:
             function: A tool function that can be used by an agent.
         """
         def func(**kwargs):
+            logger.system(f"Getting relationship entities for {self.relationship_name}")
             properties = kwargs.get('kwargs', kwargs)
             domain_param_name, _ = self._get_param_names()
             domain_primary_key_value = properties.get(domain_param_name)
+            logger.system(f"Arguments for get_relationship_entities_func: {self.domain_entity_class}, {self.domain_primary_key_prop}, {domain_primary_key_value}, {self.relationship_name}, {self.range_entity_class}, {self.range_primary_key_prop}")
             return get_relationship_entities_func( self.domain_entity_class, self.domain_primary_key_prop, domain_primary_key_value, self.relationship_name, self.range_entity_class, self.range_primary_key_prop)
 
         func.__name__ = f"get_{self.range_entity_class}s_{self.domain_entity_class}_{self.relationship_name}"
