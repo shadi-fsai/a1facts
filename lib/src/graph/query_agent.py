@@ -22,7 +22,7 @@ class QueryAgent:
                 """),
                 show_tool_calls=True,
                 markdown=True,
-                debug_mode=True,
+                debug_mode=False,
             )
 
     def query(self, query: str):
