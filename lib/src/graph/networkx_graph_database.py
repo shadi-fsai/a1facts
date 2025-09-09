@@ -3,6 +3,7 @@ import networkx as nx
 import pickle
 from colored import cprint
 from utils.logger import logger
+from io import open
 
 
 class NetworkxGraphDatabase(BaseGraphDatabase):
