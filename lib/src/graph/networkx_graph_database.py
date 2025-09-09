@@ -129,8 +129,9 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
 
     def save(self):
         try:
+            logger.system(f"NWX: Saving graph to {self.graph_file}")
             with open(self.graph_file, "wb") as f:
                 pickle.dump(self.graph, f)
         except Exception as e:
-            logger.system(f"Error saving graph: {e}")
-            print(f"Error saving graph: {e}")
+            logger.system(f"Error saving graph to {self.graph_file}: {e}")
+            print(f"Error saving graph to {self.graph_file}: {e}")
