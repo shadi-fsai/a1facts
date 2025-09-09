@@ -98,7 +98,6 @@ class MCPKnowledgeSource(KnowledgeSource):
                 Query the knowledge source for the information requested by the user.
                 Today's date is {date.today().strftime('%Y-%m-%d')}.
             """),
-            show_tool_calls=True,
             markdown=True,
             debug_mode=False,
         )

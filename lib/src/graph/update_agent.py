@@ -22,7 +22,6 @@ class UpdateAgent:
                 Make sure to add every single one of them.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
             """),
-            show_tool_calls=True,
             markdown=True,
             debug_mode=False,
             )

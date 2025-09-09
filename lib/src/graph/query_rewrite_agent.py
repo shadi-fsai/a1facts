@@ -19,7 +19,6 @@ class QueryRewriteAgent:
             instructions=dedent("""
                 Rewrite the query to use known entities.
                 """),
-                show_tool_calls=True,
                 markdown=True,
                 debug_mode=False,
             )

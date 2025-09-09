@@ -12,7 +12,6 @@ class QueryAgent:
             instructions=dedent("""
                 Query the knowledge sources for the information requested by the user.
             """),
-            show_tool_calls=True,
             markdown=True,
             debug_mode=False,
         )

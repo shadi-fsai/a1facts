@@ -16,7 +16,6 @@ class OntologyRewriteAgent:
             instructions=dedent("""
                 Rewrite the query to use ontology.
                 """),
-                show_tool_calls=True,
                 markdown=True,
                 debug_mode=False,
             )

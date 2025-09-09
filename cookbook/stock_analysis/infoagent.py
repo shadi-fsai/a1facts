@@ -12,7 +12,7 @@ from utils.modelconfig import my_model
 
 def main():
     a1facts = KnowledgeBase("finance_info_agent", "company.yaml", "sources.yaml")
-
+    exit()
     agent = Agent(
         name="finance_info_agent",
         role="get financial information about the company",
@@ -20,7 +20,6 @@ def main():
         tools=a1facts.get_tools(),
         instructions=dedent("""get financial information about the company, always start with query tool, if you don't get a satisfactory answer use the acquire tool to get new knowledge.
         never use your internal knowledge to answer the question, only use the tools to get information from the knowledge graph and the knowledge sources. - never make up information"""),
-        show_tool_calls=True,
         markdown=True,
         debug_mode=False,
     )

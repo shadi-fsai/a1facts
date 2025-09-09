@@ -35,7 +35,6 @@ class KnowledgeAcquirer:
             model=my_model,
             tools=self.tools,
             instructions=self.ontology.rewrite_agent.rewrite_query(self.get_template()),
-            show_tool_calls=True,
             markdown=True,
             debug_mode=False,
         )
