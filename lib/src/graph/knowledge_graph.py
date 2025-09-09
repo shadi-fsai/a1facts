@@ -79,6 +79,8 @@ class KnowledgeGraph:
         logger.system(f"Rewritten knowledge: {rewrite_knowledge}")
         result = self.update_agent.update(rewrite_knowledge)
         logger.system(f"Result: {result.content}")
+        self.graph_database.save()
+        logger.system(f"Graph database saved")
         return result.content
 
     def close(self):

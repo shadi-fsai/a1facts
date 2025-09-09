@@ -1,6 +1,6 @@
 [project]
 name = "a1facts"
-version = "0.1.15"
+version = "0.1.18"
 license = {file = "LICENSE"}
 authors = [
   {name = "Shadi Copty", email = "shadi@a1facts.ai"}

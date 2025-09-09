@@ -50,7 +50,9 @@ class KnowledgeBase:
         cprint(f"Acquiring knowledge", "green")
         truncated_query = query[:70] + "..." if len(query) > 70 else query
         cprint(f"Knowledge seeked: {truncated_query}", "yellow")
-        return self.knowledge_acquirer.acquire(query)
+        newknowledge = self.knowledge_acquirer.acquire(query)
+        self.ingest_knowledge(newknowledge)
+        return newknowledge
     
     def ingest_knowledge(self, knowledge: str):
         """

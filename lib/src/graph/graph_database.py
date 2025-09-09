@@ -23,6 +23,9 @@ class BaseGraphDatabase:
     def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
         pass
 
+    def save(self):
+        pass
+
     def close(self):
         pass
 
