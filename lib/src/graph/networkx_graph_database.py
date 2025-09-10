@@ -122,11 +122,9 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
             print(f"  Edge: {start} -> {end}, Data: {data}")
 
     def close(self):
-
+        logger.system(f"NWX: Closing graph")
+        pass
         #self.print_graph()
-        self.save()
-        self.graph.clear()
-        self.nodes_by_label.clear()
 
     def save(self):
         try:
