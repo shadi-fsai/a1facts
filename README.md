@@ -36,9 +36,20 @@ By using a1facts, you can build an AI agent that is not only intelligent but als
 
 a1facts is a work in progress, we'd love to hear from you on how you're using it and what you need it to do next.
 
-## Getting Started
+## Quickly trying a1facts
 
-Follow these steps to get the a1facts Knowledge Graph running on your local machine.
+We prepared a pre-loaded knowledge base for fundamental stock analysis for Meta, Google, Amazon, Microsoft and Apple. This example only requires an open_ai key, and does not showcase knowledge acquisition, to try it out:
+
+```bash
+git clone https://github.com/shadi-fsai/a1facts.git
+cd a1facts/cookbook/stock_analysis
+uv sync
+uv run chat.py
+```
+
+## Getting Started 
+
+Follow these steps to get the a1facts Knowledge Graph running on your local machine for building a new ontology, acquiting knowledge and building agents that query the knowledge base.
 
 ### Prerequisites
 
@@ -88,10 +99,10 @@ You'll need to provide credentials to connect to your Neo4j database and other s
 
 The `cookbook/` directory contains practical examples of how to use a1facts.
 
-The `cookbook/example/` directory shows how to build a financial analyst agent that can answer questions about companies. To run this example, navigate to the directory and run:
+The `cookbook/stock_analysis/` directory shows how to build a financial analyst agent that can answer questions about companies. To run this example, navigate to the directory and run:
 
 ```bash
-cd cookbook/example
+cd cookbook/stock_analysis
 uv add a1facts
 uv run infoagent.py
 ```
