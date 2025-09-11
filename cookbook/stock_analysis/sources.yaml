@@ -3,6 +3,6 @@ knowledge_sources:
     name: yfinance
     type: function
     description: yfinance provides financial data for companies.
-    functions_file: yfinance_functions.py
+    functions_package: yfinance_functions
     override_reliability: A
     override_credibility: "1"

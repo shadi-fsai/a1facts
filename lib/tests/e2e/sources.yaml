@@ -2,7 +2,7 @@ knowledge_sources:
   FMP:
     name: financial_modeling_prop
     type: function
-    functions_file: fmp_functions.py
+    functions_package: fmp_functions
     description: Financial Modeling Prep provides financial data for companies.
     all_tools: false
     run_command: "uv"

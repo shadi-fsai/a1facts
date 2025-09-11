@@ -7,7 +7,7 @@ class FunctionKnowledgeSource(KnowledgeSource):
     def __init__(self, source_config: dict):
         self.name = source_config['name']
         self.description = source_config['description']
-        self.functions_file = source_config['functions_file']
+        self.functions_package = source_config['functions_package']
         self.override_reliability = source_config['override_reliability']
         self.override_credibility = source_config['override_credibility']
         self.tools = []
@@ -21,7 +21,7 @@ class FunctionKnowledgeSource(KnowledgeSource):
             raise ValueError("Your knowledge source config is missing the 'name' field")
         if 'description' not in source_config:
             raise ValueError("Your knowledge source config is missing the 'description' field")
-        if 'functions_file' not in source_config:
+        if 'functions_package' not in source_config:
             raise ValueError("Your knowledge source config is missing the 'functions_file' field")
         if 'override_reliability' not in source_config:
             raise ValueError("Your knowledge source config is missing the 'override_reliability' field")
@@ -29,7 +29,7 @@ class FunctionKnowledgeSource(KnowledgeSource):
             raise ValueError("Your knowledge source config is missing the 'override_credibility' field")
 
     def query_tool(self):
-        functions_module = importlib.import_module(f"{self.functions_file[:-3]}")
+        functions_module = importlib.import_module(f"{self.functions_package}")
         for func_name in dir(functions_module):
             logger.system(f"Checking function {func_name}")
             if func_name.startswith('__') and func_name.endswith('__'):
