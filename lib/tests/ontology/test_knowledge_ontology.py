@@ -1,7 +1,7 @@
 import pytest
 import os
 
-from ontology.knowledge_ontology import KnowledgeOntology
+from a1facts.ontology.knowledge_ontology import KnowledgeOntology
 
 @pytest.fixture
 def ontology():

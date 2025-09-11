@@ -1,5 +1,5 @@
-from ontology.property import Property
-from utils.logger import logger
+from a1facts.ontology.property import Property
+from a1facts.utils.logger import logger
 
 class EntityClass:
     """Represents a class of entities (nodes) in the ontology."""

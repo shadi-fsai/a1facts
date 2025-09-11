@@ -1,8 +1,8 @@
-from graph.graph_database import BaseGraphDatabase
+from a1facts.graph.graph_database import BaseGraphDatabase
 import networkx as nx
 import pickle
 from colored import cprint
-from utils.logger import logger
+from a1facts.utils.logger import logger
 from io import open
 
 

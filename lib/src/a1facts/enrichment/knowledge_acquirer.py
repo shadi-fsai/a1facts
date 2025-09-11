@@ -1,16 +1,16 @@
-from graph.knowledge_graph import KnowledgeGraph
-from ontology.knowledge_ontology import KnowledgeOntology
-from enrichment.knowledge_source import KnowledgeSource
-from enrichment.function_knowledge_source.knowledge_source import FunctionKnowledgeSource
-from enrichment.mcp_knowledge_source.knowledge_source import MCPKnowledgeSource
-from utils.modelconfig import my_model
+from a1facts.graph.knowledge_graph import KnowledgeGraph
+from a1facts.ontology.knowledge_ontology import KnowledgeOntology
+from a1facts.enrichment.knowledge_source import KnowledgeSource
+from a1facts.enrichment.function_knowledge_source.knowledge_source import FunctionKnowledgeSource
+from a1facts.enrichment.mcp_knowledge_source.knowledge_source import MCPKnowledgeSource
+from a1facts.utils.modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
 from agno.tools.exa import ExaTools
 from datetime import datetime
 import yaml
 from colored import cprint
-from utils.logger import logger
+from a1facts.utils.logger import logger
 
 class KnowledgeAcquirer:
     def __init__(self, graph: KnowledgeGraph, ontology: KnowledgeOntology, knowledge_sources_config_file: str, disable_exa: bool = False):

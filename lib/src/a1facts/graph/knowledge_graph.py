@@ -1,12 +1,12 @@
-from graph.graph_database import BaseGraphDatabase
-from graph.neo4j_graph_database import Neo4jGraphDatabase
-from graph.networkx_graph_database import NetworkxGraphDatabase
-from ontology.knowledge_ontology import KnowledgeOntology
-from graph.query_agent import QueryAgent
-from graph.update_agent import UpdateAgent
-from graph.query_rewrite_agent import QueryRewriteAgent
+from a1facts.graph.graph_database import BaseGraphDatabase
+from a1facts.graph.neo4j_graph_database import Neo4jGraphDatabase
+from a1facts.graph.networkx_graph_database import NetworkxGraphDatabase
+from a1facts.ontology.knowledge_ontology import KnowledgeOntology
+from a1facts.graph.query_agent import QueryAgent
+from a1facts.graph.update_agent import UpdateAgent
+from a1facts.graph.query_rewrite_agent import QueryRewriteAgent
 from colored import cprint
-from utils.logger import logger
+from a1facts.utils.logger import logger
 
 class KnowledgeGraph:
     """

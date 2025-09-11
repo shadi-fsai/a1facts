@@ -1,6 +1,6 @@
-from ontology.entity_class import EntityClass
-from ontology.property import Property
-from utils.logger import logger
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
+from a1facts.utils.logger import logger
 
 class RelationshipClass:
     """Represents a class of relationships (edges) in the ontology."""

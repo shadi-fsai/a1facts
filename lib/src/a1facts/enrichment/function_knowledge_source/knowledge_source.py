@@ -1,7 +1,7 @@
 import importlib
-from enrichment.function_knowledge_source.query_agent import QueryAgent
-from enrichment.knowledge_source import KnowledgeSource
-from utils.logger import logger
+from a1facts.enrichment.function_knowledge_source.query_agent import QueryAgent
+from a1facts.enrichment.knowledge_source import KnowledgeSource
+from a1facts.utils.logger import logger
 
 class FunctionKnowledgeSource(KnowledgeSource):
     def __init__(self, source_config: dict):

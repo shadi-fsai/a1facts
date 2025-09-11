@@ -2,7 +2,7 @@ import pytest
 import os
 import pickle
 import networkx as nx
-from graph.networkx_graph_database import NetworkxGraphDatabase
+from a1facts.graph.networkx_graph_database import NetworkxGraphDatabase
 
 @pytest.fixture
 def db_path(tmp_path):

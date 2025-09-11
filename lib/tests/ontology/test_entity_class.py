@@ -1,6 +1,6 @@
 import pytest
-from ontology.entity_class import EntityClass
-from ontology.property import Property
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
 
 @pytest.fixture
 def sample_entity_class():

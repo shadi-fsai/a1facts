@@ -1,4 +1,4 @@
-from utils.modelconfig import my_query_model
+from a1facts.utils.modelconfig import my_query_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime

@@ -1,7 +1,7 @@
 import pytest
 import os
 
-from ontology.property import Property
+from a1facts.ontology.property import Property
 
 def test_property_initialization():
     """Test the initialization of a Property object."""

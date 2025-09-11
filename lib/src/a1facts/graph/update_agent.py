@@ -1,5 +1,5 @@
-from ontology.knowledge_ontology import KnowledgeOntology
-from utils.modelconfig import my_model
+from a1facts.ontology.knowledge_ontology import KnowledgeOntology
+from a1facts.utils.modelconfig import my_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime

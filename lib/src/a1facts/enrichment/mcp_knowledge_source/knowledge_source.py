@@ -1,12 +1,12 @@
 import asyncio
 import inspect
 import sys
-from enrichment.knowledge_source import KnowledgeSource
+from a1facts.enrichment.knowledge_source import KnowledgeSource
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 from agno.agent import Agent
 from textwrap import dedent
-from utils.modelconfig import my_model
+from a1facts.utils.modelconfig import my_model
 from datetime import date
 from threading import Thread
 import atexit

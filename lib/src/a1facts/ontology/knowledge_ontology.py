@@ -4,12 +4,12 @@ import os
 from agno.tools.function import Function
 
 from colored import cprint
-from ontology.property import Property
-from ontology.entity_class import EntityClass
-from ontology.relationship_class import RelationshipClass
-from ontology.ontology_rewrite_agent import OntologyRewriteAgent
-from utils.telemetry import nonblocking_send_telemetry_ping
-from utils.logger import logger
+from a1facts.ontology.property import Property
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.relationship_class import RelationshipClass
+from a1facts.ontology.ontology_rewrite_agent import OntologyRewriteAgent
+from a1facts.utils.telemetry import nonblocking_send_telemetry_ping
+from a1facts.utils.logger import logger
 
 class KnowledgeOntology:
     """

@@ -1,5 +1,5 @@
 import pytest
-from graph.neo4j_graph_database import Neo4jGraphDatabase
+from a1facts.graph.neo4j_graph_database import Neo4jGraphDatabase
 from dotenv import load_dotenv
 
 load_dotenv()

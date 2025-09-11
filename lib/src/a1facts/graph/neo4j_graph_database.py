@@ -1,6 +1,6 @@
-from graph.graph_database import BaseGraphDatabase
+from a1facts.graph.graph_database import BaseGraphDatabase
 from neo4j import GraphDatabase
-from utils.logger import logger
+from a1facts.utils.logger import logger
 from dotenv import load_dotenv
 
 import os

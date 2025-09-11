@@ -1,6 +1,6 @@
 from agno.agent import Agent
 from textwrap import dedent
-from utils.modelconfig import my_model
+from a1facts.utils.modelconfig import my_model
 
 class QueryAgent:
     def __init__(self, tools: list):

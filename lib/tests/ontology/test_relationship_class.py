@@ -1,7 +1,7 @@
 import pytest
-from ontology.relationship_class import RelationshipClass
-from ontology.entity_class import EntityClass
-from ontology.property import Property
+from a1facts.ontology.relationship_class import RelationshipClass
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
 
 @pytest.fixture
 def company_entity():

@@ -1,8 +1,8 @@
-from graph.knowledge_graph import KnowledgeGraph
-from ontology.knowledge_ontology import KnowledgeOntology
-from enrichment.knowledge_acquirer import KnowledgeAcquirer
+from a1facts.graph.knowledge_graph import KnowledgeGraph
+from a1facts.ontology.knowledge_ontology import KnowledgeOntology
+from a1facts.enrichment.knowledge_acquirer import KnowledgeAcquirer
 from colored import cprint
-from utils.logger import logger
+from a1facts.utils.logger import logger
 
 
 class KnowledgeBase:
