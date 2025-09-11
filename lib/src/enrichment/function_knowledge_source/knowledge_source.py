@@ -1,6 +1,7 @@
 import importlib
 from enrichment.function_knowledge_source.query_agent import QueryAgent
 from enrichment.knowledge_source import KnowledgeSource
+from utils.logger import logger
 
 class FunctionKnowledgeSource(KnowledgeSource):
     def __init__(self, source_config: dict):
@@ -11,6 +12,7 @@ class FunctionKnowledgeSource(KnowledgeSource):
         self.override_credibility = source_config['override_credibility']
         self.tools = []
         self.query_agent = None
+        logger.system(f"Initializing FunctionKnowledgeSource for {self.name}")
         self._validate_source_config(source_config)
 
 
@@ -29,15 +31,21 @@ class FunctionKnowledgeSource(KnowledgeSource):
     def query_tool(self):
         functions_module = importlib.import_module(f"{self.functions_file[:-3]}")
         for func_name in dir(functions_module):
+            logger.system(f"Checking function {func_name}")
+            if func_name.startswith('__') and func_name.endswith('__'):
+                continue
+            if hasattr(getattr(functions_module, func_name), '__class__') and func_name[0].isupper():
+                continue
             if func_name == "load_dotenv":
                 continue
             if not func_name.startswith('_'):                
                 func = getattr(functions_module, func_name)
                 if callable(func):
+                    logger.system(f"Adding function {func_name} to tools")
                     self.tools.append(func)
-
+        logger.system(f"Tools for {self.name}: {self.tools}")
         self.query_agent = QueryAgent(self.tools)
-
+        logger.system(f"Query agent for {self.name} initialized")
         def query_handler(query_text):
             return self.query_agent.query(query_text)
 
