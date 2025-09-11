@@ -80,7 +80,6 @@ class KnowledgeBase:
 
         def acquire_tool(query: str):
             result = self.acquire_knowledge_for_query(query)
-            self.ingest_knowledge(result)
             return result
 
         query_tool.__doc__ = f"""Query the knowledge graph for precise information for {self.ontology.description}

@@ -123,7 +123,8 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
 
     def close(self):
         logger.system(f"NWX: Closing graph")
-        pass
+        self.graph = nx.DiGraph()
+        self.nodes_by_label = {}
         #self.print_graph()
 
     def save(self):
