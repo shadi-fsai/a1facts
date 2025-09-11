@@ -3,10 +3,10 @@ import os
 import time
 
 from colored import cprint
-from a1facts import KnowledgeBase
+from a1facts.knowledge_base import KnowledgeBase
 from agno.agent import Agent
 from textwrap import dedent
-from utils.modelconfig import my_model
+from a1facts.utils.modelconfig import my_model
 
 def main():
     a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml", use_neo4j=False)
