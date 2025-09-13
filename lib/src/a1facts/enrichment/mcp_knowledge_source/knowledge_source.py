@@ -6,7 +6,7 @@ from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
 from agno.agent import Agent
 from textwrap import dedent
-from a1facts.utils.modelconfig import my_model
+from a1facts.utils.modelconfig import my_high_precision_model
 from datetime import date
 from threading import Thread
 import atexit
@@ -92,7 +92,7 @@ class MCPKnowledgeSource(KnowledgeSource):
         return Agent(
             name=f"{self.name} Query Agent",
             role=f"Query the {self.name} knowledge source.",
-            model=my_model,
+            model=my_high_precision_model,
             tools=self.local_tools,
             instructions=dedent(f"""
                 Query the knowledge source for the information requested by the user.

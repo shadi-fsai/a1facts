@@ -1,5 +1,5 @@
 from a1facts.ontology.knowledge_ontology import KnowledgeOntology
-from a1facts.utils.modelconfig import my_query_model
+from a1facts.utils.modelconfig import my_query_model, my_fast_tool_calling_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
@@ -11,19 +11,26 @@ class QueryAgent:
         self.agent = Agent(
             name="Knowledge Graph Agent",
             role="Interact with the knowledge graph",
-            model=my_query_model,
+            model=my_fast_tool_calling_model,
             tools=mytools,
             instructions=dedent(f"""
                 Get information from the knowledge base.
                 Use the tools to get information from the graph.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
-                Only use information from the knowledge graph to answer the question. If you don't know the answer, say so.
-                Every time you return a response add a section at the end called "Wish I could find" and state what knowledge you didn't find and wish you could find
+
+                Only use information from the knowledge graph to answer the question, do not use your own knowledge, do not make up answers. 
+                If you don't know the answer, say "A verifiable answer is not available" - don't add any other text.
+
+                Provide all sources for your answer, the sources should be extracted from the properties of the entities in the knowledge graph; you should get them when you get the information from the graph.          
                 """),
                 markdown=True,
                 debug_mode=False,
             )
 
     def query(self, query: str):
-        result = self.agent.run("Answer the following question, use as many tools as you need to get the information: {" + query + "}")
+        # Try to answer with the knowledge graph first
+        result = self.agent.run(dedent(f"""Answer the question in %QUERY%, 
+        Use as many tools as you need to get the information necessary to answer the query.
+        %QUERY%: {query}"""))     
+
         return result.content

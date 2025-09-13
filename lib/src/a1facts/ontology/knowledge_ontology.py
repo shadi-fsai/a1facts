@@ -37,7 +37,7 @@ class KnowledgeOntology:
         nonblocking_send_telemetry_ping()
         logger.user(f"Ontology loaded: {self.ontology_file}")
         logger.user(f"Ontology parsed: {str(self)}")
-        cprint(f"Ontology loaded: {self.ontology_file}", "green")
+        
 
     def find_entity_class(self, name):
         """
@@ -76,7 +76,7 @@ class KnowledgeOntology:
                 relationship_class = RelationshipClass(name, domain, range, details.get('description', 'N/A'), symmetric)
                 relationship_class.properties = []                
                 for prop in details.get('properties', []):
-                    relationship_class.add_property(Property(prop.get('property_name', 'N/A'), prop.get('type', 'N/A'), prop.get('description', 'N/A'), prop.get('primary_key', False)))
+                    relationship_class.add_property(Property(prop.get('name', 'N/A'), prop.get('type', 'N/A'), prop.get('description', 'N/A'), prop.get('primary_key', False)))
                 self.relationship_classes.append(relationship_class)
         logger.system(f"Ontology loaded from {self.ontology_file}")
 

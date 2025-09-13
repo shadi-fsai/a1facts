@@ -1,9 +1,10 @@
 from a1facts.ontology.knowledge_ontology import KnowledgeOntology
-from a1facts.utils.modelconfig import my_query_model
+from a1facts.utils.modelconfig import my_fast_language_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
 from colored import cprint
+from a1facts.utils.logger import logger
 
 
 
@@ -14,7 +15,7 @@ class QueryRewriteAgent:
         self.agent = Agent(
             name="Query rewrite agent",
             role="Rewrite the query to use known entities",
-            model=my_query_model,
+            model=my_fast_language_model,
             tools=mytools,
             instructions=dedent("""
                 Rewrite the query to use known entities.
@@ -24,8 +25,8 @@ class QueryRewriteAgent:
             )
     
     def rewrite_query(self, query: str, class_entity_pairs: dict):
-        #print(class_entity_pairs)
-        #cprint(query, 'yellow')
+
+        logger.system(f"Rewriting query: {query}")
         prompt = dedent(f"""
             Rewrite the query to use known entities from the graph, for entities not in the graph keep the entity names as is.
             Here are the known entity pairs: {class_entity_pairs}
@@ -35,5 +36,5 @@ class QueryRewriteAgent:
         )
 
         result = self.agent.run(prompt)
-        #cprint(result.content, 'green')
+        logger.system(f"Rewritten query: {result.content}")
         return result.content

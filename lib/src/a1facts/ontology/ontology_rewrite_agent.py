@@ -1,4 +1,4 @@
-from a1facts.utils.modelconfig import my_query_model
+from a1facts.utils.modelconfig import my_fast_language_model
 from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
@@ -11,7 +11,7 @@ class OntologyRewriteAgent:
         self.agent = Agent(
             name="Ontology rewrite agent",
             role="Rewrite the query to use ontology",
-            model=my_query_model,
+            model=my_fast_language_model,
             tools=mytools,
             instructions=dedent("""
                 Rewrite the query to use ontology.

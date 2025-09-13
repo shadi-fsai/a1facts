@@ -4,7 +4,7 @@ import os
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),  '..', '..', 'src'))
 
-from graph.networkx_graph_database import NetworkxGraphDatabase
+from a1facts.graph.networkx_graph_database import NetworkxGraphDatabase
 
 def main():
     """

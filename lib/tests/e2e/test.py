@@ -12,7 +12,7 @@ if sys.platform == "win32":
 
 from agno.agent import Agent
 from textwrap import dedent
-from utils.modelconfig import my_model
+from utils.modelconfig import my_high_precision_model
 
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
@@ -88,7 +88,7 @@ class QueryAgent:
         self.agent = Agent(
             name="Query Agent",
             role="Query the knowledge sources",
-            model=my_model,
+            model=my_high_precision_model,
             tools=tools,
             instructions=dedent(f"""
                 Query the knowledge sources for the information requested by the user.

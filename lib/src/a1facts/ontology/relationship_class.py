@@ -15,6 +15,7 @@ class RelationshipClass:
             description (str): A description of the relationship class.
             symmetric (bool): True if the relationship is symmetric.
         """
+
         self.relationship_name = name
         self.domain_entity_class = domain.entity_class_name
         self.domain_primary_key_prop = domain.primary_key_prop.property_name

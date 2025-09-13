@@ -11,3 +11,5 @@ wheels/
 .env
 a1facts.log
 /lib/mine
+acquirer_instructions.pickle
+lib/networkx_graph.pickle

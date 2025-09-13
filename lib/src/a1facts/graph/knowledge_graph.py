@@ -62,6 +62,7 @@ class KnowledgeGraph:
         """
         logger.system(f"Querying knowledge graph with query: {query}")
         rewritten_query = self._rewrite_query(query)
+        logger.system(f"Rewritten query: {rewritten_query}")
         return self.query_agent.query(rewritten_query)
 
     def update_knowledge(self, knowledge: str):

@@ -16,9 +16,42 @@ entity_classes:
       - name: company_type
         type: str
         description: The type of company (e.g., Public Company, Private Company).
-      - name: source
+      - name: industry_code
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Standard industry classification code (e.g., GICS, NAICS).
+      - name: business_model
+        type: str
+        description: High-level description of how the company currently generates revenue.
+      - name: lifecycle_phase
+        type: str
+        description: The current lifecycle stage of the company (e.g., Startup, Growth, Maturity, Decline).
+      - name: insider_ownership_pct
+        type: float
+        description: Percentage of shares outstanding owned by insiders and management.
+      - name: board_independence_percentage
+        type: float
+        description: Percentage of board members that are classified as independent.
+      - name: effective_tax_rate
+        type: float
+        description: The company's most recently reported effective tax rate (percentage).
+      - name: succession_plan_status
+        type: str
+        description: Status of the company's leadership succession planning (e.g., Clear, In Development).
+      - name: succession_plan_description
+        type: str
+        description: A brief description outlining the company's disclosed succession plan.
+      - name: employee_review_rating
+        type: float
+        description: Aggregated average employee review rating (1'5 scale).
+      - name: labor_relations_status
+        type: str
+        description: Narrative of the company's labor relations, including union presence.
+      - name: unionization_rate
+        type: float
+        description: Percentage of the workforce represented by labor unions. (Optional)
+      - name: sources
+        type: str
+        description: The sources of the information (e.g., a URL to a press release).
 
   Product_Service:
     description: An offering (product or service) commercialized by a Company.
@@ -30,9 +63,29 @@ entity_classes:
       - name: business_segment
         type: str
         description: The business segment a product or service belongs to.
-      - name: source
+      - name: sources
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: The sources of the information (e.g., a URL to a press release).
+
+  Customer:
+    description: An organization or individual that purchases products or services from a Company.
+    properties:
+      - name: name
+        type: str
+        primary_key: true
+        description: A str representing the name of a customer.
+      - name: customer_type
+        type: str
+        description: The type of customer (e.g., Enterprise, SMB, Individual).
+      - name: total_budget_value
+        type: float
+        description: The total budget allocated by the customer for the fiscal period.
+      - name: fiscal_period
+        type: str
+        description: The fiscal period the total budget applies to (e.g., FY2024).
+      - name: sources
+        type: str
+        description: The sources of the information (e.g., a URL to a press release).
 
   Market:
     description: The industry or economic sector where companies compete.
@@ -44,26 +97,86 @@ entity_classes:
       - name: projected_growth_rate_CAGR
         type: float
         description: The projected Compound Annual Growth Rate for a market.
-      - name: source
+      - name: historical_growth_rate_CAGR
+        type: float
+        description: Historical Compound Annual Growth Rate of the market.
+      - name: current_market_size
+        type: float
+        description: Latest measured size of the market.
+      - name: market_size_currency
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Currency unit of current_market_size (e.g., USD).
+      - name: projected_market_size_10y
+        type: float
+        description: Forecasted total market size ten years from the current year.
+      - name: projection_year
+        type: int
+        description: Calendar year associated with projected_market_size_10y.
+      - name: barriers_to_entry
+        type: str
+        description: Key factors that limit new competitors from entering this market.
+      - name: rivalry_intensity
+        type: str
+        description: Qualitative assessment of competitive rivalry (e.g., Low, Moderate, High).
+      - name: sources
+        type: str
+        description: The sources of the information (e.g., a URL to a press release).
 
   Financial_Metric:
     description: A quantitative data point on financial performance, valuation, or efficiency.
     properties:
-      - name: metric_name
+      - name: metric_id
         type: str
         primary_key: true
-        description: The name of the financial metric (e.g., IBM Q42024 Revenue, UPS FY2023 P/E Ratio).
+        description: Unique identifier for each metric observation (e.g., IBM_P/E_2024-04-30).
+      - name: metric_name
+        type: str
+        description: Descriptive name of the financial metric.
       - name: metric_value
         type: float
         description: The numerical value of the financial metric.
+      - name: metric_type
+        type: str
+        description: Standardized label of the metric (e.g., Revenue, P/E Ratio, ROIC).
+      - name: metric_category
+        type: str
+        description: High-level category (e.g., Valuation Multiple, Profitability, Dividend).
+      - name: currency
+        type: str
+        description: Currency in which the metric is reported (e.g., USD).
+      - name: metric_unit
+        type: str
+        description: Unit of measure for the metric value (e.g., USD, %, Ratio).
       - name: fiscal_period
         type: str
         description: The fiscal period the metric applies to (e.g., Q2 2025).
-      - name: source
+      - name: observation_date
+        type: date
+        description: The calendar date on which the metric was observed.
+      - name: period_type
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Specifies whether the metric is Annual, Quarterly, or TTM.
+      - name: is_non_recurring
+        type: bool
+        description: Indicates whether the metric represents a non-recurring item.
+      - name: item_category
+        type: str
+        description: Category of the non-recurring item (e.g., Restructuring Charge).
+      - name: eps_impact
+        type: float
+        description: Per-share impact of the non-recurring item on EPS.
+      - name: is_red_flag
+        type: bool
+        description: True if the metric is considered a red flag.
+      - name: red_flag_reason
+        type: str
+        description: Explanation for the red flag.
+      - name: impact_on_health
+        type: float
+        description: Numerical estimate of the red flag's impact on financial health.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Corporate_Event:
     description: A significant occurrence or announcement involving a Company.
@@ -71,16 +184,31 @@ entity_classes:
       - name: event_type
         type: str
         primary_key: true
-        description: The type of event (e.g., IBM Acquisition of Red Hat, UPS Divestiture of Consumables, META Q42024 Earnings Report).
+        description: The type of event (e.g., IBM Acquisition of Red Hat).
       - name: event_date
         type: date
         description: The date of a corporate event.
-      - name: reason
+      - name: event_category
         type: str
-        description: The reason for a corporate event (e.g., 'personal reasons', 'retirement').
-      - name: source
+        description: Standardized classification (e.g., Acquisition, Earnings, Share Repurchase).
+      - name: capital_action_type
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Categorizes the event as Share Buyback, Share Issuance, Debt Issuance, etc.
+      - name: transaction_value
+        type: float
+        description: Monetary value associated with the capital action.
+      - name: is_turning_point
+        type: bool
+        description: Flag indicating whether the event is a major turning point.
+      - name: is_material
+        type: bool
+        description: Indicates whether the event is material to the company.
+      - name: event_description
+        type: str
+        description: Narrative explaining the event's context and significance.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Leader:
     description: An individual in a leadership or governance role.
@@ -89,9 +217,47 @@ entity_classes:
         type: str
         primary_key: true
         description: A str representing the name of a leader.
-      - name: source
+      - name: net_worth
+        type: float
+        description: Estimated total net worth of the Leader in USD.
+      - name: track_record
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Summary of the leader's prior performance and achievements.
+      - name: sources
+        type: str
+        description: The sources of the information.
+
+  Leadership_Role:
+    description: An association class representing a Leader holding a position at a Company.
+    properties:
+      - name: role_id
+        type: str
+        primary_key: true
+        description: Unique identifier for each leadership role instance.
+      - name: leadership_role_title
+        type: str
+        description: The title of a leadership role (e.g., CEO, CFO).
+      - name: role_category
+        type: str
+        description: Classification of the role (e.g., Board Director, Executive Officer).
+      - name: is_independent
+        type: bool
+        description: Indicates whether a director is considered independent.
+      - name: is_founder
+        type: bool
+        description: Indicates whether the leader is a founder of the Company.
+      - name: start_date
+        type: date
+        description: The date a leadership role became effective.
+      - name: end_date
+        type: date
+        description: The date a leadership role concluded (if applicable).
+      - name: track_record_summary
+        type: str
+        description: Concise narrative of the leader's performance during tenure.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Competitive_Advantage:
     description: A factor providing a long-term advantage over competitors (Moat).
@@ -99,16 +265,25 @@ entity_classes:
       - name: competitive_advantage_name
         type: str
         primary_key: true
-        description: The name of a competitive advantage (e.g., 'APPLE Network Effects', 'UPS Supply Chain Efficiency').
+        description: The name of a competitive advantage.
       - name: advantage_type
         type: str
-        description: The type of competitive advantage (e.g., Network Effects, Supply Chain Efficiency).
+        description: The type of competitive advantage (e.g., Network Effects).
       - name: advantage_description
         type: str
-        description: A description of the competitive advantage (e.g., 'Provides a competitive edge by leveraging its network to create a barrier to entry').
-      - name: source
+        description: Description of the competitive advantage.
+      - name: current_status
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Present state of the advantage (e.g., Intact, Eroding).
+      - name: strength_rating
+        type: str
+        description: Qualitative or quantitative assessment of moat strength.
+      - name: last_verified_date
+        type: date
+        description: Most recent date the advantage was validated.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Risk_Factor:
     description: A potential threat to a Company's performance or valuation.
@@ -116,14 +291,23 @@ entity_classes:
       - name: risk_factor_name
         type: str
         primary_key: true
-        description: The name of a risk factor (e.g., 'APPLE Risk Factor', 'UPS Risk Factor').
+        description: The name of a risk factor.
       - name: risk_type
         type: str
         primary_key: true
         description: The category of risk (e.g., Operational, Legal, Macroeconomic).
-      - name: source
+      - name: risk_description
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Detailed explanation of the risk.
+      - name: status
+        type: str
+        description: Current status of the risk (e.g., Ongoing, Resolved).
+      - name: estimated_exposure_amount
+        type: float
+        description: Estimated financial exposure in USD.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Capital_Allocation_Policy:
     description: A Company's stated strategy for deploying capital.
@@ -131,13 +315,25 @@ entity_classes:
       - name: capital_allocation_policy_name
         type: str
         primary_key: true
-        description: The name of a capital allocation policy (e.g., 'APPLE Capital Allocation Policy', 'UPS Capital Allocation Policy').
+        description: The name of a capital allocation policy.
       - name: dividend_policy
         type: str
         description: Description of the organization's dividend policy.
-      - name: source
+      - name: share_repurchase_policy
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Description of share buyback programs.
+      - name: payout_ratio_target
+        type: float
+        description: Target payout ratio (dividends + buybacks ' earnings).
+      - name: leverage_metric_type
+        type: str
+        description: Definition of leverage used for the target (e.g., Net Debt/EBITDA).
+      - name: target_leverage_ratio
+        type: float
+        description: Management's stated leverage target.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
   Financial_Instrument:
     description: A contract giving rise to a financial liability, such as debt.
@@ -145,113 +341,357 @@ entity_classes:
       - name: financial_instrument_name
         type: str
         primary_key: true
-        description: The name of a financial instrument (e.g., 'APPLE 2024 Bond', 'UPS 2023 Treasury Note').
-      - name: interest_rate_terms
+        description: The name of a financial instrument.
+      - name: instrument_type
         type: str
-        description: Terms of the interest rate (e.g., 4.625% Fixed).
+        description: Classification of the instrument (e.g., Bond, Term Loan).
+      - name: principal_amount
+        type: float
+        description: Outstanding principal or face value.
+      - name: currency
+        type: str
+        description: Currency in which the principal_amount is denominated.
+      - name: interest_rate_percent
+        type: float
+        description: Current annual interest rate (%).
+      - name: issue_date
+        type: date
+        description: The date on which the instrument was issued.
       - name: maturity_date
         type: date
         description: The maturity date of a financial instrument.
-      - name: source
+      - name: sources
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: The sources of the information.
 
-  Leadership_Role:
-    description: An association class representing a Leader holding a position at a Company.
+  Governance_Rating:
+    description: A third-party evaluation of a Company's governance practices.
     properties:
-      - name: leadership_role_title
+      - name: rating_name
         type: str
-        description: The title of a leadership role (e.g., 'APPLE CEO', 'UPS CFO').
         primary_key: true
-      - name: start_date
-        type: date
-        description: The date a leadership role became effective.
-      - name: end_date
-        type: date
-        description: The date a leadership role concluded (if applicable).
-      - name: source
+        description: Identifier of a governance rating.
+      - name: rating_agency
         type: str
-        description: The source of the information (e.g., a URL to a press release).
+        description: Agency providing the governance assessment.
+      - name: rating_score
+        type: str
+        description: Score or grade assigned.
+      - name: effective_date
+        type: date
+        description: Date on which the rating became effective.
+      - name: sources
+        type: str
+        description: The sources of the information.
+
+  Market_Size:
+    description: Historical total size of a Market for a given year.
+    properties:
+      - name: metric_name
+        type: str
+        primary_key: true
+        description: Identifier for the market size metric.
+      - name: size_value
+        type: float
+        description: Total market size.
+      - name: currency
+        type: str
+        description: Currency of the size_value.
+      - name: year
+        type: int
+        description: Calendar year the size_value applies to.
+      - name: sources
+        type: str
+        description: sources of the market size figure.
+
+  Market_Forecast:
+    description: Projection of future growth for a Market.
+    properties:
+      - name: forecast_name
+        type: str
+        primary_key: true
+        description: Unique identifier for the forecast.
+      - name: forecast_period_start_year
+        type: int
+        description: First year covered by the forecast.
+      - name: forecast_period_end_year
+        type: int
+        description: Last year covered by the forecast.
+      - name: projected_cagr_low
+        type: float
+        description: Lower-bound CAGR for the forecast period.
+      - name: projected_cagr_high
+        type: float
+        description: Upper-bound CAGR for the forecast period.
+      - name: sources
+        type: str
+        description: sources of the forecast.
+
+  Intangible_Asset:
+    description: A non-physical asset that provides economic value.
+    properties:
+      - name: asset_name
+        type: str
+        primary_key: true
+        description: The name of the intangible asset.
+      - name: asset_type
+        type: str
+        description: Category of the intangible asset (e.g., Patent, Brand).
+      - name: asset_description
+        type: str
+        description: Brief description of the asset.
+      - name: asset_value
+        type: float
+        description: Estimated monetary value.
+      - name: sources
+        type: str
+        description: The sources of the information.
+
+  Insider_Transaction:
+    description: A reported purchase or sale of a company's securities by an insider.
+    properties:
+      - name: transaction_id
+        type: str
+        primary_key: true
+        description: Unique identifier for the insider transaction.
+      - name: transaction_date
+        type: date
+        description: Date the insider transaction occurred.
+      - name: transaction_type
+        type: str
+        description: Classification of the transaction (e.g., Buy, Sell).
+      - name: share_count
+        type: int
+        description: Number of shares involved.
+      - name: price_per_share
+        type: float
+        description: Price paid or received per share.
+      - name: total_value
+        type: float
+        description: Aggregate dollar value of the transaction.
+      - name: sources
+        type: str
+        description: sources URL or citation for the filing.
+
+  Off_Balance_Sheet_Commitment:
+    description: A liability or obligation not recorded on the balance sheet.
+    properties:
+      - name: name
+        type: str
+        primary_key: true
+        description: The name of the commitment.
+      - name: commitment_type
+        type: str
+        description: Category of commitment (e.g., Operating Lease).
+      - name: amount
+        type: float
+        description: Present value or undiscounted amount of the commitment.
+      - name: fiscal_period
+        type: str
+        description: Fiscal period the commitment amount relates to.
+      - name: is_significant
+        type: bool
+        description: True if the commitment is material.
+      - name: sources
+        type: str
+        description: The sources of the information.
 
 relationships:
   operates_in:
     domain: Company
     range: Market
     description: Connects a Company to a Market it operates within.
-    properties: []
+    properties:
+      - name: market_share_percentage
+        type: float
+        description: Percentage of the Market held by the Company.
+      - name: fiscal_year
+        type: int
+        description: Year the market share figure applies to.
+      - name: sources
+        type: str
+        description: Citation for the company's participation in this market.
+
   competes_with:
     domain: Company
     range: Company
     description: A symmetric relationship between two competing Companies.
     symmetric: true
-    properties: []
+    properties:
+      - name: is_key_competitor
+        type: bool
+        description: Indicates whether the related Company is a key competitor.
+      - name: overlapping_market_names
+        type: str
+        description: Comma-separated list of Markets where both Companies operate.
+      - name: sources
+        type: str
+        description: sources identifying the competitor relationship.
+
   produces:
     domain: Company
     range: Product_Service
     description: Links a Company to a Product or Service it offers.
-    properties: []
+    properties:
+      - name: revenue_percentage
+        type: float
+        description: Percentage of total company revenue generated by the product/service.
+      - name: revenue_model
+        type: str
+        description: Monetization model applied to the product/service.
+
+  purchases:
+    domain: Customer
+    range: Product_Service
+    description: Links a Customer to a Product or Service it buys.
+    properties:
+      - name: spend_amount
+        type: float
+        description: Amount the Customer spent during the fiscal period.
+      - name: fiscal_period
+        type: str
+        description: Fiscal period the spend applies to.
+      - name: sources
+        type: str
+        description: sources of the spend information.
+
   is_subject_of:
     domain: Company
     range: Corporate_Event
     description: Links a Company to an event concerning it.
     properties: []
+
   reports:
     domain: Company
     range: Financial_Metric
     description: Connects a Company to the financial metrics it has disclosed.
     properties: []
+
   is_led_by:
     domain: Company
     range: Leader
     description: Connects a Company to a Leader in a leadership role.
     properties: []
+
   has_role:
     domain: Leader
     range: Leadership_Role
     description: Connects a Leader to their various roles (past and present).
     properties: []
+
   held_at:
     domain: Leadership_Role
     range: Company
     description: Connects a Leadership_Role to the Company where it is held.
     properties: []
+
   possesses:
     domain: Company
     range: Competitive_Advantage
     description: Links a Company to its Competitive Advantage (Moat).
     properties: []
+
   is_exposed_to:
     domain: Company
     range: Risk_Factor
     description: Connects a Company to a Risk Factor.
-    properties: []
+    properties:
+      - name: exposure_level
+        type: str
+        description: Magnitude of the Company's exposure (e.g., Low, Medium, High).
+
   acquires:
     domain: Company
     range: Company
     description: Relates an acquiring Company to a target Company.
-    properties: []
+    properties:
+      - name: acquisition_date
+        type: date
+        description: Date the acquisition was announced or completed.
+      - name: acquisition_value
+        type: float
+        description: Total consideration paid for the acquisition.
+      - name: acquisition_currency
+        type: str
+        description: Currency of the acquisition value.
+      - name: sources
+        type: str
+        description: sources document providing acquisition details.
+
   divests:
     domain: Company
     range: Product_Service
     description: Relates a Company to a Product or Service it has sold off.
     properties: []
+
   has_policy:
     domain: Company
     range: Capital_Allocation_Policy
     description: Links a Company to its capital deployment strategy.
     properties: []
+
   utilizes:
     domain: Company
     range: Financial_Instrument
     description: Connects a Company to a financial instrument like debt.
     properties: []
+
   has_adviser:
     domain: Company
     range: Leader
     description: Connects a Company to a Leader serving as an adviser.
     properties: []
+
   involves_leader:
     domain: Corporate_Event
     range: Leader
     description: Connects a Corporate_Event to a Leader involved in it.
+    properties: []
+
+  has_governance_rating:
+    domain: Company
+    range: Governance_Rating
+    description: Links a Company to Governance_Rating records.
+    properties: []
+
+  has_market_size:
+    domain: Market
+    range: Market_Size
+    description: Associates a Market with its historical yearly size figures.
+    properties: []
+
+  has_forecast:
+    domain: Market
+    range: Market_Forecast
+    description: Links a Market to one of its growth forecasts.
+    properties: []
+
+  supported_by:
+    domain: Competitive_Advantage
+    range: Financial_Metric
+    description: Connects a Competitive_Advantage to Financial_Metrics that substantiate it.
+    properties: []
+
+  limited_by:
+    domain: Competitive_Advantage
+    range: Risk_Factor
+    description: Links a Competitive_Advantage to Risk_Factors that could erode it.
+    properties: []
+
+  executes:
+    domain: Leader
+    range: Insider_Transaction
+    description: Links an insider (Leader) to the Insider_Transaction they executed.
+    properties: []
+
+  pertains_to:
+    domain: Insider_Transaction
+    range: Company
+    description: Connects an Insider_Transaction to the Company whose securities were traded.
+    properties: []
+
+  has_commitment:
+    domain: Company
+    range: Off_Balance_Sheet_Commitment
+    description: Links a Company to off-balance-sheet commitments.
     properties: []

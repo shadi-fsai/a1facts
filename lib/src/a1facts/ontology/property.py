@@ -14,8 +14,18 @@ class Property:
         self.type = prop_type
         self.description = description
         self.primary_key = primary_key
+        self._validate_property()
 
     def __str__(self):
         """Returns a string representation of the property."""
         pk_str = " - Primary Key" if self.primary_key else ""
         return f"{self.property_name} ({self.type}) - {self.description}{pk_str}"
+
+    def _validate_property(self):
+        """Validates the property."""
+        if self.property_name == "":
+            raise ValueError("Property name cannot be empty")
+        if self.type == "":
+            raise ValueError("Property type cannot be empty")
+        if self.description == "":
+            raise ValueError("Property description cannot be empty")

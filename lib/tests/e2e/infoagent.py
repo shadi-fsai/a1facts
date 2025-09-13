@@ -6,10 +6,14 @@ from colored import cprint
 from a1facts.knowledge_base import KnowledgeBase
 from agno.agent import Agent
 from textwrap import dedent
-from a1facts.utils.modelconfig import my_model
+from a1facts.utils.modelconfig import my_high_precision_model
+from agno.models.groq import Groq
+
+from a1facts.graph.networkx_graph_database import NetworkxGraphDatabase
+
 
 def main():
-    a1facts = KnowledgeBase("tests\\e2e\\a1facts", "tests\\e2e\\company.yaml", "tests\\e2e\\sources.yaml", use_neo4j=False)
+    a1facts = KnowledgeBase("tests/e2e/a1facts", "tests/e2e/company.yaml", "tests/e2e/sources.yaml", use_neo4j=False)
     
 #    a1facts.ingest_knowledge("Winnibago's revenue in FY 2024 was $100 million based on the SEC filings")
     # Read sources file and ingest the knowledge
@@ -22,10 +26,19 @@ def main():
 #    a1facts.ingest_knowledge("Winnibago's revenue in FY 2024 was $100 million based on the SEC filings")
 #    print(a1facts.query("get_Financial_Metrics_Company_reports(kwargs={'from_Company_name': 'Winnebago'})"))#what was Winnibago's revenue in FY 2024?"))
 #    return
+
+    #print (a1facts.query("how does Winnibago make money?"))
+    print (a1facts.acquire_knowledge_for_query("how does Winnibago make money?"))
+    #print (a1facts.query("how does Winnibago make money?"))
+ 
+    graph_db = NetworkxGraphDatabase()
+    graph_db.print_graph()
+    return
+    
     agent = Agent(
         name="finance_info_agent",
         role="get financial information about the company",
-        model=my_model,
+        model=Groq(id="openai/gpt-oss-120b"),
         tools=a1facts.get_tools(),
         instructions=dedent("""get financial information about the company"""),
         markdown=True,
