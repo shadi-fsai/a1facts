@@ -3,7 +3,7 @@ from a1facts.ontology.knowledge_ontology import KnowledgeOntology
 from a1facts.enrichment.knowledge_acquirer import KnowledgeAcquirer
 from colored import cprint
 from a1facts.utils.logger import logger
-
+from a1facts.utils.timer import timer
 
 class KnowledgeBase:
     def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False, disable_exa: bool = False):
@@ -125,3 +125,4 @@ RETURNS: str - The result from the knowledge acquirer"""
         if hasattr(self, 'graph') and self.graph:
             self.graph.close()
             logger.system(f"KnowledgeBase closed for {self.name}")
+        timer.print_results()

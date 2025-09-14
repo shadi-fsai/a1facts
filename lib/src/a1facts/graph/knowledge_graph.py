@@ -7,6 +7,7 @@ from a1facts.graph.update_agent import UpdateAgent
 from a1facts.graph.query_rewrite_agent import QueryRewriteAgent
 from colored import cprint
 from a1facts.utils.logger import logger
+from a1facts.utils.timer import timer
 
 class KnowledgeGraph:
     """
@@ -25,19 +26,15 @@ class KnowledgeGraph:
         logger.system(f"Initializing KnowledgeGraph: {ontology.ontology_file} with use_neo4j: {use_neo4j}")
         self.ontology = ontology
         self.graph_database = NetworkxGraphDatabase() if not use_neo4j else Neo4jGraphDatabase()
-        logger.system(f"Graph database initialized")
         self.get_tools = self.ontology.get_tools_get_entity_and_relationship(self.graph_database.get_all_entities_by_label, 
-            self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
+        self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
-        logger.system(f"Add/update tools returned")
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
-        logger.system(f"Query agent initialized")
         self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
-        logger.system(f"Update agent initialized")
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
-        logger.system(f"Rewrite agent initialized")
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")
+
 
     def _get_class_entity_pairs(self):
         for entity_class in self.ontology.entity_classes:
@@ -60,10 +57,12 @@ class KnowledgeGraph:
         Returns:
             str: The content of the agent's response.
         """
+
         logger.system(f"Querying knowledge graph with query: {query}")
         rewritten_query = self._rewrite_query(query)
         logger.system(f"Rewritten query: {rewritten_query}")
-        return self.query_agent.query(rewritten_query)
+        result = self.query_agent.query(rewritten_query)
+        return result
 
     def update_knowledge(self, knowledge: str):
         """
