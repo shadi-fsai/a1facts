@@ -278,9 +278,6 @@ entity_classes:
       - name: strength_rating
         type: str
         description: Qualitative or quantitative assessment of moat strength.
-      - name: last_verified_date
-        type: date
-        description: Most recent date the advantage was validated.
       - name: sources
         type: str
         description: The sources of the information.

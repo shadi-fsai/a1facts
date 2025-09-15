@@ -15,7 +15,8 @@ class UpdateAgent:
             tools=mytools,
 
             instructions=dedent(f"""
-                The user is providing you unstrucutred knowledge. Translate the knowledge into a structured format based on the ontology.
+                The user is providing you unstrucutred knowledge. 
+                Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]
                 Return the results in RDFS format.
                 Ideally, every RDFS entity should have sources.

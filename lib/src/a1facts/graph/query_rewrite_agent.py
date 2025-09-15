@@ -17,8 +17,9 @@ class QueryRewriteAgent:
             role="Rewrite the query to use known entities",
             model=my_fast_language_model,
             tools=mytools,
-            instructions=dedent("""
+            instructions=dedent(f"""
                 Rewrite the query to use known entities.
+                Today is {datetime.now().strftime("%Y-%m-%d")}
                 """),
                 markdown=True,
                 debug_mode=False,
@@ -36,5 +37,8 @@ class QueryRewriteAgent:
         )
 
         result = self.agent.run(prompt)
-        logger.system(f"Rewritten query: {result.content}")
-        return result.content
+        result_content = result.content
+        result_content = result_content+f"\nToday is {datetime.now().strftime("%Y-%m-%d")}"
+        cprint("Rewritten query: " + result_content, 'green')
+        logger.system(f"Rewritten query: {result_content}")
+        return result_content

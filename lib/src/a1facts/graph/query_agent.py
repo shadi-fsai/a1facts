@@ -31,6 +31,8 @@ class QueryAgent:
         # Try to answer with the knowledge graph first
         result = self.agent.run(dedent(f"""Answer the question in %QUERY%, 
         Use as many tools as you need to get the information necessary to answer the query.
-        %QUERY%: {query}"""))     
+        %QUERY%: {query}
+        Today is {datetime.now().strftime("%Y-%m-%d")}
+        """))     
 
         return result.content
