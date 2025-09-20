@@ -1,1 +1,24 @@
 knowledge_sources:
+  CLINICALTRIALS_GOV:
+    name: clinicaltrials_gov_api
+    type: function
+    description: Official ClinicalTrials.gov database API for comprehensive trial registry data
+    functions_package: function_knowledge_source.clinicaltrials_functions
+    override_reliability: A
+    override_credibility: "1"
+    
+  FDA_DATABASES:
+    name: fda_drug_safety_api
+    type: function
+    description: FDA databases for drug approvals, adverse events, and safety information
+    functions_package: function_knowledge_source.fda_functions
+    override_reliability: A
+    override_credibility: "1"
+    
+  PUBMED_RESEARCH:
+    name: pubmed_clinical_research
+    type: function
+    description: PubMed database for peer-reviewed clinical trial publications and research
+    functions_package: function_knowledge_source.pubmed_functions
+    override_reliability: A
+    override_credibility: "1"
