@@ -15,17 +15,26 @@ class KnowledgeGraph:
     and querying entities and relationships based on a provided ontology.
     """
 
-    def __init__(self, ontology: KnowledgeOntology, use_neo4j: bool = False):
+    def __init__(self, ontology: KnowledgeOntology, use_neo4j: bool = False, graph_file: str = "networkx_graph.pickle", neo4j_uri: str = None, neo4j_user: str = None, neo4j_password: str = None):
         """
         Initializes the KnowledgeGraph, connects to the Neo4j database, and sets up
         the query and update agents with tools derived from the ontology.
 
         Args:
             ontology (KnowledgeOntology): The ontology defining the graph's structure.
+            use_neo4j (bool): Whether to use Neo4j or NetworkX as the backend.
+            graph_file (str): The file path for the NetworkX graph pickle.
+            neo4j_uri (str): The URI for the Neo4j database.
+            neo4j_user (str): The username for the Neo4j database.
+            neo4j_password (str): The password for the Neo4j database.
         """
         logger.system(f"Initializing KnowledgeGraph: {ontology.ontology_file} with use_neo4j: {use_neo4j}")
         self.ontology = ontology
-        self.graph_database = NetworkxGraphDatabase() if not use_neo4j else Neo4jGraphDatabase()
+        if use_neo4j:
+            self.graph_database = Neo4jGraphDatabase(uri=neo4j_uri, user=neo4j_user, password=neo4j_password)
+        else:
+            self.graph_database = NetworkxGraphDatabase(graph_file=graph_file)
+        
         self.get_tools = self.ontology.get_tools_get_entity_and_relationship(self.graph_database.get_all_entities_by_label, 
         self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        

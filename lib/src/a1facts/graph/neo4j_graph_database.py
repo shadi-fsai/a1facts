@@ -13,9 +13,15 @@ URI = os.getenv("NEO4J_URI")
 AUTH = ("neo4j", os.getenv("NEO4J_AUTH"))
 
 class Neo4jGraphDatabase(BaseGraphDatabase):
-    def __init__(self):
+    def __init__(self, uri=None, user=None, password=None):
         try:
-            self.driver = GraphDatabase.driver(URI, auth=(AUTH[0], AUTH[1]))
+            db_uri = uri or URI
+            if user and password:
+                db_auth = (user, password)
+            else:
+                db_auth = (AUTH[0], AUTH[1])
+
+            self.driver = GraphDatabase.driver(db_uri, auth=db_auth)
             cprint("Successfully connected to Neo4j database.", "green")
         except Exception as e:
             print(f"Failed to connect to Neo4j database: {e}")
@@ -259,7 +265,7 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         
         return [record["properties"] for record in records]
 
-    def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_primary_key_prop):
+    def get_relationship_entities(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label):
         """
         Gets all range entities connected to a specific domain entity via a relationship.
 
@@ -269,7 +275,6 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
             domain_primary_key_value (str): The primary key of the domain entity.
             relationship_type (str): The type of the relationship.
             range_label (str): The label of the range entities to retrieve.
-            range_primary_key_prop (str): The primary key property of the range entity.
 
         Returns:
             list: A list of dictionaries, where each represents a range entity's properties.
@@ -312,10 +317,12 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
             primary_key_value (str): The primary key value of the entity.
 
         Returns:
-            list: A list containing the properties of the entity.
+            dict or None: The properties of the entity, or None if not found.
         """
         # For a given entity, get the properties
         query = f"MATCH (n:{label} {{{pk_prop}: $primary_key_value}}) RETURN properties(n) AS properties"
         parameters = {"primary_key_value": primary_key_value}
         records = self._execute_read_query(query, parameters)
-        return [record["properties"] for record in records]
+        if records:
+            return records[0]["properties"]
+        return None

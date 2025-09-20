@@ -6,11 +6,18 @@ from a1facts.utils.logger import logger
 from a1facts.utils.timer import timer
 
 class KnowledgeBase:
-    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False, disable_exa: bool = False):
+    def __init__(self, name: str, ontology_config_file: str, knowledge_sources_config_file: str, use_neo4j: bool = False, disable_exa: bool = False, graph_file: str = "networkx_graph.pickle", neo4j_uri: str = None, neo4j_user: str = None, neo4j_password: str = None):
         logger.system(f"Initializing KnowledgeBase for {name}")
         self.name = name
         self.ontology = KnowledgeOntology(ontology_config_file)
-        self.graph = KnowledgeGraph(self.ontology, use_neo4j)
+        self.graph = KnowledgeGraph(
+            self.ontology,
+            use_neo4j,
+            graph_file=graph_file,
+            neo4j_uri=neo4j_uri,
+            neo4j_user=neo4j_user,
+            neo4j_password=neo4j_password
+        )
         self.knowledge_acquirer = KnowledgeAcquirer(self.graph, self.ontology, knowledge_sources_config_file, disable_exa)
         logger.system(f"KnowledgeBase initialized for {self.name}")
 

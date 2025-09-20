@@ -1,0 +1,16 @@
+pytest
+pytest-docker
+neo4j
+pyyaml
+colored
+agnos
+openai
+python-dotenv
+networkx
+pandas
+yfinance
+psutil
+fastapi
+uvicorn
+python-multipart
+requests

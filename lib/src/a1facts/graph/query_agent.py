@@ -4,6 +4,7 @@ from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
 from colored import cprint
+from a1facts.utils.logger import logger
 
 class QueryAgent:
     def __init__(self, ontology: KnowledgeOntology, mytools: list):
@@ -35,4 +36,8 @@ class QueryAgent:
         Today is {datetime.now().strftime("%Y-%m-%d")}
         """))     
 
+        if not result.content:
+            logger.system(f"No answer found to {query}, returning fallback.")
+            return "A verifiable answer is not available."
+        
         return result.content

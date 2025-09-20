@@ -74,6 +74,7 @@ class KnowledgeAcquirer:
                 'instructions': instructions
             }, f)
         logger.system(f"Acquisition instructions cached")
+
         return instructions
 
     def acquire(self, query: str):
@@ -87,7 +88,7 @@ class KnowledgeAcquirer:
         with open(knowledge_sources_config_file, 'r') as file:
             knowledge_sources_config = yaml.load(file, Loader=yaml.FullLoader)
             logger.system(f"Knowledge sources config loading from {knowledge_sources_config}")
-            if knowledge_sources_config['knowledge_sources']:
+            if knowledge_sources_config.get('knowledge_sources'):
                 for source in knowledge_sources_config['knowledge_sources']:
                     if 'type' not in knowledge_sources_config['knowledge_sources'][source]:
                         logger.warning(f"Your knowledge source config is missing the 'type' field for source: {source}")
@@ -110,60 +111,55 @@ class KnowledgeAcquirer:
     def get_template(self):
         return dedent(f"""(Template Instructions: Before use, replace the bracketed placeholders [...] with the specific details relevant to your target ontology and knowledge base.)
 
-Objective
-Answer user queries by synthesizing information from a structured knowledge base and supplementing it with verified web search results when necessary.
+Goal:
+Expand the knowledge graph to answer the user's query with validated and reliable information.
+Return the full answer to the user's query.
 
-1. Information Retrieval Strategy
-Primary Source: Your primary data source is the [Knowledge_Base_Name].
-Initial Search: First, query the [Knowledge_Base_Name] to retrieve relevant [entities] and [relationships]. Prioritize searching for key entity types such as [e.g., Company, Product, Event].
-
-Web Search Trigger: Conduct a web search only if:
-
-The [Knowledge_Base_Name] lacks the necessary data (e.g., is missing entities, properties, or contains outdated information).
-
-The user specifically requests real-time data or very recent news.
+Procedure:
+1. Query the knowledge graph to retrieve relevant entities and relationships.    
+1.2. If the knowledge graph lacks the necessary information(entities, properties, relationships or outdated information), query the knowledge sources (including the web) to supplement the knowledge graph.
+1.3. If the knowledge graph has the necessary information, and the information is guaranteed to be current, return the answer to the user's query.
+1.4. If the knowledge graph has the necessary information, but the information is not guaranteed to be current, query the knowledge sources (including the web) to supplement the knowledge graph.
+1.5. If the knowledge graph lacks the necessary information, and the information is not guaranteed to be current, query the knowledge sources (including the web) to supplement the knowledge graph.
+1.6. If the knowledge sources lack the necessary information, return "A verifiable answer is not available".
 
 2. Data Supplementation & Vetting
-Prioritization: Always prioritize foundational data (e.g., [describe the types of data in the KB, like fundamental data, historical performance, etc.]) from the [Knowledge_Base_Name] over web search results.
+Prioritization: Always prioritize foundational data that pertains to [Main entity classes] and [Main relationship types] from the [knowledge graph]
 
 Web Search Scope: Use web searches to find:
+1. Real-time or very recent data not available in the knowledge base.
+2. The latest news, press releases, or official filings.
+3. Broader contextual information (e.g., economic indicators, industry trends).
+4. Third-party analysis (e.g., analyst ratings, reviews).
 
-Real-time or very recent data not available in the knowledge base.
-
-The latest news, press releases, or official filings.
-
-Broader contextual information (e.g., economic indicators, industry trends).
-
-Third-party analysis (e.g., analyst ratings, reviews).
+For information coming from knowledge sources that have a reliability rating of A or B, you can use the information directly.
 
 IMPORTANT:
-Source Reliability Assessment: Evaluate each web source using the following scale:
-
-A: Completely reliable - The source is undoubtedly authentic and trustworthy.
-B: Usually reliable - Minor doubts exist, but the source is historically valid.
-C: Fairly reliable - Doubts exist, but the source has provided valid information before.
-D: Not usually reliable - Significant doubts about the source's reliability.
-E: Unreliable - The source has a history of providing invalid information.
-F: Reliability cannot be judged - Insufficient information for evaluation.
-
+3. Source Reliability Assessment: Evaluate each web source using the following scale: [Keep these verbatim in your transformation to the ontology given]
+    A: Completely reliable - The source is undoubtedly authentic and trustworthy.
+    B: Usually reliable - Minor doubts exist, but the source is historically valid.
+    C: Fairly reliable - Doubts exist, but the source has provided valid information before.
+    D: Not usually reliable - Significant doubts about the source's reliability.
+    E: Unreliable - The source has a history of providing invalid information.
+    F: Reliability cannot be judged - Insufficient information for evaluation.
 Constraint: Never use sources rated D, E, or F.
 
-3. Information Synthesis & Validation
-Information Validity Assessment: After gathering information, assess each piece of data using this scale:
-
-1. Confirmed: Corroborated by multiple, independent, reliable sources.
-2. Probably true: Logical and consistent with other data, but not fully corroborated.
-3. Possibly true: Plausible but lacks strong corroboration.
-4. Doubtful: Not logical or may be contradicted by other information.
-5. Improbable: Illogical and contradicted by other information.
-6. Cannot be judged: Insufficient information to assess validity.
-
+IMPORTANT:
+4. Information Synthesis & Validation [Keep these verbatim in your transformation to the ontology given]
+Information Validity Assessment: After gathering information, assess each piece of data across all sources using this scale:
+    1. Confirmed: Corroborated by multiple, independent, reliable sources.
+    2. Probably true: Logical and consistent with other data, but not fully corroborated.
+    3. Possibly true: Plausible but lacks strong corroboration.
+    4. Doubtful: Not logical or may be contradicted by other information.
+    5. Improbable: Illogical and contradicted by other information.
+    6. Cannot be judged: Insufficient information to assess validity.
 Constraint: Only use information assessed as Confirmed, Probably true, or Possibly true.
 
 Timeliness: Ensure all data is current relative to the date below.
 
-4. Output Formatting
+5. Output Formatting
 Data Display: Use tables to present quantitative and comparative data.
+Use bullet points to present qualitative and descriptive data.
 
 Citation: When information is Confirmed by multiple sources, cite those sources in your response.
 Always provide sources for your answer, the sources should be extracted from the properties of the entities in the knowledge graph; you should get them when you get the information from the graph.          
