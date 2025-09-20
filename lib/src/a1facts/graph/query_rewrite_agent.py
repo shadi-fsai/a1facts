@@ -32,6 +32,7 @@ class QueryRewriteAgent:
             Rewrite the query to use known entities from the graph, for entities not in the graph keep the entity names as is.
             Here are the known entity pairs: {class_entity_pairs}
             Here is the query to rewrite: {query}
+            Preserve the original meaning of the query, and the original form of the query.
             Only return the rewritten query, no other text.
             """
         )
