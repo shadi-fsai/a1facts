@@ -83,9 +83,9 @@ def create_complex_ontology(tmp_path):
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.update_agent.Agent')
+@patch('a1facts.graph.knowledge_graph.UpdateAgent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgentInternal, MockAcquirerAgent, tmp_path, db_backend, request):
+def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Tests the full end-to-end lifecycle of the KnowledgeBase.
     This test runs for both NetworkX and Neo4j backends.
@@ -117,7 +117,7 @@ def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgentIn
 
     # Mock the internal agno.Agent instances' .run() method for each agent
     mock_query_run = MockQueryAgentInternal.return_value.run
-    mock_update_run = MockUpdateAgentInternal.return_value.run
+    mock_update_agent_instance = MockUpdateAgent.return_value
     mock_acquirer_run = MockAcquirerAgent.return_value.run
 
     # 2. Query Empty Graph: Simulate the agent finding no information.
@@ -131,22 +131,14 @@ def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgentIn
     acquired_knowledge = "The person Alice is 30 years old."
     mock_acquirer_run.return_value = Mock(content=acquired_knowledge)
     
-    new_knowledge = kb.acquire_knowledge_for_query("Find info about Alice.")
-    assert new_knowledge == acquired_knowledge
-    
-    # 4. Ingest Knowledge: Simulate the update agent processing the knowledge.
-    # The `acquire_knowledge_for_query` method automatically calls `ingest_knowledge`.
+    # 4. Ingest Knowledge: The `acquire_knowledge_for_query` method automatically calls `ingest_knowledge`.
     with patch.object(kb.graph, '_rewrite_query', return_value=acquired_knowledge):
-        kb.ingest_knowledge(acquired_knowledge)
+        new_knowledge = kb.acquire_knowledge_for_query("Find info about Alice.")
+
+    assert new_knowledge == acquired_knowledge
         
-        # Verify that the update agent's internal run method was called with the
-        # correct, fully-formed prompt.
-        expected_prompt = (
-            "Translate the following knowledge into a structured format based on the ontology, "
-            "then add every entity and every relationship to the graph using the tools available to you.\n \n "
-            f"{acquired_knowledge}"
-        )
-        mock_update_run.assert_called_with(expected_prompt)
+    # Verify that the update agent's update method was called.
+    mock_update_agent_instance.update.assert_called_with(acquired_knowledge)
 
     # 5. Query Populated Graph: Now, simulate the agent finding the data.
     mock_query_run.reset_mock()

@@ -58,6 +58,7 @@ def test_acquire_and_ingest_flow(MockUpdateAgent, MockQueryAgent, MockAcquirerAg
         mock_update_agent_instance.update.assert_called_with(acquired_knowledge)
         
     # c) Verify the graph database's save method was called after ingestion
-    with patch.object(kb.graph.graph_database, 'save') as mock_save:
+    with patch.object(kb.graph.graph_database, 'save') as mock_save, \
+         patch.object(kb.graph, '_rewrite_query', return_value=acquired_knowledge):
         kb.ingest_knowledge(acquired_knowledge)
         mock_save.assert_called_once()

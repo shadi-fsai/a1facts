@@ -1,0 +1,254 @@
+
+# Paste your RDFS example here
+@prefix : <http://example.org/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# --- Market Entities ---
+:Crop_Protection_Market a :Market ;
+    :name "Crop Protection" ;
+    :rivalry_intensity "High" ;
+    :barriers_to_entry "High R&D spend, regulatory approval, but moderate switching costs and high substitutability due to patent cliffs and generics." ;
+    :sources "Section 8-Industry Rivalry, sourced from 2023–2024 annual reports, Porter's analysis in provided source" .
+
+# --- Company Entities ---
+:FMC_Corporation a :Company ;
+    :name "FMC Corporation" ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Crop protection pure-play; post-2017 focuses on agricultural chemicals, post-DuPont acquisition and Livent spin-off; since 2023 restructuring to focus on biologicals & precision tools, reduced non-core businesses, asset-light partnerships (Corteva 2025)." ;
+    :governance_notes "Class-action securities suit pending regarding 2025 guidance mis-statements." ;
+    :macro_environment_notes "Industry faces cycles from commodity prices and regulatory pressure." ;
+    :customer_concentration_notes "No single customer concentration noted; typical of diversified crop protection customer base." ;
+    :culture_and_labor_notes "Emphasis on innovation and partnership since 2023 restructuring." ;
+    :operational_risk_notes "Competitive litigation, risk from biological disruptors, patent cliffs, ongoing industry litigation on glyphosate, dicamba." ;
+    :sources "FMC 2024 Form 10-K, 2023–2024 annual reports, Section 7/8 of provided source." .
+:Syngenta_Group a :Company ;
+    :name "Syngenta Group" ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biologicals, seeds & traits, digital agri solutions." ;
+    :sources "FMC 2024 Form 10-K, Syngenta 2023 annual report, product literature." .
+:Bayer_Crop_Science a :Company ;
+    :name "Bayer Crop Science" ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biologicals, seeds & traits, digital agri solutions (FieldView)." ;
+    :sources "FMC 2024 Form 10-K, Bayer 2024 annual report, product literature." .
+:BASF_Agricultural_Solutions a :Company ;
+    :name "BASF Agricultural Solutions" ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, seeds, biologicals, digital agri solutions (xarvio)." ;
+    :sources "FMC 2024 Form 10-K, BASF 2024 annual report, product literature." .
+:Corteva_Agriscience a :Company ;
+    :name "Corteva Agriscience" ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biologicals (Stoller, Symborg), seeds, digital (Granular)." ;
+    :sources "FMC 2024 Form 10-K, Corteva 2023 annual report, product literature." .
+:UPL_Ltd a :Company ;
+    :name "UPL Ltd." ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biologicals (ProNutiva), seeds (Advanta), digital." ;
+    :sources "FMC 2024 Form 10-K, UPL 2023 annual report, product literature." .
+:Sumitomo_Chemical_Co a :Company ;
+    :name "Sumitomo Chemical Co. Ltd." ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biorationals (Valent BioSciences)." ;
+    :sources "FMC 2024 Form 10-K, Sumitomo 2023 annual report, product literature." .
+:Nufarm_Ltd a :Company ;
+    :name "Nufarm Ltd." ;
+    :company_type "Public Company" ;
+    :industry_code "GICS:15101030" ;
+    :business_model "Chemicals, biological JV, seeds (Nuseed)." ;
+    :sources "FMC 2024 Form 10-K, Nufarm 2023 annual report, product literature." .
+
+# --- Relationship: operates_in (Company -> Market) with historical market share ---
+:FMC_Corporation :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 7.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+:Syngenta_Group :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 17.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+:Bayer_Crop_Science :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 15.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+:BASF_Agricultural_Solutions :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 11.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+:Corteva_Agriscience :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 12.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+:UPL_Ltd :operates_in :Crop_Protection_Market ;
+    :market_share_percentage 7.0 ;
+    :fiscal_year 2024 ;
+    :sources "Phillips McDougall, AgbioInvestor annual league tables (2015-24)" .
+
+# --- Relationship: competes_with (symmetric, overlapping market: Crop Protection) ---
+:FMC_Corporation :competes_with :Syngenta_Group ;
+    :is_key_competitor true ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :Bayer_Crop_Science ;
+    :is_key_competitor true ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :BASF_Agricultural_Solutions ;
+    :is_key_competitor true ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :Corteva_Agriscience ;
+    :is_key_competitor true ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :UPL_Ltd ;
+    :is_key_competitor true ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :Sumitomo_Chemical_Co ;
+    :is_key_competitor false ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+:FMC_Corporation :competes_with :Nufarm_Ltd ;
+    :is_key_competitor false ;
+    :overlapping_market_names "Crop Protection" ;
+    :sources "FMC 2024 Form 10-K, Section 2 Competitor Table." .
+
+# --- Financial Metric: P/E, P/S, P/B (20-year mean and 09-Aug-2025 levels) ---
+:FMC_PE_Today a :Financial_Metric ;
+    :metric_id "FMC_P/E_2025-08-09" ;
+    :metric_name "Price/Earnings Ratio" ;
+    :metric_value 45.1 ;
+    :metric_type "P/E Ratio" ;
+    :metric_category "Valuation Multiple" ;
+    :currency "USD" ;
+    :metric_unit "Ratio" ;
+    :fiscal_period "FY 2025" ;
+    :observation_date "2025-08-09"^^xsd:date ;
+    :period_type "Annual" ;
+    :is_non_recurring false ;
+    :sources "FMC get_ratios_ttm; Bloomberg PX for 09-Aug-25" .
+:FMC_PS_Today a :Financial_Metric ;
+    :metric_id "FMC_P/S_2025-08-09" ;
+    :metric_name "Price/Sales Ratio" ;
+    :metric_value 1.08 ;
+    :metric_type "P/S Ratio" ;
+    :metric_category "Valuation Multiple" ;
+    :currency "USD" ;
+    :metric_unit "Ratio" ;
+    :fiscal_period "FY 2025" ;
+    :observation_date "2025-08-09"^^xsd:date ;
+    :period_type "Annual" ;
+    :is_non_recurring false ;
+    :sources "FMC get_ratios_ttm; Bloomberg PX for 09-Aug-25" .
+:FMC_PB_Today a :Financial_Metric ;
+    :metric_id "FMC_P/B_2025-08-09" ;
+    :metric_name "Price/Book Ratio" ;
+    :metric_value 1.01 ;
+    :metric_type "P/B Ratio" ;
+    :metric_category "Valuation Multiple" ;
+    :currency "USD" ;
+    :metric_unit "Ratio" ;
+    :fiscal_period "FY 2025" ;
+    :observation_date "2025-08-09"^^xsd:date ;
+    :period_type "Annual" ;
+    :is_non_recurring false ;
+    :sources "FMC get_ratios_ttm; Bloomberg PX for 09-Aug-25" .
+# Similar Financial_Metric entities should be defined for Bayer and BASF as in source table, here omitted for brevity.
+
+# --- Relationship: reports Company → Financial_Metric ---
+:FMC_Corporation :reports :FMC_PE_Today, :FMC_PS_Today, :FMC_PB_Today .
+
+# --- Corporate Events: Major Turning Points ---
+:Event_FMC_Acq_DuPont a :Corporate_Event ;
+    :event_type "Acquisition" ;
+    :event_date "2017-03-31"^^xsd:date ;
+    :is_material true ;
+    :is_turning_point true ;
+    :event_description "FMC acquired DuPont crop chemical assets, transforming into a crop protection-focused company. P/S jumped 90%." ;
+    :sources "provided source, Section 3.3" .
+:Event_FMC_Guidance_Cut_2023 a :Corporate_Event ;
+    :event_type "Earnings" ;
+    :event_date "2023-10-01"^^xsd:date ;
+    :is_material true ;
+    :is_turning_point true ;
+    :event_description "FMC issued earnings guidance cut due to channel destocking; P/E fell from 22×→14×." ;
+    :sources "provided source, Section 3.3" .
+
+:FMC_Corporation :is_subject_of :Event_FMC_Acq_DuPont, :Event_FMC_Guidance_Cut_2023 .
+
+# --- Risk Entities: Key Legal and Litigation Risks ---
+:Bayer_Glyphosate_Litigation a :Risk ;
+    :risk_id "Bayer_Glyphosate_Litigation_2018-2025" ;
+    :risk_type "Legal" ;
+    :description "Glyphosate carcinogenicity lawsuits against Bayer Crop Science, settlements >US$14bn, ongoing appeals." ;
+    :status "Ongoing" ;
+    :sources "Section 5 of provided source" .
+:BASF_Bayer_Dicamba_Suits a :Risk ;
+    :risk_id "BASF_Bayer_Dicamba_2017-2021" ;
+    :risk_type "Legal" ;
+    :description "Dicamba drift suits: Crop damage claims, US$400m joint settlement (Bayer), BASF share undisclosed." ;
+    :status "Resolved" ;
+    :sources "Section 5 of provided source" .
+:FMC_UPL_Patent_2015 a :Risk ;
+    :risk_id "FMC_UPL_Patent_Settlement_2015" ;
+    :risk_type "Legal" ;
+    :description "FMC vs. UPL patent infringement – sulfentrazone: settled, FMC received royalty." ;
+    :status "Resolved" ;
+    :sources "Section 5 of provided source" .
+:Corteva_UPL_Patent_2020 a :Risk ;
+    :risk_id "Corteva_UPL_Patent_2020_22" ;
+    :risk_type "Legal" ;
+    :description "Corteva vs. UPL patent on Rinskor™ analogs: ITC ruled for Corteva, limited UPL imports." ;
+    :status "Resolved" ;
+    :sources "Section 5 of provided source" .
+:Syngenta_BASF_SDHI_2017 a :Risk ;
+    :risk_id "Syngenta_BASF_SDHI_2017_19" ;
+    :risk_type "Legal" ;
+    :description "Syngenta vs. BASF patent on SDHI fungicide classes: cross-licence agreed, no damages." ;
+    :status "Resolved" ;
+    :sources "Section 5 of provided source" .
+:FMC_Securities_Class_Action_2025 a :Risk ;
+    :risk_id "FMC_Securities_Class_Action_2025" ;
+    :risk_type "Legal" ;
+    :description "Class-action suit against FMC for guidance mis-statements in 2025. Motions to dismiss filed July 2025." ;
+    :status "Ongoing" ;
+    :sources "Section 5 of provided source" .
+
+# --- Relationship: has_risk (Company → Risk) ---
+:Bayer_Crop_Science :has_risk :Bayer_Glyphosate_Litigation ;
+    :exposure_level "High" ;
+    :sources "Section 5 of provided source" .
+:BASF_Agricultural_Solutions :has_risk :BASF_Bayer_Dicamba_Suits ;
+    :exposure_level "Medium" ;
+    :sources "Section 5 of provided source" .
+:Bayer_Crop_Science :has_risk :BASF_Bayer_Dicamba_Suits ;
+    :exposure_level "High" ;
+    :sources "Section 5 of provided source" .
+:FMC_Corporation :has_risk :FMC_UPL_Patent_2015 ;
+    :exposure_level "Low" ;
+    :sources "Section 5 of provided source" .
+:Corteva_Agriscience :has_risk :Corteva_UPL_Patent_2020 ;
+    :exposure_level "Medium" ;
+    :sources "Section 5 of provided source" .
+:Syngenta_Group :has_risk :Syngenta_BASF_SDHI_2017 ;
+    :exposure_level "Low" ;
+    :sources "Section 5 of provided source" .
+:BASF_Agricultural_Solutions :has_risk :Syngenta_BASF_SDHI_2017 ;
+    :exposure_level "Low" ;
+    :sources "Section 5 of provided source" .
+:FMC_Corporation :has_risk :FMC_Securities_Class_Action_2025 ;
+    :exposure_level "Medium" ;
+    :sources "Section 5 of provided source" .
+
+# --- Disruptor Companies (partial, not fully defined per ontology) ---
+# For reference: Indigo Ag, Pivot Bio, AgBiome, Bioceres Crop Solutions, Vestaron noted as disruptors, each <3% share, >30% CAGR; not expanded per ontology due to data limits.
+
+# --- End of RDFS ---
