@@ -85,13 +85,10 @@ class KnowledgeGraph:
             str: The content of the agent's response.
         """
         logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
-        print(f"Updating knowledge graph with knowledge: {knowledge}")
         rewrite_knowledge = self._rewrite_query(knowledge) #entity deduplication
         logger.system(f"Rewritten knowledge: {rewrite_knowledge}")
-        print(f"Rewritten knowledge: {rewrite_knowledge}")
         result = self.update_agent.update(rewrite_knowledge)
         logger.system(f"Result: {result}")
-        print(f"Result: {result}")
         self.graph_database.save()
         logger.system(f"Graph database saved")
         return result
