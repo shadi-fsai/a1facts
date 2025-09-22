@@ -50,17 +50,41 @@ class RelationshipClass:
         """Returns True if the relationship is symmetric."""
         return self.symmetric
 
-    def _validate_properties(self, properties):
-        """
-        Validates that all required properties are present.
-
-        Args:
-            properties (dict): A dictionary of properties to validate.
-        """
+    def validate_properties(self, properties: dict, domain_name: str, error_messages: list, block_index: int):
+        from a1facts.utils.validation import check_type
+        is_valid = True
         if properties:
-            for prop in self.properties:
-                if prop.property_name not in properties:
-                    raise Exception(f"Property {prop.property_name} not found in properties, you need to change the world model")
+            defined_props = {p.property_name: p for p in self.properties}
+            for prop, value in properties.items():
+                if prop not in defined_props:
+                    error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In relationship '{domain_name}->{self.relationship_name}', property '{prop}' is not defined.")
+                    is_valid = False
+                elif not check_type(value, defined_props[prop].type):
+                    error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In relationship '{domain_name}->{self.relationship_name}', property '{prop}' has wrong type. Expected '{defined_props[prop].type}' but value was '{value}'.")
+                    is_valid = False
+        return is_valid
+
+    def validate_domain_and_range(self, domain_name: str, range_name: str, entities: dict, error_messages: list, block_index: int):
+        from a1facts.ontology.rdfs_entity import RDFSEntity
+        is_valid = True
+        domain_entity = entities.get(domain_name)
+        range_entity = entities.get(range_name)
+        
+        if not domain_entity:
+            error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: Domain entity '{domain_name}' was never defined with a type.")
+            is_valid = False
+        elif domain_entity.properties.get('type') != self.domain_entity_class:
+            error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: For relationship '{self.relationship_name}', domain '{domain_name}' of type '{domain_entity.properties.get('type')}' does not match expected domain '{self.domain_entity_class}'.")
+            is_valid = False
+        
+        if not range_entity:
+            # Stub undefined range entities
+            range_entity = RDFSEntity(name=range_name, properties={'type': self.range_entity_class})
+            entities[range_name] = range_entity
+        elif range_entity.properties.get('type') != self.range_entity_class:
+             error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: For relationship '{self.relationship_name}', range '{range_name}' of type '{range_entity.properties.get('type')}' does not match expected range '{self.range_entity_class}'.")
+             is_valid = False
+        return is_valid
 
     def get_tool_add_or_update_relationship(self, add_or_update_relationship_func):
         """
@@ -80,7 +104,7 @@ class RelationshipClass:
             domain_primary_key_value = properties.get(domain_param_name)
             range_primary_key_value = properties.get(range_param_name)
             props = properties.get("properties")
-            self._validate_properties(props)
+            self.validate_properties(props, domain_primary_key_value, [], 0) # This is a placeholder, will be fixed later
             logger.system(f"Arguments for add_or_update_relationship_func: {self.domain_entity_class}, {self.domain_primary_key_prop}, {domain_primary_key_value}, {self.range_entity_class}, {self.range_primary_key_prop}, {range_primary_key_value}, {self.relationship_name}, {props}, {self.symmetric}")
             return add_or_update_relationship_func(
                 self.domain_entity_class,

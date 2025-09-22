@@ -10,6 +10,9 @@ from a1facts.ontology.relationship_class import RelationshipClass
 from a1facts.ontology.ontology_rewrite_agent import OntologyRewriteAgent
 from a1facts.utils.telemetry import nonblocking_send_telemetry_ping
 from a1facts.utils.logger import logger
+import re
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
 
 class KnowledgeOntology:
     """
@@ -235,3 +238,96 @@ class KnowledgeOntology:
         for relationship_class in self.relationship_classes:
             ontology_str += f"   {relationship_class}"
         return ontology_str
+
+    def parse_rdfs_with_validation(self, rdfs_content: str):
+        """
+        Parses and validates an RDFS string against the ontology.
+        
+        Args:
+            rdfs_content: A string containing the RDFS data.
+        
+        Returns:
+            A tuple containing two lists: (entities, relationships)
+        """
+        # 2. Pre-processing: Clean RDFS content
+        rdfs_content = re.sub(r'#.*', '', rdfs_content)
+        rdfs_content = rdfs_content.replace(u'\xa0', ' ')
+        blocks = rdfs_content.strip().split('.\n')
+
+        # 3. First Pass: Create all entities
+        entities = {}
+        error_messages = []
+        
+        for i, block_text in enumerate(blocks):
+            block_text = block_text.strip()
+            if not block_text or block_text.startswith('@prefix'):
+                continue
+            
+            lines = [line.strip() for line in block_text.split('\n') if line.strip()]
+            if not lines: continue
+
+            match = re.match(r'(:[^\s]+)\s+a\s+(.*)', lines[0])
+            if not match: continue
+
+            subject = match.group(1).strip(':')
+            rest_of_line = match.group(2).rstrip(';').strip()
+            
+            properties = {}
+            for line in lines[1:]:
+                prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
+                if prop_match:
+                    key = prop_match.group(1).strip(':')
+                    value = prop_match.group(2).rstrip(';').strip()
+                    if '^^' in value: value = value.split('^^')[0]
+                    value = value.strip('"')
+                    properties[key] = value
+
+            entity = RDFSEntity.from_rdfs_block(subject, rest_of_line, properties, self, error_messages, i)
+            if entity:
+                entities[entity.name] = entity
+
+        # 4. Second Pass: Parse, validate, and create relationships
+        relationships = []
+        success_messages = [f"Created entity: {entity}" for entity in entities.values()]
+
+        for i, block_text in enumerate(blocks):
+            block_text = block_text.strip()
+            if not block_text or block_text.startswith('@prefix'):
+                continue
+            
+            lines = [line.strip() for line in block_text.split('\n') if line.strip()]
+            if not lines: continue
+
+            match = re.match(r'(:[^\s]+)\s+(:[^\s]+)\s+(.*)', lines[0])
+            if not match or match.group(2) == 'a': continue
+
+            domain = match.group(1).strip(':')
+            relationship = match.group(2).strip(':')
+            range_str = match.group(3).rstrip(';').strip()
+            
+            properties = {}
+            for line in lines[1:]:
+                prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
+                if prop_match:
+                    key = prop_match.group(1).strip(':')
+                    value = prop_match.group(2).rstrip(';').strip()
+                    if '^^' in value: value = value.split('^^')[0]
+                    value = value.strip('"')
+                    properties[key] = value
+            
+            new_relationships = RDFSRelationship.from_rdfs_block(domain, relationship, range_str, properties, self, entities, error_messages, i)
+            relationships.extend(new_relationships)
+            for rel in new_relationships:
+                success_messages.append(f"Created relationship: {rel}")
+
+        print("\n--- ✅ Successful Operations ---")
+        for msg in success_messages:
+            print(msg)
+
+        if error_messages:
+            print("\n--- ❌ Validation Errors ---")
+            for msg in error_messages:
+                print(msg)
+        print("\n--- Parsing and Validation Complete ---")
+
+        return list(entities.values()), relationships

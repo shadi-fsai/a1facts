@@ -36,6 +36,19 @@ class EntityClass:
             entity_str += f"      - {prop}\n"
         return entity_str
 
+    def validate_properties(self, properties: dict, entity_name: str, error_messages: list, block_index: int):
+        from a1facts.utils.validation import check_type
+        is_valid = True
+        defined_props = {p.property_name: p for p in self.properties}
+        for prop, value in properties.items():
+            if prop not in defined_props:
+                error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In entity '{entity_name}', property '{prop}' is not defined for class '{self.entity_class_name}'.")
+                is_valid = False
+            elif not check_type(value, defined_props[prop].type):
+                error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In entity '{entity_name}', property '{prop}' has wrong type. Expected '{defined_props[prop].type}' but value was '{value}'.")
+                is_valid = False
+        return is_valid
+
     def get_tool_add_or_update_entity(self, add_or_update_entity_func):
         """
         Creates a tool function for adding or updating an entity of this class.
