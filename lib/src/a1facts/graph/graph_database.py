@@ -1,3 +1,6 @@
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+
 class BaseGraphDatabase:
     """
     Base class for graph databases.
@@ -5,10 +8,10 @@ class BaseGraphDatabase:
     def __init__(self):
         pass
 
-    def add_or_update_entity(self, label, primary_key_field, properties):
+    def add_or_update_entity(self, entity: RDFSEntity):
         pass
 
-    def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
+    def add_relationship(self, relationship: RDFSRelationship):
         pass
 
     def get_all_entities_by_label(self, label):

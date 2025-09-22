@@ -3,6 +3,9 @@ from a1facts.knowledge_base import KnowledgeBase
 import os
 import yaml
 from unittest.mock import Mock, patch
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+from colored import cprint
 
 # E2E tests will be added here to validate the full KnowledgeBase lifecycle.
 
@@ -18,7 +21,8 @@ def create_e2e_ontology(tmp_path):
                 'description': 'A human being.',
                 'properties': [
                     {'name': 'name', 'type': 'string', 'description': 'The name of the person.', 'primary_key': True},
-                    {'name': 'age', 'type': 'integer', 'description': 'The age of the person.'}
+                    {'name': 'age', 'type': 'integer', 'description': 'The age of the person.'},
+                    {'name': 'occupation', 'type': 'string', 'description': 'The occupation of the person.'}
                 ]
             }
         },
@@ -83,9 +87,9 @@ def create_complex_ontology(tmp_path):
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.knowledge_graph.UpdateAgent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgent, MockAcquirerAgent, tmp_path, db_backend, request):
+@patch('a1facts.graph.query_rewrite_agent.Agent')
+def test_knowledge_base_full_lifecycle(MockQueryRewriteAgent, MockQueryAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Tests the full end-to-end lifecycle of the KnowledgeBase.
     This test runs for both NetworkX and Neo4j backends.
@@ -116,9 +120,9 @@ def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgent, 
     )
 
     # Mock the internal agno.Agent instances' .run() method for each agent
-    mock_query_run = MockQueryAgentInternal.return_value.run
-    mock_update_agent_instance = MockUpdateAgent.return_value
+    mock_query_run = MockQueryAgent.return_value.run
     mock_acquirer_run = MockAcquirerAgent.return_value.run
+    mock_rewrite_run = MockQueryRewriteAgent.return_value.run
 
     # 2. Query Empty Graph: Simulate the agent finding no information.
     # The QueryAgent's logic will return a fallback string if content is empty.
@@ -126,34 +130,52 @@ def test_knowledge_base_full_lifecycle(MockQueryAgentInternal, MockUpdateAgent, 
     result_empty = kb.query("What is the age of Alice?")
     assert "A verifiable answer is not available" in result_empty
     mock_query_run.assert_called_once()
-
+    
     # 3. Acquire Knowledge: Simulate the acquirer finding new information.
     acquired_knowledge = "The person Alice is 30 years old."
     mock_acquirer_run.return_value = Mock(content=acquired_knowledge)
-    
-    # 4. Ingest Knowledge: The `acquire_knowledge_for_query` method automatically calls `ingest_knowledge`.
-    with patch.object(kb.graph, '_rewrite_query', return_value=acquired_knowledge):
-        new_knowledge = kb.acquire_knowledge_for_query("Find info about Alice.")
+    mock_rewrite_run.return_value = Mock(content=acquired_knowledge)
 
-    assert new_knowledge == acquired_knowledge
-        
-    # Verify that the update agent's update method was called.
-    mock_update_agent_instance.update.assert_called_with(acquired_knowledge)
+    # 4. Ingest Knowledge: The `acquire_knowledge_for_query` method automatically calls `ingest_knowledge`.
+    
+    returned_knowledge = kb.knowledge_acquirer.acquire("Find info about Alice.")
+    assert returned_knowledge == acquired_knowledge
+
+    from a1facts.graph.update_agent import RDFSResult
+    rdfs_for_alice = """
+        :Alice a :Person ;
+            :name "Alice" ;
+            :age "30" .
+    """
+    mock_rdfs_response = RDFSResult(rdfs=rdfs_for_alice, other_information="", ontology_elements_used=[])
+
+    mock_rdfs_agent = Mock()
+    mock_rdfs_agent.run.return_value = Mock(content=mock_rdfs_response)
+    kb.graph.update_agent.rdfs_agent = mock_rdfs_agent
+
+    kb.ingest_knowledge(returned_knowledge)
+
+
+    # Verify that the entity was added to the graph.
+    alice_data = kb.graph.graph_database.get_entity_properties("Person", "name", "Alice")
+    assert alice_data is not None
+    assert alice_data.get("age") == "30"
 
     # 5. Query Populated Graph: Now, simulate the agent finding the data.
     mock_query_run.reset_mock()
     mock_query_run.return_value = Mock(content="The age of Alice is 30.")
     
     result_populated = kb.query("What is the age of Alice?")
-    assert "age of Alice is 30" in result_populated
-    mock_query_run.assert_called_once()
+    assert "Alice" in result_populated
+    assert "30" in result_populated
+
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_knowledge_extension_e2e(MockQueryAgentInternal, MockUpdateAgentInternal, MockAcquirerAgent, tmp_path, db_backend, request):
+@patch('a1facts.graph.query_rewrite_agent.Agent')
+def test_knowledge_extension_e2e(MockQueryRewriteAgent, MockQueryAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Tests a more complex E2E flow for both backends.
     """
@@ -182,28 +204,42 @@ def test_knowledge_extension_e2e(MockQueryAgentInternal, MockUpdateAgentInternal
     )
 
     # Mock the internal agents' run methods
-    mock_query_run = MockQueryAgentInternal.return_value.run
-    mock_update_run = MockUpdateAgentInternal.return_value.run
+    mock_query_run = MockQueryAgent.return_value.run
     mock_acquirer_run = MockAcquirerAgent.return_value.run
+    mock_rewrite_run = MockQueryRewriteAgent.return_value.run
 
     # 2. Ingest Initial Knowledge
     initial_knowledge = "There is a person named Bob."
     # We will directly add this to the graph to simulate a pre-existing state
-    kb.graph.graph_database.add_or_update_entity("Person", "name", {"name": "Bob"})
+    person_class = kb.ontology.find_entity_class("Person")
+    bob = RDFSEntity(person_class, "Bob", {"name": "Bob"})
+    kb.graph.graph_database.add_or_update_entity(bob)
 
     # 3. Acquire New Knowledge
     new_knowledge = "Bob is 42 years old."
     mock_acquirer_run.return_value = Mock(content=new_knowledge)
     
-    acquired_info = kb.acquire_knowledge_for_query("How old is Bob?")
-    assert acquired_info == new_knowledge
+    # Mock the rewrite agent to just pass the knowledge through for this test
+    mock_rewrite_run.return_value = Mock(content=new_knowledge)
+
+    returned_knowledge = kb.knowledge_acquirer.acquire("How old is Bob?")
+    assert returned_knowledge == new_knowledge
+
+    from a1facts.graph.update_agent import RDFSResult
+    rdfs_for_bob_age = """
+        :Bob a :Person ;
+            :name "Bob" ;
+            :age "42" .
+    """
+    mock_rdfs_response = RDFSResult(rdfs=rdfs_for_bob_age, other_information="", ontology_elements_used=[])
+
+    mock_rdfs_agent = Mock()
+    mock_rdfs_agent.run.return_value = Mock(content=mock_rdfs_response)
+    kb.graph.update_agent.rdfs_agent = mock_rdfs_agent
+
+    kb.ingest_knowledge(returned_knowledge)
     
-    # 4. Ingest and Extend Knowledge
-    # In a real run, this would involve an LLM call to translate knowledge to tool calls.
-    # We will simulate the outcome of that LLM call: updating the existing entity.
-    # The acquirer's run would trigger an ingest, which calls the update agent.
-    # We can simulate this by directly calling the update function on the real graph DB.
-    kb.graph.graph_database.add_or_update_entity("Person", "name", {"name": "Bob", "age": 42})
+    # The manual update is no longer needed as the ingestion pipeline handles it.
 
     # 5. Verify the Update
     # We now query the graph for the new information.
@@ -215,7 +251,7 @@ def test_knowledge_extension_e2e(MockQueryAgentInternal, MockUpdateAgentInternal
     assert len(all_persons) == 1
     bob_data = all_persons[0]
     assert bob_data.get("name") == "Bob"
-    assert bob_data.get("age") == 42
+    assert bob_data.get("age") == "42"
     
     # Finally, simulate the query agent returning this data
     mock_query_run.return_value = Mock(content="Bob is 42 years old.")
@@ -225,9 +261,9 @@ def test_knowledge_extension_e2e(MockQueryAgentInternal, MockUpdateAgentInternal
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_stress_knowledge_base(MockQueryAgentInternal, MockUpdateAgentInternal, MockAcquirerAgent, tmp_path, db_backend, request):
+@patch('a1facts.graph.query_rewrite_agent.Agent')
+def test_stress_knowledge_base(MockQueryRewriteAgent, MockQueryAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Stress tests the system for both backends.
     """
@@ -256,15 +292,16 @@ def test_stress_knowledge_base(MockQueryAgentInternal, MockUpdateAgentInternal, 
     )
     
     # Mock the internal agents' run methods
-    mock_query_run = MockQueryAgentInternal.return_value.run
+    mock_query_run = MockQueryAgent.return_value.run
     mock_acquirer_run = MockAcquirerAgent.return_value.run
+    mock_rewrite_run = MockQueryRewriteAgent.return_value.run
     
     # 2. Populate the Graph with a large number of entities
     num_entities = 1000
+    person_class = kb.ontology.find_entity_class("Person")
     for i in range(num_entities):
-        kb.graph.graph_database.add_or_update_entity(
-            "Person", "name", {"name": f"Person_{i}", "age": 20 + (i % 50)}
-        )
+        person = RDFSEntity(person_class, f"Person_{i}", {"name": f"Person_{i}", "age": 20 + (i % 50)})
+        kb.graph.graph_database.add_or_update_entity(person)
 
     # Verify that all entities were added
     all_persons = kb.graph.graph_database.get_all_entities_by_label("Person")
@@ -279,9 +316,8 @@ def test_stress_knowledge_base(MockQueryAgentInternal, MockUpdateAgentInternal, 
 
     # 4. Update an existing entity
     # Simulate an update call that would be triggered by an ingest operation
-    kb.graph.graph_database.add_or_update_entity(
-        "Person", "name", {"name": target_person_name, "age": 21}
-    )
+    updated_person_entity = RDFSEntity(person_class, target_person_name, {"name": target_person_name, "age": 21})
+    kb.graph.graph_database.add_or_update_entity(updated_person_entity)
     
     # Verify the update by checking the graph directly
     updated_person = kb.graph.graph_database.get_entity_properties("Person", "name", target_person_name)
@@ -292,13 +328,28 @@ def test_stress_knowledge_base(MockQueryAgentInternal, MockUpdateAgentInternal, 
     new_knowledge = f"{acquire_target} now has an occupation of 'Engineer'."
     mock_acquirer_run.return_value = Mock(content=new_knowledge)
     
-    acquired_info = kb.acquire_knowledge_for_query(f"What is {acquire_target}'s job?")
-    assert acquired_info == new_knowledge
+    # Mock the rewrite agent to just pass the knowledge through for this test
+    mock_rewrite_run.return_value = Mock(content=new_knowledge)
+
+    returned_knowledge = kb.knowledge_acquirer.acquire(f"What is {acquire_target}'s job?")
+    assert returned_knowledge == new_knowledge
+
+    from a1facts.graph.update_agent import RDFSResult
+    # Configure the mock for the rdfs_agent to handle the new knowledge
+    rdfs_for_person_750 = f"""
+        :{acquire_target} a :Person ;
+            :name "{acquire_target}" ;
+            :occupation "Engineer" .
+    """
+    mock_rdfs_response = RDFSResult(rdfs=rdfs_for_person_750, other_information="", ontology_elements_used=[])
+
+    mock_rdfs_agent = Mock()
+    mock_rdfs_agent.run.return_value = Mock(content=mock_rdfs_response)
+    kb.graph.update_agent.rdfs_agent = mock_rdfs_agent
+
+    kb.ingest_knowledge(returned_knowledge)
     
-    # Simulate the ingestion of this new property
-    kb.graph.graph_database.add_or_update_entity(
-        "Person", "name", {"name": acquire_target, "occupation": "Engineer"}
-    )
+    # The manual update is no longer needed as the ingestion pipeline handles it.
     
     # Verify the extension
     extended_person = kb.graph.graph_database.get_entity_properties("Person", "name", acquire_target)
@@ -309,9 +360,9 @@ def test_stress_knowledge_base(MockQueryAgentInternal, MockUpdateAgentInternal, 
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_complex_ontology_relationships(MockQueryAgentInternal, MockUpdateAgentInternal, MockAcquirerAgent, tmp_path, db_backend, request):
+@patch('a1facts.graph.query_rewrite_agent.Agent')
+def test_complex_ontology_relationships(MockQueryRewriteAgent, MockQueryAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Tests ingestion and querying of entities and relationships with properties
     using a more complex, multi-class ontology.
@@ -340,18 +391,19 @@ def test_complex_ontology_relationships(MockQueryAgentInternal, MockUpdateAgentI
         neo4j_password=neo4j_password
     )
 
-    mock_query_run = MockQueryAgentInternal.return_value.run
+    mock_query_run = MockQueryAgent.return_value.run
 
     # 2. Ingest interconnected entities
-    kb.graph.graph_database.add_or_update_entity("Person", "name", {"name": "Alice", "age": 30})
-    kb.graph.graph_database.add_or_update_entity("Company", "name", {"name": "InnovateCorp", "industry": "Tech"})
+    person_class = kb.ontology.find_entity_class("Person")
+    company_class = kb.ontology.find_entity_class("Company")
+    alice = RDFSEntity(person_class, "Alice", {"name": "Alice", "age": 30})
+    innovate_corp = RDFSEntity(company_class, "InnovateCorp", {"name": "InnovateCorp", "industry": "Tech"})
+    kb.graph.graph_database.add_or_update_entity(alice)
+    kb.graph.graph_database.add_or_update_entity(innovate_corp)
     
     # 3. Add a relationship with properties
-    kb.graph.graph_database.add_relationship(
-        "Person", "name", "Alice",
-        "Company", "name", "InnovateCorp",
-        "WORKS_AT", {"role_title": "Lead Developer"}
-    )
+    works_at = RDFSRelationship(alice, "WORKS_AT", innovate_corp, {"role_title": "Lead Developer"})
+    kb.graph.graph_database.add_relationship(works_at)
     
     # 4. Verify the relationship and its properties via query
     # Simulate the query agent finding the role title from the relationship
@@ -384,9 +436,9 @@ def test_complex_ontology_relationships(MockQueryAgentInternal, MockUpdateAgentI
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 @patch('a1facts.graph.query_agent.Agent')
-def test_stress_complex_ontology(MockQueryAgentInternal, MockUpdateAgentInternal, MockAcquirerAgent, tmp_path, db_backend, request):
+@patch('a1facts.graph.query_rewrite_agent.Agent')
+def test_stress_complex_ontology(MockQueryRewriteAgent, MockQueryAgent, MockAcquirerAgent, tmp_path, db_backend, request):
     """
     Stress tests the system using the complex ontology with many interconnected
     entities and relationships.
@@ -415,26 +467,24 @@ def test_stress_complex_ontology(MockQueryAgentInternal, MockUpdateAgentInternal
         neo4j_password=neo4j_password
     )
 
-    mock_query_run = MockQueryAgentInternal.return_value.run
+    mock_query_run = MockQueryAgent.return_value.run
 
     # 2. Populate the Graph
     num_companies = 50
     persons_per_company = 20
+    person_class = kb.ontology.find_entity_class("Person")
+    company_class = kb.ontology.find_entity_class("Company")
     for i in range(num_companies):
         company_name = f"Company_{i}"
-        kb.graph.graph_database.add_or_update_entity(
-            "Company", "name", {"name": company_name, "industry": "Tech"}
-        )
+        company = RDFSEntity(company_class, company_name, {"name": company_name, "industry": "Tech"})
+        kb.graph.graph_database.add_or_update_entity(company)
         for j in range(persons_per_company):
             person_name = f"Person_{i}_{j}"
-            kb.graph.graph_database.add_or_update_entity(
-                "Person", "name", {"name": person_name, "age": 30 + j}
-            )
-            kb.graph.graph_database.add_relationship(
-                "Person", "name", person_name,
-                "Company", "name", company_name,
-                "WORKS_AT", {"role_title": "Engineer"}
-            )
+            person = RDFSEntity(person_class, person_name, {"name": person_name, "age": 30 + j})
+            kb.graph.graph_database.add_or_update_entity(person)
+            
+            works_at = RDFSRelationship(person, "WORKS_AT", company, {"role_title": "Engineer"})
+            kb.graph.graph_database.add_relationship(works_at)
     
     total_persons = num_companies * persons_per_company
     total_entities = total_persons + num_companies

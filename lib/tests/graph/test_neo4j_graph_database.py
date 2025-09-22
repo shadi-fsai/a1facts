@@ -4,6 +4,20 @@ from a1facts.graph.neo4j_graph_database import Neo4jGraphDatabase
 from dotenv import load_dotenv
 import os
 import time
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
+
+# Mock classes for testing
+class MockEntityClass(EntityClass):
+    def __init__(self, name, description, primary_key_name):
+        super().__init__(name, description)
+        self.primary_key_prop = Property(primary_key_name, "str", "pk", True)
+
+class MockProperty:
+    def __init__(self, name):
+        self.property_name = name
 
 # Load environment variables from .env file
 load_dotenv()
@@ -35,8 +49,10 @@ def test_add_entity(neo4j_db):
     """
     Tests adding a new entity to the graph.
     """
+    mock_entity_class = MockEntityClass("Person", "A person", "name")
     properties = {"name": "Alice", "age": 30}
-    neo4j_db.add_or_update_entity("Person", "name", properties)
+    entity = RDFSEntity(mock_entity_class, "Alice", properties)
+    neo4j_db.add_or_update_entity(entity)
     
     with neo4j_db.driver.session() as session:
         result = session.run("MATCH (p:Person {name: 'Alice'}) RETURN p.name AS name, p.age AS age")
@@ -49,13 +65,16 @@ def test_update_entity(neo4j_db):
     """
     Tests updating an existing entity's properties.
     """
+    mock_entity_class = MockEntityClass("Person", "A person", "name")
     # First, add an entity
     initial_properties = {"name": "Bob", "age": 40}
-    neo4j_db.add_or_update_entity("Person", "name", initial_properties)
+    entity1 = RDFSEntity(mock_entity_class, "Bob", initial_properties)
+    neo4j_db.add_or_update_entity(entity1)
     
     # Now, update it
     updated_properties = {"name": "Bob", "age": 41, "city": "New York"}
-    neo4j_db.add_or_update_entity("Person", "name", updated_properties)
+    entity2 = RDFSEntity(mock_entity_class, "Bob", updated_properties)
+    neo4j_db.add_or_update_entity(entity2)
     
     with neo4j_db.driver.session() as session:
         result = session.run("MATCH (p:Person {name: 'Bob'}) RETURN p.name AS name, p.age AS age, p.city AS city")
@@ -69,11 +88,16 @@ def test_add_relationship(neo4j_db):
     Tests adding a relationship between two entities.
     """
     # Add two entities
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Charlie"})
-    neo4j_db.add_or_update_entity("City", "name", {"name": "Paris"})
+    person_class = MockEntityClass("Person", "A person", "name")
+    city_class = MockEntityClass("City", "A city", "name")
+    person = RDFSEntity(person_class, "Charlie", {"name": "Charlie"})
+    city = RDFSEntity(city_class, "Paris", {"name": "Paris"})
+    neo4j_db.add_or_update_entity(person)
+    neo4j_db.add_or_update_entity(city)
     
     # Add a relationship between them
-    neo4j_db.add_relationship("Person", "name", "Charlie", "City", "name", "Paris", "LIVES_IN", {"since": 2020})
+    relationship = RDFSRelationship(person, "LIVES_IN", city, {"since": 2020})
+    neo4j_db.add_relationship(relationship)
     
     with neo4j_db.driver.session() as session:
         result = session.run("""
@@ -88,8 +112,10 @@ def test_get_entity_properties(neo4j_db):
     """
     Tests retrieving properties of a specific entity.
     """
+    mock_entity_class = MockEntityClass("Person", "A person", "name")
     properties = {"name": "David", "occupation": "Engineer"}
-    neo4j_db.add_or_update_entity("Person", "name", properties)
+    entity = RDFSEntity(mock_entity_class, "David", properties)
+    neo4j_db.add_or_update_entity(entity)
     
     retrieved_props = neo4j_db.get_entity_properties("Person", "name", "David")
     assert retrieved_props is not None
@@ -101,8 +127,11 @@ def test_get_all_entities_by_label(neo4j_db):
     """
     Tests retrieving all entities with a specific label.
     """
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Eve"})
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Frank"})
+    mock_entity_class = MockEntityClass("Person", "A person", "name")
+    entity1 = RDFSEntity(mock_entity_class, "Eve", {"name": "Eve"})
+    entity2 = RDFSEntity(mock_entity_class, "Frank", {"name": "Frank"})
+    neo4j_db.add_or_update_entity(entity1)
+    neo4j_db.add_or_update_entity(entity2)
     
     all_persons = neo4j_db.get_all_entities_by_label("Person")
     assert len(all_persons) == 2
@@ -114,9 +143,15 @@ def test_get_relationship_properties(neo4j_db):
     """
     Tests retrieving properties of a specific relationship.
     """
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Grace"})
-    neo4j_db.add_or_update_entity("Company", "name", {"name": "InnovateCorp"})
-    neo4j_db.add_relationship("Person", "name", "Grace", "Company", "name", "InnovateCorp", "WORKS_AT", {"role": "Developer"})
+    person_class = MockEntityClass("Person", "A person", "name")
+    company_class = MockEntityClass("Company", "A business entity", "name")
+    person = RDFSEntity(person_class, "Grace", {"name": "Grace"})
+    company = RDFSEntity(company_class, "InnovateCorp", {"name": "InnovateCorp"})
+    neo4j_db.add_or_update_entity(person)
+    neo4j_db.add_or_update_entity(company)
+    
+    relationship = RDFSRelationship(person, "WORKS_AT", company, {"role": "Developer"})
+    neo4j_db.add_relationship(relationship)
     
     # Corrected the order of arguments to match the method signature.
     rel_props = neo4j_db.get_relationship_properties("Person", "name", "Grace", "WORKS_AT", "Company", "name", "InnovateCorp")
@@ -129,11 +164,19 @@ def test_get_relationship_entities(neo4j_db):
     """
     Tests retrieving entities connected by a specific relationship.
     """
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Heidi"})
-    neo4j_db.add_or_update_entity("Project", "name", {"name": "Alpha"})
-    neo4j_db.add_or_update_entity("Project", "name", {"name": "Beta"})
-    neo4j_db.add_relationship("Person", "name", "Heidi", "Project", "name", "Alpha", "MANAGES", {})
-    neo4j_db.add_relationship("Person", "name", "Heidi", "Project", "name", "Beta", "MANAGES", {})
+    person_class = MockEntityClass("Person", "A person", "name")
+    project_class = MockEntityClass("Project", "A project", "name")
+    person = RDFSEntity(person_class, "Heidi", {"name": "Heidi"})
+    project1 = RDFSEntity(project_class, "Alpha", {"name": "Alpha"})
+    project2 = RDFSEntity(project_class, "Beta", {"name": "Beta"})
+    neo4j_db.add_or_update_entity(person)
+    neo4j_db.add_or_update_entity(project1)
+    neo4j_db.add_or_update_entity(project2)
+
+    relationship1 = RDFSRelationship(person, "MANAGES", project1, {})
+    relationship2 = RDFSRelationship(person, "MANAGES", project2, {})
+    neo4j_db.add_relationship(relationship1)
+    neo4j_db.add_relationship(relationship2)
     
     related_projects = neo4j_db.get_relationship_entities("Person", "name", "Heidi", "MANAGES", "Project")
     assert len(related_projects) == 2
@@ -152,8 +195,12 @@ def test_relationship_not_found(neo4j_db):
     """
     Tests that getting properties of a non-existent relationship returns an empty list.
     """
-    neo4j_db.add_or_update_entity("Person", "name", {"name": "Ivan"})
-    neo4j_db.add_or_update_entity("City", "name", {"name": "Tokyo"})
+    person_class = MockEntityClass("Person", "A person", "name")
+    city_class = MockEntityClass("City", "A city", "name")
+    person = RDFSEntity(person_class, "Ivan", {"name": "Ivan"})
+    city = RDFSEntity(city_class, "Tokyo", {"name": "Tokyo"})
+    neo4j_db.add_or_update_entity(person)
+    neo4j_db.add_or_update_entity(city)
     
     rel_props = neo4j_db.get_relationship_properties("Person", "name", "Ivan", "City", "name", "Tokyo", "LIVES_IN")
     assert rel_props == []

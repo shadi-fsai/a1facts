@@ -30,6 +30,7 @@ class KnowledgeGraph:
         """
         logger.system(f"Initializing KnowledgeGraph: {ontology.ontology_file} with use_neo4j: {use_neo4j}")
         self.ontology = ontology
+        self.graph_database = None
         if use_neo4j:
             self.graph_database = Neo4jGraphDatabase(uri=neo4j_uri, user=neo4j_user, password=neo4j_password)
         else:
@@ -39,7 +40,7 @@ class KnowledgeGraph:
         self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
-        self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
+        self.update_agent = UpdateAgent(ontology=self.ontology, graph_database=self.graph_database)
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")
@@ -84,13 +85,16 @@ class KnowledgeGraph:
             str: The content of the agent's response.
         """
         logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
-        rewrite_knowledge = self._rewrite_query(knowledge)
+        print(f"Updating knowledge graph with knowledge: {knowledge}")
+        rewrite_knowledge = self._rewrite_query(knowledge) #entity deduplication
         logger.system(f"Rewritten knowledge: {rewrite_knowledge}")
+        print(f"Rewritten knowledge: {rewrite_knowledge}")
         result = self.update_agent.update(rewrite_knowledge)
-        logger.system(f"Result: {result.content}")
+        logger.system(f"Result: {result}")
+        print(f"Result: {result}")
         self.graph_database.save()
         logger.system(f"Graph database saved")
-        return result.content
+        return result
 
     def close(self):
         if self.graph_database is not None:

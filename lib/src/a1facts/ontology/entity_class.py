@@ -36,11 +36,19 @@ class EntityClass:
             entity_str += f"      - {prop}\n"
         return entity_str
 
-    def validate_properties(self, properties: dict, entity_name: str, error_messages: list, block_index: int):
-        from a1facts.utils.validation import check_type
+    def validate_properties(self, rdfs_properties: list, entity_name: str, error_messages: list, block_index: int):
+        from a1facts.ontology.rdfs_property import check_type
         is_valid = True
         defined_props = {p.property_name: p for p in self.properties}
-        for prop, value in properties.items():
+        
+        properties_dict = {prop.key: prop.value for prop in rdfs_properties}
+
+        # Check for presence of primary key
+        if self.primary_key_prop and self.primary_key_prop.property_name not in properties_dict:
+            # If PK is not in properties, assume the entity name is the PK value
+            properties_dict[self.primary_key_prop.property_name] = entity_name
+
+        for prop, value in properties_dict.items():
             if prop not in defined_props:
                 error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In entity '{entity_name}', property '{prop}' is not defined for class '{self.entity_class_name}'.")
                 is_valid = False

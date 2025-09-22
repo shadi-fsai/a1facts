@@ -1,6 +1,11 @@
+from __future__ import annotations
 from a1facts.ontology.entity_class import EntityClass
 from a1facts.ontology.property import Property
 from a1facts.utils.logger import logger
+import typing
+if typing.TYPE_CHECKING:
+    from a1facts.ontology.knowledge_ontology import KnowledgeOntology
+
 
 class RelationshipClass:
     """Represents a class of relationships (edges) in the ontology."""
@@ -50,12 +55,15 @@ class RelationshipClass:
         """Returns True if the relationship is symmetric."""
         return self.symmetric
 
-    def validate_properties(self, properties: dict, domain_name: str, error_messages: list, block_index: int):
-        from a1facts.utils.validation import check_type
+    def validate_properties(self, rdfs_properties: list, domain_name: str, error_messages: list, block_index: int):
+        from a1facts.ontology.rdfs_property import check_type
         is_valid = True
-        if properties:
+        
+        properties_dict = {prop.key: prop.value for prop in rdfs_properties}
+
+        if properties_dict:
             defined_props = {p.property_name: p for p in self.properties}
-            for prop, value in properties.items():
+            for prop, value in properties_dict.items():
                 if prop not in defined_props:
                     error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: In relationship '{domain_name}->{self.relationship_name}', property '{prop}' is not defined.")
                     is_valid = False
@@ -64,7 +72,7 @@ class RelationshipClass:
                     is_valid = False
         return is_valid
 
-    def validate_domain_and_range(self, domain_name: str, range_name: str, entities: dict, error_messages: list, block_index: int):
+    def validate_domain_and_range(self, domain_name: str, range_name: str, entities: dict, ontology: "KnowledgeOntology", error_messages: list, block_index: int):
         from a1facts.ontology.rdfs_entity import RDFSEntity
         is_valid = True
         domain_entity = entities.get(domain_name)
@@ -79,8 +87,10 @@ class RelationshipClass:
         
         if not range_entity:
             # Stub undefined range entities
-            range_entity = RDFSEntity(name=range_name, properties={'type': self.range_entity_class})
-            entities[range_name] = range_entity
+            range_entity_class = ontology.find_entity_class(self.range_entity_class)
+            if not range_entity_class:
+                error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: Range entity class '{self.range_entity_class}' for relationship '{self.relationship_name}' not found in ontology.")
+                is_valid = False
         elif range_entity.properties.get('type') != self.range_entity_class:
              error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: For relationship '{self.relationship_name}', range '{range_name}' of type '{range_entity.properties.get('type')}' does not match expected range '{self.range_entity_class}'.")
              is_valid = False
@@ -104,7 +114,7 @@ class RelationshipClass:
             domain_primary_key_value = properties.get(domain_param_name)
             range_primary_key_value = properties.get(range_param_name)
             props = properties.get("properties")
-            self.validate_properties(props, domain_primary_key_value, [], 0) # This is a placeholder, will be fixed later
+            self.validate_properties([], domain_primary_key_value, [], 0) # This is a placeholder, will be fixed later
             logger.system(f"Arguments for add_or_update_relationship_func: {self.domain_entity_class}, {self.domain_primary_key_prop}, {domain_primary_key_value}, {self.range_entity_class}, {self.range_primary_key_prop}, {range_primary_key_value}, {self.relationship_name}, {props}, {self.symmetric}")
             return add_or_update_relationship_func(
                 self.domain_entity_class,

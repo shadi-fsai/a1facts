@@ -15,8 +15,9 @@ class RDFSResult(BaseModel):
 
 
 class UpdateAgent:
-    def __init__(self, ontology: KnowledgeOntology, mytools: list):
+    def __init__(self, ontology: KnowledgeOntology, graph_database):
         self.ontology = ontology
+        self.graph_database = graph_database
         self.rdfs_agent = Agent(
             name="RDFS Agent",
             role="Translate the knowledge into a structured format based on the ontology.",
@@ -38,40 +39,33 @@ class UpdateAgent:
             debug_mode=False,
             output_schema=RDFSResult,
         )
-        self.update_agent = Agent(
-            name="Knowledge Graph Update Agent",
-            role="Update the knowledge graph",
-            model=my_high_precision_model,
-            tools=mytools,
+        
 
-            instructions=dedent(f"""
-                The user is providing you RDFS format of the knowledge. 
-                Add every entity and relationship to the graph using the tools available to you.
-                First add the entities, then add the relationships.
-                Make sure to add every single one of them.
-                Today is {datetime.now().strftime("%Y-%m-%d")}
-            """),
-            markdown=True,
-            debug_mode=False,
-            input_schema=RDFSResult,
-            )
-
-    def update(self, knowledge: str):
+    def update(self, knowledge: str) -> str:
         #step 0 - translate the knowledge into rdfs format
         #step 1 - deduplicate the knowledge using spacy; add alises to entities and relatioinships
         #step 2 - add the knowledge to the graph using the tools available to you
         logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
         rdfs_result = self.rdfs_agent.run("Translate the following knowledge into a structured format based on the ontology\n\n " + knowledge)
-        cprint(rdfs_result.content.rdfs, 'red')
-        cprint(rdfs_result.content.other_information, 'yellow')
-        
+        logger.system("\n--- RDFS Content ---")
+        logger.system(rdfs_result.content.rdfs)
+        logger.system("\n--- Other Information ---") #TODO: this can be used to improve the ontology
+        logger.system(rdfs_result.content.other_information)      
+        print(f"RDFS result: {rdfs_result.content.rdfs}")
         entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
+        print(f"Entities: {entities}")
+        print(f"Relationships: {relationships}")
+        logger.system("\n--- Parsed Entities ---")
+        return_str = ""
         for entity in entities:
-            cprint(entity, 'green')
-        exit()
+            print(f"Adding entity: {entity}")
+            self.graph_database.add_or_update_entity(entity)
+            logger.system(entity)
+            return_str += f"Added entity: {entity}\n"
+        logger.system("\n--- Parsed Relationships ---")
         for relationship in relationships:
-            cprint(relationship, 'blue')
-        exit()    
-        logger.system(f"RDFS result: {rdfs_result.content.rdfs + "\nToday is " + datetime.now().strftime("%Y-%m-%d")}")
-        logger.system(f"RDFS not in ontology: {rdfs_result.content.other_information}")
-        return self.update_agent.run(rdfs_result.content.rdfs + "\nToday is " + datetime.now().strftime("%Y-%m-%d"))
+            self.graph_database.add_relationship(relationship)
+            logger.system(relationship)
+            return_str += f"Added relationship: {relationship}\n"
+
+        return return_str

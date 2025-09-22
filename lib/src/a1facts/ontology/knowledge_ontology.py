@@ -13,6 +13,7 @@ from a1facts.utils.logger import logger
 import re
 from a1facts.ontology.rdfs_entity import RDFSEntity
 from a1facts.ontology.rdfs_relationship import RDFSRelationship
+from a1facts.ontology.rdfs_property import RDFSProperty
 
 class KnowledgeOntology:
     """
@@ -41,24 +42,39 @@ class KnowledgeOntology:
         logger.user(f"Ontology loaded: {self.ontology_file}")
         logger.user(f"Ontology parsed: {str(self)}")
         
+    def find_relationship_class(self, relationship_class_name):
+        """
+        Finds a relationship class by name.
 
-    def find_entity_class(self, name):
+        Args:
+            relationship_class_name (str): The name of the relationship class to find.
+        """
+        logger.system(f"Finding relationship class: {relationship_class_name}")
+        for relationship_class in self.relationship_classes:
+            if relationship_class.relationship_name == relationship_class_name:
+                return relationship_class
+        logger.system(f"Relationship class not found: {relationship_class_name}")
+        return None
+        
+    def find_entity_class(self, entity_class_name):
         """
         Finds an entity class by name.
 
         Args:
-            name (str): The name of the entity class to find.
+            entity_class_name (str): The name of the entity class to find.
 
         Returns:
             EntityClass or None: The found entity class, or None if not found.
         """
-        logger.system(f"Finding entity class: {name}")
+        logger.system(f"Finding entity class: {entity_class_name}")
         for entity_class in self.entity_classes:
-            if entity_class.entity_class_name == name:
+            if entity_class.entity_class_name == entity_class_name:
                 return entity_class
-        logger.system(f"Entity class not found: {name}")
+        logger.system(f"Entity class not found: {entity_class_name}")
         return None   
  
+
+
     def load_ontology(self):
         """Loads the ontology from the specified YAML file."""
         logger.system(f"Loading ontology from {self.ontology_file}")
@@ -249,76 +265,90 @@ class KnowledgeOntology:
         Returns:
             A tuple containing two lists: (entities, relationships)
         """
-        # 2. Pre-processing: Clean RDFS content
+        # 1. Pre-process the RDFS content
         rdfs_content = re.sub(r'#.*', '', rdfs_content)
         rdfs_content = rdfs_content.replace(u'\xa0', ' ')
-        blocks = rdfs_content.strip().split('.\n')
+        
+        # Extract prefixes and remove prefix lines
+        lines = rdfs_content.split('\n')
+        prefixes = {}
+        content_lines = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith('@prefix'):
+                parts = stripped.split()
+                if len(parts) == 4:
+                    prefixes[parts[1]] = parts[2].strip('<>')
+            else:
+                content_lines.append(line)
+        
+        # Split content into blocks based on terminating periods
+        content_body = "\n".join(content_lines)
+        
+        # Split content into blocks based on terminating periods
+        blocks = [block.strip() for block in re.split(r'\s*\.\s*', content_body.strip()) if block.strip()]
 
-        # 3. First Pass: Create all entities
+        # 2. Initialize data structures
         entities = {}
+        relationships = []
         error_messages = []
         
+        # 3. Combined Pass: Parse, validate, and create entities and relationships
         for i, block_text in enumerate(blocks):
-            block_text = block_text.strip()
+            block_text = block_text.strip().rstrip('.')
             if not block_text or block_text.startswith('@prefix'):
                 continue
-            
-            lines = [line.strip() for line in block_text.split('\n') if line.strip()]
-            if not lines: continue
 
-            match = re.match(r'(:[^\s]+)\s+a\s+(.*)', lines[0])
-            if not match: continue
+            # Attempt to parse as an entity
+            entity_match = re.search(r'([^\s]+)\s+a\s+(:[^\s]+)\s*;?', block_text)
+            if entity_match:
+                subject = entity_match.group(1)
+                entity_class_name_str = entity_match.group(2)
+                properties_str = block_text[entity_match.end():]
 
-            subject = match.group(1).strip(':')
-            entity_class_name_str = match.group(2).rstrip(';').strip().rstrip('.').strip()
-            
-            properties = {}
-            for line in lines[1:]:
-                prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
-                if prop_match:
-                    key = prop_match.group(1).strip(':')
-                    value = prop_match.group(2).rstrip(';').rstrip('.').strip()
-                    if '^^' in value: value = value.split('^^')[0]
-                    value = value.strip('"')
-                    properties[key] = value
+                if subject.startswith('_:'): subject = subject[2:]
+                elif subject.startswith(':'): subject = subject[1:]
 
-            entity = RDFSEntity.from_rdfs_block(subject, entity_class_name_str, properties, self, error_messages, i)
-            if entity:
-                entities[entity.name] = entity
+                if entity_class_name_str.startswith(':'): entity_class_name_str = entity_class_name_str[1:]
 
-        # 4. Second Pass: Parse, validate, and create relationships
-        relationships = []
+                rdfs_properties = []
+                prop_parts = [p.strip() for p in properties_str.split(';') if p.strip()]
+                for part in prop_parts:
+                    prop = RDFSProperty.from_rdf_line(part)
+                    if prop:
+                        rdfs_properties.append(prop)
+
+                entity = RDFSEntity.from_rdfs_block(subject, entity_class_name_str, rdfs_properties, self, error_messages, i)
+                if entity:
+                    entities[entity.name] = entity
+                continue
+
+            # Attempt to parse as a relationship
+            rel_match = re.match(r'([^\s]+)\s+(:[^\s]+)\s+(.*)', block_text)
+            if rel_match:
+                domain = rel_match.group(1)
+                relationship = rel_match.group(2)
+                rest = rel_match.group(3)
+
+                if domain.startswith('_:'): domain = domain[2:]
+                elif domain.startswith(':'): domain = domain[1:]
+                if relationship.startswith(':'): relationship = relationship[1:]
+
+                parts = [p.strip() for p in rest.split(';') if p.strip()]
+                range_str = parts[0].rstrip('.').strip()
+
+                rdfs_properties = []
+                for part in parts[1:]:
+                    prop = RDFSProperty.from_rdf_line(part)
+                    if prop:
+                        rdfs_properties.append(prop)
+
+                new_relationships = RDFSRelationship.from_rdfs_block(domain, relationship, range_str, rdfs_properties, self, entities, error_messages, i)
+                relationships.extend(new_relationships)
+
         success_messages = [f"Created entity: {entity}" for entity in entities.values()]
-
-        for i, block_text in enumerate(blocks):
-            block_text = block_text.strip()
-            if not block_text or block_text.startswith('@prefix'):
-                continue
-            
-            lines = [line.strip() for line in block_text.split('\n') if line.strip()]
-            if not lines: continue
-
-            match = re.match(r'(:[^\s]+)\s+(:[^\s]+)\s+(.*)', lines[0])
-            if not match or match.group(2) == 'a': continue
-
-            domain = match.group(1).strip(':')
-            relationship = match.group(2).strip(':')
-            range_str = match.group(3).rstrip(';').strip().rstrip('.').strip()
-            
-            properties = {}
-            for line in lines[1:]:
-                prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
-                if prop_match:
-                    key = prop_match.group(1).strip(':')
-                    value = prop_match.group(2).rstrip(';').rstrip('.').strip()
-                    if '^^' in value: value = value.split('^^')[0]
-                    value = value.strip('"')
-                    properties[key] = value
-            
-            new_relationships = RDFSRelationship.from_rdfs_block(domain, relationship, range_str, properties, self, entities, error_messages, i)
-            relationships.extend(new_relationships)
-            for rel in new_relationships:
-                success_messages.append(f"Created relationship: {rel}")
+        for rel in relationships:
+            success_messages.append(f"Created relationship: {rel}")
 
         logger.system("\n--- ✅ Successful Operations ---")
         for msg in success_messages:

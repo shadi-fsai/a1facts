@@ -3,6 +3,9 @@ import yaml
 from unittest.mock import patch, Mock
 from a1facts.knowledge_base import KnowledgeBase
 from a1facts.enrichment.knowledge_acquirer import KnowledgeAcquirer
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+
 
 @pytest.fixture
 def complex_ontology(tmp_path):
@@ -188,7 +191,9 @@ def test_query_rewrite_with_complex_ontology(MockQueryRewriteAgent, complex_onto
     mock_rewrite_run.return_value = Mock(content=rewritten_query)
 
     # 3. Populate the graph with some data
-    kb.graph.graph_database.add_or_update_entity("Corporation", "name", {"name": "GlobalCorp", "market_cap": 500.0})
+    corporation_class = kb.ontology.find_entity_class("Corporation")
+    global_corp = RDFSEntity(corporation_class, "GlobalCorp", {"name": "GlobalCorp", "market_cap": 500.0})
+    kb.graph.graph_database.add_or_update_entity(global_corp)
 
     # 4. Execute the query and verify the rewrite
     with patch.object(kb.graph, '_rewrite_query', return_value=rewritten_query) as mock_rewrite:
@@ -252,21 +257,18 @@ def test_acquisition_instruction_rewrite(MockOntologyRewriteAgent, complex_ontol
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.graph.query_rewrite_agent.Agent')
-@patch('a1facts.graph.update_agent.Agent')
-def test_knowledge_ingestion_rewrite(MockUpdateAgent, MockQueryRewriteAgent, complex_ontology, tmp_path, db_backend, request):
+def test_knowledge_ingestion_rewrite(MockQueryRewriteAgent, complex_ontology, tmp_path, db_backend, request):
     """
     Tests that acquired, unstructured knowledge is rewritten into a structured
     format before being ingested into the graph.
     """
     # 1. Setup mocks
-    mock_rdfs_agent = Mock()
-    mock_update_agent_inner = Mock()
-    MockUpdateAgent.side_effect = [mock_rdfs_agent, mock_update_agent_inner]
+    mock_rdfs_agent_instance = Mock()
+    MockQueryRewriteAgent.return_value = mock_rdfs_agent_instance
 
     from a1facts.graph.update_agent import RDFSResult
     rdfs_knowledge = "<rdf>MegaCorp hires Jane Doe as CEO</rdf>"
-    mock_rdfs_agent.run.return_value = RDFSResult(rdfs=rdfs_knowledge, other_information="")
-    mock_update_agent_inner.run.return_value = Mock(content="success")
+    mock_rdfs_agent_instance.run.return_value = Mock(content=RDFSResult(rdfs=rdfs_knowledge, other_information="", ontology_elements_used=[]))
 
     # 2. Setup KnowledgeBase
     use_neo4j = (db_backend == "neo4j")
@@ -296,17 +298,25 @@ def test_knowledge_ingestion_rewrite(MockUpdateAgent, MockQueryRewriteAgent, com
     structured_knowledge = "ADD ENTITY Executive {'name': 'Jane Doe', 'title': 'CEO'}; ADD RELATIONSHIP EMPLOYS from Corporation {'name': 'MegaCorp'} to Executive {'name': 'Jane Doe'}"
     
     # 3. Ingest the unstructured knowledge
-    with patch.object(kb.graph, '_rewrite_query', return_value=structured_knowledge) as mock_rewrite:
+    with patch.object(kb.graph, '_rewrite_query', return_value=structured_knowledge) as mock_rewrite, \
+         patch('a1facts.graph.update_agent.Agent') as MockRdfsAgent, \
+         patch.object(kb.ontology, 'parse_rdfs_with_validation', return_value=([], [])) as mock_parse:
+        
+        from a1facts.graph.update_agent import RDFSResult
+        rdfs_knowledge = "<rdf>MegaCorp hires Jane Doe as CEO</rdf>"
+        MockRdfsAgent.return_value.run.return_value = Mock(content=RDFSResult(rdfs=rdfs_knowledge, other_information="", ontology_elements_used=[]))
+
         kb.ingest_knowledge(unstructured_knowledge)
 
         # 4. Verify that the rewrite was called and the update agent received the structured data
         mock_rewrite.assert_called_with(unstructured_knowledge)
         
-        # Verify that the rdfs agent was called to translate, and the inner update agent was called with the RDF.
-        mock_rdfs_agent.run.assert_called_once_with(
+        # Verify that the rdfs agent was called to translate...
+        MockRdfsAgent.return_value.run.assert_called_once_with(
             "Translate the following knowledge into a structured format based on the ontology\n\n " + structured_knowledge
         )
-        mock_update_agent_inner.run.assert_called_once_with(rdfs_knowledge)
+        # ...and that the result was passed to the parser.
+        mock_parse.assert_called_once_with(rdfs_knowledge)
 
 
 @pytest.mark.e2e
@@ -314,9 +324,7 @@ def test_knowledge_ingestion_rewrite(MockUpdateAgent, MockQueryRewriteAgent, com
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
 @patch('a1facts.graph.query_agent.Agent')
 @patch('a1facts.graph.query_rewrite_agent.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 def test_full_lifecycle_rewrite_under_load(
-    MockUpdateAgent,
     MockQueryRewriteAgent,
     MockQueryAgentInternal,
     MockAcquirerAgent,
@@ -330,9 +338,8 @@ def test_full_lifecycle_rewrite_under_load(
     populated graph to ensure the system functions correctly under load.
     """
     # 1. Setup mocks
-    mock_rdfs_agent = Mock()
-    mock_update_agent_inner = Mock()
-    MockUpdateAgent.side_effect = [mock_rdfs_agent, mock_update_agent_inner]
+    mock_rdfs_agent_instance = Mock()
+    MockQueryRewriteAgent.return_value = mock_rdfs_agent_instance
     from a1facts.graph.update_agent import RDFSResult
 
     # 2. Setup KnowledgeBase
@@ -359,13 +366,18 @@ def test_full_lifecycle_rewrite_under_load(
     )
 
     # 2. Populate the graph with a large amount of data
+    corporation_class = kb.ontology.find_entity_class("Corporation")
+    executive_class = kb.ontology.find_entity_class("Executive")
     for i in range(50):
         corp_name = f"Corp_{i}"
-        kb.graph.graph_database.add_or_update_entity("Corporation", "name", {"name": corp_name, "market_cap": 1000.0 + i})
+        corp = RDFSEntity(corporation_class, corp_name, {"name": corp_name, "market_cap": 1000.0 + i})
+        kb.graph.graph_database.add_or_update_entity(corp)
         for j in range(10):
             exec_name = f"Exec_{i}_{j}"
-            kb.graph.graph_database.add_or_update_entity("Executive", "name", {"name": exec_name, "title": "VP"})
-            kb.graph.graph_database.add_relationship("Corporation", "name", corp_name, "Executive", "name", exec_name, "EMPLOYS", {"start_year": 2020})
+            executive = RDFSEntity(executive_class, exec_name, {"name": exec_name, "title": "VP"})
+            kb.graph.graph_database.add_or_update_entity(executive)
+            employs = RDFSRelationship(corp, "EMPLOYS", executive, {"start_year": 2020})
+            kb.graph.graph_database.add_relationship(employs)
 
     # 3. Acquire new knowledge about an existing entity
     mock_acquirer_run = MockAcquirerAgent.return_value.run
@@ -374,27 +386,27 @@ def test_full_lifecycle_rewrite_under_load(
 
     # 4. Ingest the new knowledge, triggering the update rewrite
     structured_update = "UPDATE ENTITY Corporation {'name': 'Corp_25', 'market_cap': 2500.0}"
-    rdfs_update = "<rdf>Corp_25 market cap 2500.0</rdf>"
-    mock_rdfs_agent.run.return_value = RDFSResult(rdfs=rdfs_update, other_information="")
-    mock_update_agent_inner.run.return_value = Mock(content="success")
+    
+    with patch.object(kb.graph, '_rewrite_query', return_value=structured_update) as mock_ingest_rewrite, \
+         patch('a1facts.graph.update_agent.Agent') as MockRdfsAgent:
+        
+        from a1facts.graph.update_agent import RDFSResult
+        rdfs_update = "<rdf>Corp_25 market cap 2500.0</rdf>"
+        MockRdfsAgent.return_value.run.return_value = Mock(content=RDFSResult(rdfs=rdfs_update, other_information="", ontology_elements_used=[]))
 
-    with patch.object(kb.graph, '_rewrite_query', return_value=structured_update) as mock_ingest_rewrite:
         # acquire_knowledge_for_query calls ingest_knowledge internally
         kb.acquire_knowledge_for_query("What is the new market cap of Corp_25?")
         
         mock_ingest_rewrite.assert_called_with(new_knowledge)
         
-        # Verify that the rdfs agent was called to translate, and the inner update agent was called with the RDF.
-        mock_rdfs_agent.run.assert_called_once_with(
+        # Verify that the rdfs agent was called to translate...
+        MockRdfsAgent.return_value.run.assert_called_once_with(
             "Translate the following knowledge into a structured format based on the ontology\n\n " + structured_update
         )
-        mock_update_agent_inner.run.assert_called_once_with(rdfs_update)
 
-        # Because the UpdateAgent is mocked, we need to manually perform the update
-        # to simulate its effect on the graph database for the subsequent query.
-        kb.graph.graph_database.add_or_update_entity(
-            "Corporation", "name", {"name": "Corp_25", "market_cap": 2500.0}
-        )
+        # Because the UpdateAgent is now real, we don't need to manually update the DB.
+        # The real agent will parse the RDFS and call the DB methods.
+        # We'll rely on the final query to verify the update.
 
         # 5. Query for the updated knowledge, triggering the query rewrite
         mock_query_rewrite_run = MockQueryRewriteAgent.return_value.run

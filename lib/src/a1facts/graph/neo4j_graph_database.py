@@ -2,6 +2,8 @@ from a1facts.graph.graph_database import BaseGraphDatabase
 from neo4j import GraphDatabase
 from a1facts.utils.logger import logger
 from dotenv import load_dotenv
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
 
 import os
 from colored import cprint
@@ -71,16 +73,11 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         if self.driver is not None:
             self.driver.close()
 
-    def add_or_update_entity(self, label, primary_key_field, properties):
-        """
-        Adds a new entity (node) to the graph or updates an existing one
-        based on its primary key.
-
-        Args:
-            label (str): The label of the entity (e.g., 'Company').
-            primary_key_field (str): The name of the primary key property.
-            properties (dict): A dictionary of the entity's properties.
-        """
+    def add_or_update_entity(self, entity: RDFSEntity):
+        label = entity.entity_class.entity_class_name
+        primary_key_field = entity.entity_class.primary_key_prop.property_name
+        properties = entity.properties
+        
         if primary_key_field not in properties:
             print(f"Error: Primary key '{primary_key_field}' not found in properties.")
             return
@@ -111,22 +108,16 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         self._execute_query(query, parameters)
         #print(f"Successfully added/updated entity: {label} with {primary_key_field} = '{primary_value}'")
 
-    def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
-        """
-        Creates a relationship between two existing nodes in the graph.
-
-        Args:
-            start_node_label (str): The label of the starting node.
-            start_pk_field (str): The primary key field of the starting node.
-            start_node_pk_val (str): The primary key value of the starting node.
-            end_node_label (str): The label of the ending node.
-            end_pk_field (str): The primary key field of the ending node.
-            end_node_label (str): The label of the ending node.
-            end_node_pk_val (str): The primary key value of the ending node.
-            relationship_type (str): The type of the relationship.
-            properties (dict, optional): Properties for the relationship. Defaults to None.
-            symmetric (bool): If True, creates a relationship in both directions.
-        """
+    def add_relationship(self, relationship: RDFSRelationship):
+        start_node_label = relationship.domain_entity.entity_class.entity_class_name
+        start_pk_field = relationship.domain_entity.entity_class.primary_key_prop.property_name
+        start_node_pk_val = relationship.domain_entity.properties[start_pk_field]
+        end_node_label = relationship.range_entity.entity_class.entity_class_name
+        end_pk_field = relationship.range_entity.entity_class.primary_key_prop.property_name
+        end_node_pk_val = relationship.range_entity.properties[end_pk_field]
+        relationship_type = relationship.relationship
+        properties = relationship.properties
+        symmetric = relationship.symmetric
 
         # Base query for a directional relationship
         query = (
