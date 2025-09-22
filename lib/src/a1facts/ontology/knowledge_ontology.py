@@ -270,19 +270,19 @@ class KnowledgeOntology:
             if not match: continue
 
             subject = match.group(1).strip(':')
-            rest_of_line = match.group(2).rstrip(';').strip()
+            entity_class_name_str = match.group(2).rstrip(';').strip().rstrip('.').strip()
             
             properties = {}
             for line in lines[1:]:
                 prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
                 if prop_match:
                     key = prop_match.group(1).strip(':')
-                    value = prop_match.group(2).rstrip(';').strip()
+                    value = prop_match.group(2).rstrip(';').rstrip('.').strip()
                     if '^^' in value: value = value.split('^^')[0]
                     value = value.strip('"')
                     properties[key] = value
 
-            entity = RDFSEntity.from_rdfs_block(subject, rest_of_line, properties, self, error_messages, i)
+            entity = RDFSEntity.from_rdfs_block(subject, entity_class_name_str, properties, self, error_messages, i)
             if entity:
                 entities[entity.name] = entity
 
@@ -303,14 +303,14 @@ class KnowledgeOntology:
 
             domain = match.group(1).strip(':')
             relationship = match.group(2).strip(':')
-            range_str = match.group(3).rstrip(';').strip()
+            range_str = match.group(3).rstrip(';').strip().rstrip('.').strip()
             
             properties = {}
             for line in lines[1:]:
                 prop_match = re.match(r'(:[^\s]+)\s+(.*)', line)
                 if prop_match:
                     key = prop_match.group(1).strip(':')
-                    value = prop_match.group(2).rstrip(';').strip()
+                    value = prop_match.group(2).rstrip(';').rstrip('.').strip()
                     if '^^' in value: value = value.split('^^')[0]
                     value = value.strip('"')
                     properties[key] = value
@@ -320,14 +320,14 @@ class KnowledgeOntology:
             for rel in new_relationships:
                 success_messages.append(f"Created relationship: {rel}")
 
-        print("\n--- ✅ Successful Operations ---")
+        logger.system("\n--- ✅ Successful Operations ---")
         for msg in success_messages:
-            print(msg)
+            logger.system(msg)
 
         if error_messages:
-            print("\n--- ❌ Validation Errors ---")
+            logger.system("\n--- ❌ Validation Errors ---")
             for msg in error_messages:
-                print(msg)
-        print("\n--- Parsing and Validation Complete ---")
+                logger.system(msg)
+        logger.system("\n--- Parsing and Validation Complete ---")
 
         return list(entities.values()), relationships

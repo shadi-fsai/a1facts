@@ -68,6 +68,7 @@ class UpdateAgent:
         entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
         for entity in entities:
             cprint(entity, 'green')
+        exit()
         for relationship in relationships:
             cprint(relationship, 'blue')
         exit()    

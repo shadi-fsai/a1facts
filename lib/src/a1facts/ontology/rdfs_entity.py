@@ -24,8 +24,8 @@ class RDFSEntity:
         print(str(self))
 
     @staticmethod
-    def from_rdfs_block(subject, rest_of_line, properties, ontology, error_messages, block_index):
-        entity_class_name = rest_of_line.strip(':')
+    def from_rdfs_block(subject, entity_class_name_str, properties, ontology, error_messages, block_index):
+        entity_class_name = entity_class_name_str.strip(':')
         entity_class = ontology.find_entity_class(entity_class_name)
 
         if not entity_class:
