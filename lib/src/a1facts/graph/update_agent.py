@@ -34,6 +34,19 @@ class UpdateAgent:
                 If you have an entity that can't be expressed in the ontology, include it in the other_information field.
                 Use ":" as prefix for the entities and relationships. use "a" to describe an entity that is a type of another entity.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
+
+                # --- Define the entities ---
+
+                :Opposition_Event_2025 a :AstronomicalObservation ;
+                    :observationID "Opposition_Event_2025" ;
+                    :observationType "Opposition" ;
+                    :magnitude "-2.8"^^xsd:decimal . # Apparent magnitude of the planet
+
+                # --- Create a linking node for the relationship ---
+
+                :Mars :hasObservation :Opposition_Event_2025 ;
+                    :observationDate "2025-12-08" ;
+                    :visibility "Excellent" .
             """),
             markdown=True,
             debug_mode=False,
@@ -54,10 +67,10 @@ class UpdateAgent:
             
         logger.system("\n--- RDFS Content ---")
         logger.system(rdfs_result.content.rdfs)
+        
         logger.system("\n--- Other Information ---") #TODO: this can be used to improve the ontology
         logger.system(rdfs_result.content.other_information)      
         entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
-
         logger.system("\n--- Parsed Entities ---")
         return_str = ""
         for entity in entities:
