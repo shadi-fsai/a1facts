@@ -34,8 +34,12 @@ class UpdateAgent:
                 If you have an entity that can't be expressed in the ontology, include it in the other_information field.
                 Use ":" as prefix for the entities and relationships. use "a" to describe an entity that is a type of another entity.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
+                The following is an example of the RDFS format:
 
                 # --- Define the entities ---
+
+                :Mars a :Planet ;
+                    :commonName "Mars" .
 
                 :Opposition_Event_2025 a :AstronomicalObservation ;
                     :observationID "Opposition_Event_2025" ;
