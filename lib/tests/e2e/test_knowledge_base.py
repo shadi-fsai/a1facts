@@ -14,7 +14,8 @@ def create_e2e_ontology(tmp_path):
     ontology_data = {
         'world': {
             'name': 'E2E Test World',
-            'description': 'A world for testing the full lifecycle.'
+            'description': 'A world for testing the full lifecycle.',
+            'main_entities': ['Person']
         },
         'entity_classes': {
             'Person': {
@@ -38,7 +39,8 @@ def create_complex_ontology(tmp_path):
     ontology_data = {
         'world': {
             'name': 'CorporateWorld',
-            'description': 'An ontology for companies, employees, and their roles.'
+            'description': 'An ontology for companies, employees, and their roles.',
+            'main_entities': ['Company', 'Person', 'Role']
         },
         'entity_classes': {
             'Company': {

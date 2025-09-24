@@ -2,6 +2,10 @@ world:
   name: Clinical Trials Knowledge Graph
   description: An ontology for tracking clinical trial information, including drugs,
     targets, sponsors, and outcomes.
+  main_entities: 
+    - ClinicalTrial
+    - Drug
+    - Sponsor
 
 entity_classes:
   ClinicalTrial:

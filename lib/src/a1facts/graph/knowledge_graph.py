@@ -47,11 +47,16 @@ class KnowledgeGraph:
 
 
     def _get_class_entity_pairs(self):
-        for entity_class in self.ontology.entity_classes:
+        for entity_class_name in self.ontology.main_entities:
+            entity_class = self.ontology.find_entity_class(entity_class_name)
+            if not entity_class:
+                logger.warning(f"Main entity '{entity_class_name}' not found in ontology entity classes.")
+                continue
+
             self.class_entity_pairs[entity_class.entity_class_name] = []
             entities = self.graph_database.get_all_entities_by_label(entity_class.entity_class_name)
             for entity in entities:
-                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])      
+                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])
 
     def _rewrite_query(self, query: str):
         self._get_class_entity_pairs()

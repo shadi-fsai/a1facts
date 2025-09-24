@@ -1,6 +1,6 @@
 [project]
 name = "a1facts"
-version = "0.2.4"
+version = "0.2.5"
 license = {file = "LICENSE"}
 authors = [
   {name = "Shadi Copty", email = "shadi@a1facts.ai"}
@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "agno>=1.8.0",
+    "chromadb>=1.0.13",
     "colored>=2.3.1",
     "exa-py>=1.15.3",
     "mcp>=1.13.1",
@@ -19,6 +20,9 @@ dependencies = [
     "posthog>=6.7.1",
     "pytest>=8.4.2",
     "pytest-docker>=3.2.3",
+    "sentence-transformers>=5.1.1",
+    "spacy>=3.8.7",
+    "thefuzz>=0.22.1",
     "yfinance>=0.2.65",
 ]
 

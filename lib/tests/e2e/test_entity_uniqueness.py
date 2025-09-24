@@ -24,7 +24,8 @@ def simple_ontology(tmp_path):
     ontology_data = {
         'world': {
             'name': 'SimpleCorp',
-            'description': 'A simple ontology for companies, employees, and projects.'
+            'description': 'A simple ontology for companies, employees, and projects.',
+            'main_entities': ['Company', 'Employee', 'Project']
         },
         'entity_classes': {
             'Company': {

@@ -33,6 +33,7 @@ class KnowledgeOntology:
         self.relationship_classes = []
         self.name = ""
         self.description = ""
+        self.main_entities = []
         logger.system(f"Loading ontology from {ontology_file}")
         self.load_ontology()
         logger.system(f"Ontology loaded from {ontology_file}")
@@ -80,8 +81,13 @@ class KnowledgeOntology:
         logger.system(f"Loading ontology from {self.ontology_file}")
         with open(self.ontology_file, 'r') as file:
             ontology = yaml.load(file, Loader=yaml.FullLoader)
-            self.name = ontology.get('world', {}).get('name', 'N/A')
-            self.description = ontology.get('world', {}).get('description', 'N/A')
+            world_data = ontology.get('world', {})
+            self.name = world_data.get('name', 'N/A')
+            self.description = world_data.get('description', 'N/A')
+            self.main_entities = world_data.get('main_entities')
+            if self.main_entities is None:
+                raise ValueError(f"'main_entities' is a required field in the 'world' section of the ontology file: {self.ontology_file}")
+
             for name, details in ontology.get('entity_classes', {}).items():
                 entity_class = EntityClass(name, details.get('description', 'N/A'))
                 entity_class.properties = []                
@@ -322,30 +328,31 @@ class KnowledgeOntology:
                 if entity:
                     entities[entity.name] = entity
                 continue
-
+    
             # Attempt to parse as a relationship
-            rel_match = re.match(r'([^\s]+)\s+(:[^\s]+)\s+(.*)', block_text)
+            rel_match = re.match(r'([^\s]+)\s+(:[^\s]+)\s+([^;]+)', block_text)
             if rel_match:
-                domain = rel_match.group(1)
-                relationship = rel_match.group(2)
-                rest = rel_match.group(3)
-
+                domain = rel_match.group(1).strip()
+                relationship = rel_match.group(2).strip()
+                range_str = rel_match.group(3).strip()
+                
+                # The rest of the block contains properties of the relationship
+                properties_str = block_text[rel_match.end():]
+    
                 if domain.startswith('_:'): domain = domain[2:]
                 elif domain.startswith(':'): domain = domain[1:]
                 if relationship.startswith(':'): relationship = relationship[1:]
-
-                parts = [p.strip() for p in rest.split(';') if p.strip()]
-                range_str = parts[0].rstrip('.').strip()
-
+    
                 rdfs_properties = []
-                for part in parts[1:]:
+                prop_parts = [p.strip() for p in properties_str.split(';') if p.strip()]
+                for part in prop_parts:
                     prop = RDFSProperty.from_rdf_line(part)
                     if prop:
                         rdfs_properties.append(prop)
-
+    
                 new_relationships = RDFSRelationship.from_rdfs_block(domain, relationship, range_str, rdfs_properties, self, entities, error_messages, i)
                 relationships.extend(new_relationships)
-
+    
         success_messages = [f"Created entity: {entity}" for entity in entities.values()]
         for rel in relationships:
             success_messages.append(f"Created relationship: {rel}")

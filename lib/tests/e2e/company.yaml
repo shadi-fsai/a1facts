@@ -1,6 +1,10 @@
 world:
   name: Company Knowledge Graph
   description: Financial and Market Intelligence knowledge graph.
+  main_entities: 
+    - Company
+    - Market
+    - Leader
 
 entity_classes:
   Company:
