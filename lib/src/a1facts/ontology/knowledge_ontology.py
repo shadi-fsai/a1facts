@@ -283,17 +283,28 @@ class KnowledgeOntology:
             return [], []
 
 
+        def get_alias(term, graph):
+            if isinstance(term, URIRef):
+                return graph.qname(term)
+            return str(term)
 
         # 1. First pass: identify and create all entities with their properties
         for s, o in g.subject_objects(predicate=RDF.type):
             entity_name = get_alias(s, g)
+            entity_class_name = get_alias(o, g)
+            entity_class = self.find_entity_class(entity_class_name)
             if not entity_class:
+                error_messages.append(f"VALIDATION ERROR: Entity class '{entity_class_name}' not found in ontology for entity '{entity_name}'.")
+                continue
 
             rdfs_properties = []
             for p_prop, o_prop in g.predicate_objects(subject=s):
                 if isinstance(o_prop, Literal):  # This is a property
                     prop_key = get_alias(p_prop, g)
+                    prop_value = str(o_prop)
+                    rdfs_properties.append(RDFSProperty(prop_key, prop_value))
             if entity_class.validate_properties(rdfs_properties, entity_name, error_messages, 0):
+                properties_dict = {prop.key: prop.value for prop in rdfs_properties}
                 properties_dict['type'] = entity_class_name
                 entity = RDFSEntity(entity_class=entity_class, entity_name=entity_name, properties=properties_dict)
                 entities[entity_name] = entity

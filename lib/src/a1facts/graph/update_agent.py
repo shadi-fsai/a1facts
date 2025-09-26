@@ -78,6 +78,7 @@ class UpdateAgent:
             
         logger.system("\n--- RDFS Content ---")
         logger.system(rdfs_result.content.rdfs)
+
         logger.system("\n--- Other Information ---") #TODO: this can be used to improve the ontology
         logger.system(rdfs_result.content.other_information)      
         try:
