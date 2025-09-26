@@ -116,7 +116,6 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         end_pk_field = relationship.range_entity.entity_class.primary_key_prop.property_name
         end_node_pk_val = relationship.range_entity.properties[end_pk_field]
         relationship_type = relationship.relationship
-        properties = relationship.properties
         symmetric = relationship.symmetric
 
         # Base query for a directional relationship
@@ -125,8 +124,6 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
             f"(b:{end_node_label} {{{end_pk_field}: $end_val}}) "
             f"MERGE (a)-[r:{relationship_type}]->(b) "
         )
-        if properties:
-            query += "SET r += $props"
 
         # If the relationship is symmetric, create the reverse relationship as well
         if symmetric:
@@ -135,13 +132,10 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
                 f"(b:{end_node_label} {{{end_pk_field}: $end_val}}) "
                 f"MERGE (b)-[r:{relationship_type}]->(a) "
             )
-            if properties:
-                reverse_query += "SET r += $props"
         
         parameters = {
             "start_val": start_node_pk_val,
-            "end_val": end_node_pk_val,
-            "props": properties or {}
+            "end_val": end_node_pk_val
         }
 
         try:
@@ -219,7 +213,7 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
             f"WHERE {where_clause} "
             "OPTIONAL MATCH (n)-[r]-(related) "
             "RETURN properties(n) AS properties, "
-            "collect({relationship: type(r), properties: properties(r), related_entity: coalesce(related.name, related.role_title)}) AS relationships"
+            "collect({relationship: type(r), related_entity: coalesce(related.name, related.role_title)}) AS relationships"
         )
         parameters = {"identifier": entity_identifier}
         records = self._execute_read_query(query, parameters)
@@ -276,28 +270,6 @@ class Neo4jGraphDatabase(BaseGraphDatabase):
         records = self._execute_read_query(query, parameters)
         return [record["properties"] for record in records]
     
-    def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
-        """
-        Gets the properties of a specific relationship between two entities.
-
-        Args:
-            domain_label (str): The label of the domain entity.
-            domain_pk_prop (str): The primary key property of the domain entity.
-            domain_primary_key_value (str): The primary key of the domain entity.
-            relationship_type (str): The type of the relationship.
-            range_label (str): The label of the range entity.
-            range_pk_prop (str): The primary key property of the range entity.
-            range_primary_key_value (str): The primary key of the range entity.
-
-        Returns:
-            list: A list containing the properties of the relationship.
-        """
-        # For a given domain and range, get the properties of the relationship
-        query = f"MATCH (n:{domain_label} {{{domain_pk_prop}: $domain_primary_key_value}}) MATCH (n)-[r:{relationship_type}]->(m:{range_label} {{{range_pk_prop}: $range_primary_key_value}}) RETURN properties(r) AS properties"
-        parameters = {"domain_primary_key_value": domain_primary_key_value, "range_primary_key_value": range_primary_key_value}
-        records = self._execute_read_query(query, parameters)
-        return [record["properties"] for record in records]
-
     def get_entity_properties(self, label, pk_prop, primary_key_value):
         """
         Gets the properties of a single entity identified by its primary key.

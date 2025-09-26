@@ -36,11 +36,13 @@ class KnowledgeGraph:
         else:
             self.graph_database = NetworkxGraphDatabase(graph_file=graph_file)
         
+        logger.system(f"Successfully initialized graph database.")
+        
         self.get_tools = self.ontology.get_tools_get_entity_and_relationship(self.graph_database.get_all_entities_by_label, 
-        self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
+        self.graph_database.get_entity_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
-        self.update_agent = UpdateAgent(ontology=self.ontology, graph_database=self.graph_database)
+        self.update_agent = UpdateAgent(self.ontology, self.graph_database)
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")

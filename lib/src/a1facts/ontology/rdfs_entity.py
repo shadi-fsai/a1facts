@@ -30,19 +30,3 @@ class RDFSEntity:
     def print(self):
         """Prints the string representation of the RDFS entity."""
         print(str(self))
-
-    @staticmethod
-    def from_rdfs_block(subject, entity_class_name_str, rdfs_properties, ontology: "KnowledgeOntology", error_messages, block_index):
-        entity_class_name = entity_class_name_str.strip(':')
-        entity_class = ontology.find_entity_class(entity_class_name)
-
-        if not entity_class:
-            error_messages.append(f"Block {block_index+1}: VALIDATION ERROR: Entity class '{entity_class_name}' not found in ontology for entity '{subject}'.")
-            return None
-        
-        if entity_class.validate_properties(rdfs_properties, subject, error_messages, block_index):
-            properties_dict = {prop.key: prop.value for prop in rdfs_properties}
-            properties_dict['type'] = entity_class_name
-            return RDFSEntity(entity_class=entity_class, entity_name=subject, properties=properties_dict)
-        
-        return None

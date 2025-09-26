@@ -67,7 +67,7 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         end_pk_field = relationship.range_entity.entity_class.primary_key_prop.property_name
         end_node_pk_val = relationship.range_entity.properties[end_pk_field]
         relationship_type = relationship.relationship
-        properties = relationship.properties
+
         symmetric = relationship.symmetric
 
         logger.system(f"NWX: Adding {relationship_type} relationship between {start_node_label} {start_node_pk_val} and {end_node_label} {end_node_pk_val}")
@@ -75,7 +75,7 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         start_node_id = (start_node_label, start_node_pk_val)
         end_node_id = (end_node_label, end_node_pk_val)
         
-        edge_properties = properties.copy() if properties else {}
+        edge_properties = {}
         edge_properties['type'] = relationship_type
 
         self.graph.add_edge(start_node_id, end_node_id, **edge_properties)
@@ -103,19 +103,6 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
                     self.graph.nodes[neighbor].get('label') == range_label):
                 results.append(self.graph.nodes[neighbor])
         return results
-
-    def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
-        logger.system(f"NWX: Getting {relationship_type} relationship properties for {domain_label} {domain_primary_key_value} and {range_label} {range_primary_key_value}")
-        start_node_id = (domain_label, domain_primary_key_value)
-        end_node_id = (range_label, range_primary_key_value)
-        
-        if self.graph.has_edge(start_node_id, end_node_id):
-            edge_data = self.graph.get_edge_data(start_node_id, end_node_id)
-            if edge_data.get('type') == relationship_type:
-                return edge_data
-        
-        logger.system(f"NWX: No relationship found for {domain_label} {domain_primary_key_value} and {range_label} {range_primary_key_value}")
-        return None
 
     def get_entity_properties(self, label, pk_prop, primary_key_value):
         logger.system(f"NWX: Getting {label} properties for {primary_key_value}")

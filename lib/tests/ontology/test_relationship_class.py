@@ -21,7 +21,6 @@ def sector_entity():
 def operates_in_relationship(company_entity, sector_entity):
     """Returns a sample RelationshipClass object."""
     rel = RelationshipClass(name="operates_in", domain=company_entity, range=sector_entity, description="A company operates in a sector")
-    rel.add_property(Property(name="start_date", prop_type="string", description="When the company started operating in this sector"))
     return rel
 
 def test_relationship_class_init(operates_in_relationship, company_entity, sector_entity):
@@ -31,20 +30,12 @@ def test_relationship_class_init(operates_in_relationship, company_entity, secto
     assert operates_in_relationship.range_entity_class == sector_entity.entity_class_name
     assert operates_in_relationship.domain_primary_key_prop == "name"
     assert operates_in_relationship.range_primary_key_prop == "name"
-    assert len(operates_in_relationship.properties) == 1
+    assert len(operates_in_relationship.properties) == 0
     assert not operates_in_relationship.symmetric
-
-def test_add_property(operates_in_relationship):
-    """Tests adding a property to a relationship class."""
-    new_prop = Property(name="end_date", prop_type="string", description="End date")
-    operates_in_relationship.add_property(new_prop)
-    assert len(operates_in_relationship.properties) == 2
-    assert operates_in_relationship.properties[-1] == new_prop
 
 def test_str_representation(operates_in_relationship):
     """Tests the string representation of a RelationshipClass object."""
     expected_str = "operates_in (A company operates in a sector) - Domain: Company - Range: Sector\n"
-    expected_str += "   - start_date (string) - When the company started operating in this sector\n"
     assert str(operates_in_relationship) == expected_str
 
 def test_is_symmetric():
@@ -53,15 +44,6 @@ def test_is_symmetric():
     company.add_property(Property("name", "string", "desc", True))
     symmetric_rel = RelationshipClass("works_with", company, company, "desc", symmetric=True)
     assert symmetric_rel.is_symmetric()
-
-def test_validate_properties(operates_in_relationship):
-    """Tests the _validate_properties method."""
-    with pytest.raises(Exception, match="Property missing_prop not found"):
-        operates_in_relationship.properties.append(Property("missing_prop", "string", "desc"))
-        operates_in_relationship._validate_properties({"start_date": "2023-01-01"})
-
-    # Should not raise an exception
-    operates_in_relationship._validate_properties({"start_date": "2023-01-01", "missing_prop": "value"})
 
 
 def test_get_tool_add_or_update_relationship(operates_in_relationship):
@@ -72,19 +54,8 @@ def test_get_tool_add_or_update_relationship(operates_in_relationship):
     tool = operates_in_relationship.get_tool_add_or_update_relationship(mock_add_or_update)
     assert tool.__name__ == "add_link_Company_operates_in_Sector"
     
-    result = tool(from_Company_name="TestCorp", to_Sector_name="Tech", properties={"start_date": "2023"})
-    assert "TestCorp" in result and "Tech" in result and "operates_in" in result
-
-def test_get_tool_get_relationship_properties(operates_in_relationship):
-    """Tests the get_tool_get_relationship_properties method."""
-    def mock_get_properties(*args):
-        return {"properties": f"Called with {args}"}
-
-    tool = operates_in_relationship.get_tool_get_relationship_properties(mock_get_properties)
-    assert tool.__name__ == "get_operates_in_properties"
-    
     result = tool(from_Company_name="TestCorp", to_Sector_name="Tech")
-    assert "TestCorp" in result["properties"] and "Tech" in result["properties"]
+    assert "TestCorp" in result and "Tech" in result and "operates_in" in result
 
 def test_get_tool_get_relationship_entities(operates_in_relationship):
     """Tests the get_get_relationship_entities_tool method."""

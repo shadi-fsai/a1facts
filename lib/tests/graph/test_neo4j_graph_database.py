@@ -96,17 +96,16 @@ def test_add_relationship(neo4j_db):
     neo4j_db.add_or_update_entity(city)
     
     # Add a relationship between them
-    relationship = RDFSRelationship(person, "LIVES_IN", city, {"since": 2020})
+    relationship = RDFSRelationship(person, "LIVES_IN", city)
     neo4j_db.add_relationship(relationship)
     
     with neo4j_db.driver.session() as session:
         result = session.run("""
             MATCH (p:Person {name: 'Charlie'})-[r:LIVES_IN]->(c:City {name: 'Paris'})
-            RETURN r.since AS since
+            RETURN r
         """)
         record = result.single()
         assert record is not None
-        assert record["since"] == 2020
 
 def test_get_entity_properties(neo4j_db):
     """
@@ -139,27 +138,6 @@ def test_get_all_entities_by_label(neo4j_db):
     names = {p['name'] for p in all_persons}
     assert names == {"Eve", "Frank"}
 
-def test_get_relationship_properties(neo4j_db):
-    """
-    Tests retrieving properties of a specific relationship.
-    """
-    person_class = MockEntityClass("Person", "A person", "name")
-    company_class = MockEntityClass("Company", "A business entity", "name")
-    person = RDFSEntity(person_class, "Grace", {"name": "Grace"})
-    company = RDFSEntity(company_class, "InnovateCorp", {"name": "InnovateCorp"})
-    neo4j_db.add_or_update_entity(person)
-    neo4j_db.add_or_update_entity(company)
-    
-    relationship = RDFSRelationship(person, "WORKS_AT", company, {"role": "Developer"})
-    neo4j_db.add_relationship(relationship)
-    
-    # Corrected the order of arguments to match the method signature.
-    rel_props = neo4j_db.get_relationship_properties("Person", "name", "Grace", "WORKS_AT", "Company", "name", "InnovateCorp")
-    assert rel_props is not None
-    assert len(rel_props) == 1
-    # Corrected the assertion to match the actual return format (a list of property dicts).
-    assert rel_props[0]['role'] == "Developer"
-
 def test_get_relationship_entities(neo4j_db):
     """
     Tests retrieving entities connected by a specific relationship.
@@ -190,17 +168,3 @@ def test_entity_not_found(neo4j_db):
     """
     retrieved_props = neo4j_db.get_entity_properties("Person", "name", "Zoe")
     assert retrieved_props is None
-
-def test_relationship_not_found(neo4j_db):
-    """
-    Tests that getting properties of a non-existent relationship returns an empty list.
-    """
-    person_class = MockEntityClass("Person", "A person", "name")
-    city_class = MockEntityClass("City", "A city", "name")
-    person = RDFSEntity(person_class, "Ivan", {"name": "Ivan"})
-    city = RDFSEntity(city_class, "Tokyo", {"name": "Tokyo"})
-    neo4j_db.add_or_update_entity(person)
-    neo4j_db.add_or_update_entity(city)
-    
-    rel_props = neo4j_db.get_relationship_properties("Person", "name", "Ivan", "City", "name", "Tokyo", "LIVES_IN")
-    assert rel_props == []

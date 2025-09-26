@@ -14,6 +14,8 @@ import re
 from a1facts.ontology.rdfs_entity import RDFSEntity
 from a1facts.ontology.rdfs_relationship import RDFSRelationship
 from a1facts.ontology.rdfs_property import RDFSProperty
+from rdflib import Graph, Literal, BNode, URIRef
+from rdflib.namespace import RDF
 
 class KnowledgeOntology:
     """
@@ -99,9 +101,6 @@ class KnowledgeOntology:
                 range = self.find_entity_class(details.get('range', 'N/A'))
                 symmetric = details.get('symmetric', False)
                 relationship_class = RelationshipClass(name, domain, range, details.get('description', 'N/A'), symmetric)
-                relationship_class.properties = []                
-                for prop in details.get('properties', []):
-                    relationship_class.add_property(Property(prop.get('name', 'N/A'), prop.get('type', 'N/A'), prop.get('description', 'N/A'), prop.get('primary_key', False)))
                 self.relationship_classes.append(relationship_class)
         logger.system(f"Ontology loaded from {self.ontology_file}")
 
@@ -173,23 +172,6 @@ class KnowledgeOntology:
         logger.system(f"Relationship add/update tools returned")
         return tools
 
-    def get_tools_get_relationship_properties(self, get_relationship_properties_func):
-        """
-        Gets a list of all 'get properties' tools for all relationship classes.
-
-        Args:
-            get_relationship_properties_func (function): The function to call to get relationship properties.
-
-        Returns:
-            list: A list of tool functions.
-        """
-        logger.system(f"Getting relationship get relationship entities tools")
-        tools = []
-        for relationship_class in self.relationship_classes:
-            tools.append(relationship_class.get_tool_get_relationship_properties(get_relationship_properties_func))
-        logger.system(f"Relationship get relationship entities tools returned")
-        return tools
-
     def get_tools_get_relationship_entities(self, get_relationship_entities_func):
         """
         Gets a list of all 'get related entities' tools for all relationship classes.
@@ -225,14 +207,13 @@ class KnowledgeOntology:
         logger.system(f"Add/update tools returned")
         return tools
 
-    def get_tools_get_entity_and_relationship(self, get_all_entity_func, get_entity_properties_func, get_relationship_properties_func, get_relationship_entities_func):
+    def get_tools_get_entity_and_relationship(self, get_all_entity_func, get_entity_properties_func, get_relationship_entities_func):
         """
         Gets a combined list of all 'get' tools for both entities and relationships.
 
         Args:
             get_all_entity_func (function): Function to get all entities.
             get_entity_properties_func (function): Function to get entity properties.
-            get_relationship_properties_func (function): Function to get relationship properties.
             get_relationship_entities_func (function): Function to get related entities.
 
         Returns:
@@ -242,7 +223,6 @@ class KnowledgeOntology:
         tools = []
         tools.extend(self.get_tools_get_all_entity(get_all_entity_func))
         tools.extend(self.get_tools_get_entity_properties(get_entity_properties_func))
-        tools.extend(self.get_tools_get_relationship_properties(get_relationship_properties_func))
         tools.extend(self.get_tools_get_relationship_entities(get_relationship_entities_func))
         logger.system(f"Get tools returned")
         return tools
@@ -263,96 +243,100 @@ class KnowledgeOntology:
 
     def parse_rdfs_with_validation(self, rdfs_content: str):
         """
-        Parses and validates an RDFS string against the ontology.
+        Parses and validates an RDFS string against the ontology using rdflib.
         
         Args:
-            rdfs_content: A string containing the RDFS data.
+            rdfs_content: A string containing the RDFS data in Turtle format.
         
         Returns:
             A tuple containing two lists: (entities, relationships)
         """
-        # 1. Pre-process the RDFS content
-        rdfs_content = re.sub(r'#.*', '', rdfs_content)
-        rdfs_content = rdfs_content.replace(u'\xa0', ' ')
-        
-        # Extract prefixes and remove prefix lines
-        lines = rdfs_content.split('\n')
-        prefixes = {}
-        content_lines = []
-        for line in lines:
-            stripped = line.strip()
-            if stripped.startswith('@prefix'):
-                parts = stripped.split()
-                if len(parts) == 4:
-                    prefixes[parts[1]] = parts[2].strip('<>')
-            else:
-                content_lines.append(line)
-        
-        # Split content into blocks based on terminating periods
-        content_body = "\n".join(content_lines)
-        
-        # Split content into blocks based on terminating periods
-        blocks = [block.strip() for block in re.split(r'\s*\.\s*', content_body.strip()) if block.strip()]
-
-        # 2. Initialize data structures
         entities = {}
         relationships = []
         error_messages = []
+
+        # Find the base URI from prefixes, if it exists
+        base_uri_match = re.search(r'@prefix\s*:\s*<([^>]+)>', rdfs_content)
+        base_uri = base_uri_match.group(1) if base_uri_match else None
+
+        processed_rdfs = rdfs_content.strip()
+        if processed_rdfs.startswith('{') and processed_rdfs.endswith('}'):
+            processed_rdfs = processed_rdfs[1:-1].strip()
+
+        # Ensure essential prefixes are present
+        if '@prefix rdfs:' not in processed_rdfs:
+            processed_rdfs = '@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n' + processed_rdfs
+        if '@prefix xsd:' not in processed_rdfs:
+            processed_rdfs = '@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n' + processed_rdfs
+        if base_uri and '@prefix :' not in processed_rdfs:
+            processed_rdfs = f'@prefix : <{base_uri}> .\n' + processed_rdfs
+
+        g = Graph()
         
-        # 3. Combined Pass: Parse, validate, and create entities and relationships
-        for i, block_text in enumerate(blocks):
-            block_text = block_text.strip().rstrip('.')
-            if not block_text or block_text.startswith('@prefix'):
+        try:
+            g.parse(data=processed_rdfs, format='turtle')
+        except Exception as e:
+            error_messages.append(f"RDFS parsing error: {e}")
+            logger.system("\n--- ❌ Validation Errors ---")
+            for msg in error_messages:
+                logger.system(msg)
+            return [], []
+
+
+
+        # 1. First pass: identify and create all entities with their properties
+        for s, o in g.subject_objects(predicate=RDF.type):
+            entity_name = get_alias(s, g)
+            if not entity_class:
+
+            rdfs_properties = []
+            for p_prop, o_prop in g.predicate_objects(subject=s):
+                if isinstance(o_prop, Literal):  # This is a property
+                    prop_key = get_alias(p_prop, g)
+            if entity_class.validate_properties(rdfs_properties, entity_name, error_messages, 0):
+                properties_dict['type'] = entity_class_name
+                entity = RDFSEntity(entity_class=entity_class, entity_name=entity_name, properties=properties_dict)
+                entities[entity_name] = entity
+        # 2. Second pass: identify and create relationships
+        for s, p, o in g:
+            # Skip entity declarations and properties of entities
+            if p == RDF.type or isinstance(o, Literal):
                 continue
 
-            # Attempt to parse as an entity
-            entity_match = re.search(r'([^\s]+)\s+a\s+(:[^\s]+)\s*;?', block_text)
-            if entity_match:
-                subject = entity_match.group(1)
-                entity_class_name_str = entity_match.group(2)
-                properties_str = block_text[entity_match.end():]
+            relationship_name = get_alias(p, g)
+            relationship_class = self.find_relationship_class(relationship_name)
 
-                if subject.startswith('_:'): subject = subject[2:]
-                elif subject.startswith(':'): subject = subject[1:]
-
-                if entity_class_name_str.startswith(':'): entity_class_name_str = entity_class_name_str[1:]
-
-                rdfs_properties = []
-                prop_parts = [p.strip() for p in properties_str.split(';') if p.strip()]
-                for part in prop_parts:
-                    prop = RDFSProperty.from_rdf_line(part)
-                    if prop:
-                        rdfs_properties.append(prop)
-
-                entity = RDFSEntity.from_rdfs_block(subject, entity_class_name_str, rdfs_properties, self, error_messages, i)
-                if entity:
-                    entities[entity.name] = entity
-                continue
-    
-            # Attempt to parse as a relationship
-            rel_match = re.match(r'([^\s]+)\s+(:[^\s]+)\s+([^;]+)', block_text)
-            if rel_match:
-                domain = rel_match.group(1).strip()
-                relationship = rel_match.group(2).strip()
-                range_str = rel_match.group(3).strip()
+            if relationship_class:
+                domain_name = get_alias(s, g)
+                domain_entity = entities.get(domain_name)
                 
-                # The rest of the block contains properties of the relationship
-                properties_str = block_text[rel_match.end():]
-    
-                if domain.startswith('_:'): domain = domain[2:]
-                elif domain.startswith(':'): domain = domain[1:]
-                if relationship.startswith(':'): relationship = relationship[1:]
-    
+                range_entity = None
                 rdfs_properties = []
-                prop_parts = [p.strip() for p in properties_str.split(';') if p.strip()]
-                for part in prop_parts:
-                    prop = RDFSProperty.from_rdf_line(part)
-                    if prop:
-                        rdfs_properties.append(prop)
-    
-                new_relationships = RDFSRelationship.from_rdfs_block(domain, relationship, range_str, rdfs_properties, self, entities, error_messages, i)
-                relationships.extend(new_relationships)
-    
+
+                # This is a direct relationship without properties
+                range_name = get_alias(o, g)
+                range_entity = entities.get(range_name)
+
+
+                if not domain_entity:
+                    if domain_name not in entities:
+                        error_messages.append(f"VALIDATION ERROR: Domain entity '{domain_name}' for relationship '{relationship_name}' not defined or failed validation.")
+                    continue
+                
+                if not range_entity:
+                    error_messages.append(f"VALIDATION ERROR: Range for relationship '{relationship_name}' must be an entity. Found '{range_name}'.")
+                    continue
+
+                valid = True
+                if not relationship_class.validate_domain_and_range(domain_name, range_name, entities, self, error_messages, 0):
+                    valid = False
+                
+                if valid:
+                    symmetric = relationship_class.symmetric
+                    rel = RDFSRelationship(domain_entity=domain_entity, relationship=relationship_name, range_entity=range_entity, symmetric=symmetric)
+                    relationships.append(rel)
+
+        # 3. Log results
         success_messages = [f"Created entity: {entity}" for entity in entities.values()]
         for rel in relationships:
             success_messages.append(f"Created relationship: {rel}")

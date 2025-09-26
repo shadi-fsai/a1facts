@@ -68,16 +68,12 @@ def create_complex_ontology(tmp_path):
             'WORKS_AT': {
                 'description': 'A Person works at a Company.',
                 'domain': 'Person',
-                'range': 'Company',
-                'properties': [
-                    {'name': 'role_title', 'type': 'string'}
-                ]
+                'range': 'Company'
             },
             'HAS_ROLE': {
                 'description': 'A Person has a Role.',
                 'domain': 'Person',
-                'range': 'Role',
-                'properties': []
+                'range': 'Role'
             }
         }
     }
@@ -145,6 +141,7 @@ def test_knowledge_base_full_lifecycle(MockQueryRewriteAgent, MockQueryAgent, Mo
 
     from a1facts.graph.update_agent import RDFSResult
     rdfs_for_alice = """
+        @prefix : <http://example.org/ontology#> .
         :Alice a :Person ;
             :name "Alice" ;
             :age "30" .
@@ -229,6 +226,7 @@ def test_knowledge_extension_e2e(MockQueryRewriteAgent, MockQueryAgent, MockAcqu
 
     from a1facts.graph.update_agent import RDFSResult
     rdfs_for_bob_age = """
+        @prefix : <http://example.org/ontology#> .
         :Bob a :Person ;
             :name "Bob" ;
             :age "42" .
@@ -339,6 +337,7 @@ def test_stress_knowledge_base(MockQueryRewriteAgent, MockQueryAgent, MockAcquir
     from a1facts.graph.update_agent import RDFSResult
     # Configure the mock for the rdfs_agent to handle the new knowledge
     rdfs_for_person_750 = f"""
+        @prefix : <http://example.org/ontology#> .
         :{acquire_target} a :Person ;
             :name "{acquire_target}" ;
             :occupation "Engineer" .
@@ -403,37 +402,33 @@ def test_complex_ontology_relationships(MockQueryRewriteAgent, MockQueryAgent, M
     kb.graph.graph_database.add_or_update_entity(alice)
     kb.graph.graph_database.add_or_update_entity(innovate_corp)
     
-    # 3. Add a relationship with properties
-    works_at = RDFSRelationship(alice, "WORKS_AT", innovate_corp, {"role_title": "Lead Developer"})
+    # 3. Add a relationship
+    works_at = RDFSRelationship(alice, "WORKS_AT", innovate_corp)
     kb.graph.graph_database.add_relationship(works_at)
     
-    # 4. Verify the relationship and its properties via query
-    # Simulate the query agent finding the role title from the relationship
-    mock_query_run.return_value = Mock(content="Alice's role at InnovateCorp is Lead Developer.")
+    # 4. Verify the relationship exists
+    mock_query_run.return_value = Mock(content="Alice works at InnovateCorp.")
     
-    query = "What is Alice's role at InnovateCorp?"
+    query = "Does Alice work at InnovateCorp?"
     result = kb.query(query)
     
-    assert "Lead Developer" in result
+    assert "Alice" in result
+    assert "InnovateCorp" in result
     mock_query_run.assert_called_once()
 
-    # 5. Verify by checking the graph directly for more detailed validation
+    # 5. Verify by checking the graph directly
     if use_neo4j:
         with kb.graph.graph_database.driver.session() as session:
             res = session.run("""
                 MATCH (p:Person {name: 'Alice'})-[r:WORKS_AT]->(c:Company {name: 'InnovateCorp'})
-                RETURN r.role_title AS role
+                RETURN r
             """).single()
             assert res is not None
-            assert res["role"] == "Lead Developer"
     else: # NetworkX
-        rel_props = kb.graph.graph_database.get_relationship_properties(
-            "Person", "name", "Alice",
-            "WORKS_AT",
-            "Company", "name", "InnovateCorp"
-        )
-        assert rel_props is not None
-        assert rel_props.get("role_title") == "Lead Developer"
+        # Check if an edge exists between the two nodes
+        alice_node = ("Person", "Alice")
+        innovate_corp_node = ("Company", "InnovateCorp")
+        assert kb.graph.graph_database.graph.has_edge(alice_node, innovate_corp_node)
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
@@ -485,7 +480,7 @@ def test_stress_complex_ontology(MockQueryRewriteAgent, MockQueryAgent, MockAcqu
             person = RDFSEntity(person_class, person_name, {"name": person_name, "age": 30 + j})
             kb.graph.graph_database.add_or_update_entity(person)
             
-            works_at = RDFSRelationship(person, "WORKS_AT", company, {"role_title": "Engineer"})
+            works_at = RDFSRelationship(person, "WORKS_AT", company)
             kb.graph.graph_database.add_relationship(works_at)
     
     total_persons = num_companies * persons_per_company
@@ -503,12 +498,11 @@ def test_stress_complex_ontology(MockQueryRewriteAgent, MockQueryAgent, MockAcqu
         assert kb.graph.graph_database.graph.number_of_nodes() == total_entities
         assert kb.graph.graph_database.graph.number_of_edges() == total_relationships
 
-    # 3. Query for a specific relationship in the populated graph
+    # 3. Query for a specific person in the populated graph
     target_person = "Person_25_10"
-    target_company = "Company_25"
-    mock_query_run.return_value = Mock(content=f"{target_person}'s role at {target_company} is Engineer.")
+    mock_query_run.return_value = Mock(content=f"{target_person} exists.")
     
-    query = f"What is {target_person}'s role at {target_company}?"
+    query = f"Does {target_person} exist?"
     result = kb.query(query)
-    assert "Engineer" in result
+    assert "exist" in result
     mock_query_run.assert_called_once()

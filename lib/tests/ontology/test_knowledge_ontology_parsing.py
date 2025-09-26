@@ -5,7 +5,7 @@ from a1facts.ontology.knowledge_ontology import KnowledgeOntology
 @pytest.fixture
 def ontology():
     """Fixture to create a KnowledgeOntology instance for testing."""
-    ontology_file = os.path.join(os.path.dirname(__file__), '..', '..', 'ontology.yaml')
+    ontology_file = os.path.join(os.path.dirname(__file__), 'company.yaml')
     return KnowledgeOntology(ontology_file)
 
 def test_parse_simple_entity(ontology):
@@ -46,22 +46,6 @@ def test_parse_simple_relationship(ontology):
     assert relationship.domain.name == "FMC_Corporation"
     assert relationship.relationship == "is_subject_of"
     assert relationship.range.name == "Event_FMC_Acq_DuPont"
-
-def test_parse_relationship_with_properties(ontology):
-    """Test parsing a relationship with properties."""
-    rdfs_content = """
-    :FMC_Corporation a :Company .
-    :Crop_Protection_Market a :Market .
-    :FMC_Corporation :operates_in :Crop_Protection_Market ;
-        :market_share_percentage 7.0 ;
-        :fiscal_year 2024 .
-    """
-    entities, relationships = ontology.parse_rdfs_with_validation(rdfs_content)
-    assert len(entities) == 2
-    assert len(relationships) == 1
-    relationship = relationships[0]
-    assert relationship.properties["market_share_percentage"] == "7.0"
-    assert relationship.properties["fiscal_year"] == "2024"
 
 def test_parse_relationship_with_stubbed_range(ontology):
     """Test parsing a relationship where the range is not explicitly defined."""

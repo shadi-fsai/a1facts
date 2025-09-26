@@ -27,7 +27,7 @@ def test_initialization(MockRewrite, MockUpdate, MockQuery, MockNeo4j, MockNetwo
     MockNetworkx.assert_called_once()
     MockNeo4j.assert_not_called()
     MockQuery.assert_called_with(mock_ontology, ["get_tool_1"])
-    MockUpdate.assert_called_with(ontology=mock_ontology, graph_database=MockNetworkx.return_value)
+    MockUpdate.assert_called_with(mock_ontology, MockNetworkx.return_value)
     MockRewrite.assert_called_with(mock_ontology, [])
     assert kg_networkx.graph_database == MockNetworkx.return_value
 

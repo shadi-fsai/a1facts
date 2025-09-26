@@ -57,9 +57,6 @@ def test_tool_creation(ontology):
     # Test relationship tool creation
     add_rel_tools = ontology.get_tools_add_or_update_relationship(dummy_func)
     assert len(add_rel_tools) == len(ontology.relationship_classes)
-
-    get_rel_prop_tools = ontology.get_tools_get_relationship_properties(dummy_func)
-    assert len(get_rel_prop_tools) == len(ontology.relationship_classes)
     
     get_rel_entities_tools = ontology.get_tools_get_relationship_entities(dummy_func)
     assert len(get_rel_entities_tools) == len(ontology.relationship_classes)

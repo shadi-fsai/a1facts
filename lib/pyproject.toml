@@ -1,6 +1,6 @@
 [project]
 name = "a1facts"
-version = "0.2.5"
+version = "0.2.6"
 license = {file = "LICENSE"}
 authors = [
   {name = "Shadi Copty", email = "shadi@a1facts.ai"}
@@ -20,6 +20,7 @@ dependencies = [
     "posthog>=6.7.1",
     "pytest>=8.4.2",
     "pytest-docker>=3.2.3",
+    "rdflib>=7.2.1",
     "sentence-transformers>=5.1.1",
     "spacy>=3.8.7",
     "thefuzz>=0.22.1",

@@ -29,10 +29,7 @@ def ontology(tmp_path):
             'WORKS_AT': {
                 'description': 'A Person works at a Company.',
                 'domain': 'Person',
-                'range': 'Company',
-                'properties': [
-                    {'name': 'role', 'type': 'string'}
-                ]
+                'range': 'Company'
             }
         }
     }
@@ -85,13 +82,13 @@ def test_multiple_entities(ontology):
     assert acme.properties["industry"] == "Manufacturing"
 
 
-@pytest.mark.parametrize("rdfs_content, domain, rel, range_name, role", [
+@pytest.mark.parametrize("rdfs_content, domain, rel, range_name", [
     # Standard relationship
-    (':Alice a :Person ; :name "Alice" . :ACME a :Company ; :name "ACME" . :Alice :WORKS_AT :ACME ; :role "Engineer" .', "Alice", "WORKS_AT", "ACME", "Engineer"),
+    (':Alice a :Person ; :name "Alice" . :ACME a :Company ; :name "ACME" . :Alice :WORKS_AT :ACME .', "Alice", "WORKS_AT", "ACME"),
     # Relationship with blank nodes
-    ('_:a a :Person ; :name "Anon" . _:c a :Company ; :name "Confidential" . _:a :WORKS_AT _:c ; :role "Manager" .', "a", "WORKS_AT", "c", "Manager"),
+    ('_:a a :Person ; :name "Anon" . _:c a :Company ; :name "Confidential" . _:a :WORKS_AT _:c .', "a", "WORKS_AT", "c"),
 ])
-def test_relationship_parsing(ontology, rdfs_content, domain, rel, range_name, role):
+def test_relationship_parsing(ontology, rdfs_content, domain, rel, range_name):
     """Tests parsing various RDFS relationship formats."""
     entities, relationships = ontology.parse_rdfs_with_validation(rdfs_content)
     assert len(entities) == 2
@@ -101,4 +98,3 @@ def test_relationship_parsing(ontology, rdfs_content, domain, rel, range_name, r
     assert relationship.domain_entity.name == domain
     assert relationship.relationship == rel
     assert relationship.range_entity.name == range_name
-    assert relationship.properties["role"] == role

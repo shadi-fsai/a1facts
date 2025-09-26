@@ -311,29 +311,11 @@ class OntologyPerformanceTester:
                 _ = rel_class.range_entity_class
                 _ = rel_class.description
                 _ = rel_class.symmetric
-                for prop in rel_class.properties:
-                    _ = prop.property_name
-                    _ = prop.type
         
         result = self.run_performance_test(
             access_relationship_properties,
             "Relationship Property Access",
             iterations=50
-        )
-        results.append(result)
-        
-        # Test relationship validation
-        def validate_relationships():
-            for rel_class in ontology.relationship_classes:
-                try:
-                    rel_class._validate_properties({})
-                except Exception:
-                    pass  # Expected for some relationships
-        
-        result = self.run_performance_test(
-            validate_relationships,
-            "Relationship Validation",
-            iterations=30
         )
         results.append(result)
         
@@ -386,7 +368,6 @@ class OntologyPerformanceTester:
         # Test relationship tool generation
         def generate_relationship_tools():
             tools = ontology.get_tools_add_or_update_relationship(dummy_add_relationship)
-            tools.extend(ontology.get_tools_get_relationship_properties(dummy_get_relationship))
             tools.extend(ontology.get_tools_get_relationship_entities(dummy_get_relationship))
             return tools
         
@@ -403,7 +384,7 @@ class OntologyPerformanceTester:
                 dummy_add_entity, dummy_add_relationship
             )
             get_tools = ontology.get_tools_get_entity_and_relationship(
-                dummy_get_entity, dummy_get_entity, dummy_get_relationship, dummy_get_relationship
+                dummy_get_entity, dummy_get_entity, dummy_get_relationship
             )
             return entity_tools + get_tools
         

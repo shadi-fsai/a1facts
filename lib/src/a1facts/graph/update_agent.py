@@ -9,9 +9,9 @@ from pydantic import BaseModel, Field
 
 
 class RDFSResult(BaseModel):
-    rdfs: str = Field(description="The RDFS format of the knowledge. Only include entities, relationships and their properties that are in the ontology.")
+    rdfs: str = Field(description="The RDFS format of the knowledge. Only include entities with their properties and relationships that are in the ontology.")
     other_information: str = Field(description="Other information that couldn't be described in the ontology. Ideally this is empty, but if you have other info that is not in the ontology, included it here verbatim.")
-    ontology_elements_used: list[str] = Field(description="The elements of the ontology that were used to create the RDFS format. each line should represent either an entity or a relationship and should include the properties verbatim that were used from the ontology.")
+    ontology_elements_used: list[str] = Field(description="The elements of the ontology that were used to create the RDFS format. each line should represent either an entity (with properties) or a relationship used from the ontology.")
 
 
 class UpdateAgent:
@@ -25,7 +25,7 @@ class UpdateAgent:
             instructions=dedent(f"""
                 Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]
-                Return the results in RDFS format. Include both entities and relationships -- along with their properties.
+                Return the results in turtle RDFS format. Include entities with their properties and relationships.
                 ALWAYS use the properties verbatim that were used from the ontology.
                 ALWAYS use the entities and relationships verbatim that were used from the ontology.
                 NEVER make up information. 
@@ -35,22 +35,29 @@ class UpdateAgent:
                 Use ":" as prefix for the entities and relationships. use "a" to describe an entity that is a type of another entity.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
                 The following is an example of the RDFS format:
+                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+                @prefix : <http://example.org/ontology#> .
+                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
                 # --- Define the entities ---
 
                 :Mars a :Planet ;
                     :commonName "Mars" .
 
+                # --- Define the Observation (the relationship node) and its properties ---
+
                 :Opposition_Event_2025 a :AstronomicalObservation ;
                     :observationID "Opposition_Event_2025" ;
                     :observationType "Opposition" ;
-                    :magnitude "-2.8"^^xsd:decimal . # Apparent magnitude of the planet
-
-                # --- Create a linking node for the relationship ---
-
-                :Mars :hasObservation :Opposition_Event_2025 ;
-                    :observationDate "2025-12-08" ;
+                    :magnitude "-2.8"^^xsd:decimal ;
+                    # These properties belong to the event, NOT Mars
+                    :observationDate "2025-12-08"^^xsd:date ;
                     :visibility "Excellent" .
+
+                # --- Link the entities together ---
+
+                # This single triple connects Mars to its detailed observation event.
+                :Mars :hasObservation :Opposition_Event_2025 .
             """),
             markdown=True,
             debug_mode=False,
@@ -71,10 +78,13 @@ class UpdateAgent:
             
         logger.system("\n--- RDFS Content ---")
         logger.system(rdfs_result.content.rdfs)
-        
         logger.system("\n--- Other Information ---") #TODO: this can be used to improve the ontology
         logger.system(rdfs_result.content.other_information)      
-        entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
+        try:
+            entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
+        except Exception as e:
+            logger.system(f"An error occurred during RDFS parsing and validation: {e}")
+            return f"Failed to update knowledge due to a parsing error: {e}"
         logger.system("\n--- Parsed Entities ---")
         return_str = ""
         for entity in entities:

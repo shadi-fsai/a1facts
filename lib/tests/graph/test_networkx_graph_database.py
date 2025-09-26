@@ -131,8 +131,8 @@ def populated_db(db):
     db.add_or_update_entity(c1)
     db.add_or_update_entity(c2)
     
-    works_for = RDFSRelationship(p1, "WORKS_FOR", c1, {"role": "Engineer"})
-    manages = RDFSRelationship(p2, "WORKS_FOR", c1, {"role": "Manager"})
+    works_for = RDFSRelationship(p1, "WORKS_FOR", c1)
+    manages = RDFSRelationship(p2, "WORKS_FOR", c1)
     partners_with = RDFSRelationship(c1, "PARTNERS_WITH", c2, symmetric=True)
 
     db.add_relationship(works_for)
@@ -149,7 +149,6 @@ def test_add_relationship(populated_db):
     assert populated_db.graph.has_edge(person1_id, company1_id)
     edge_data = populated_db.graph.get_edge_data(person1_id, company1_id)
     assert edge_data["type"] == "WORKS_FOR"
-    assert edge_data["role"] == "Engineer"
     
     assert populated_db.graph.has_edge(company1_id, company2_id)
     assert populated_db.graph.has_edge(company2_id, company1_id)
@@ -185,15 +184,6 @@ def test_get_relationship_entities(populated_db):
     partners_of_c2 = populated_db.get_relationship_entities("Company", "id", "c2", "PARTNERS_WITH", "Company", "id")
     assert len(partners_of_c2) == 1
     assert partners_of_c2[0]["name"] == "AlphaInc"
-
-def test_get_relationship_properties(populated_db):
-    """Test getting properties of a specific relationship."""
-    props = populated_db.get_relationship_properties("Person", "id", "p1", "WORKS_FOR", "Company", "id", "c1")
-    assert props["role"] == "Engineer"
-    
-    # Test for non-existent edge
-    no_props = populated_db.get_relationship_properties("Person", "id", "p1", "WORKS_FOR", "Company", "id", "c2")
-    assert no_props is None
 
 def test_get_entity_properties(populated_db):
     """Test getting properties of a single entity."""
