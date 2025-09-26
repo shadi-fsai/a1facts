@@ -4,31 +4,98 @@ from agno.agent import Agent
 from textwrap import dedent
 from datetime import datetime
 from a1facts.utils.logger import logger
+from colored import cprint
+from pydantic import BaseModel, Field
+
+
+class RDFSResult(BaseModel):
+    rdfs: str = Field(description="The RDFS format of the knowledge. Only include entities with their properties and relationships that are in the ontology.")
+    other_information: str = Field(description="Other information that couldn't be described in the ontology. Ideally this is empty, but if you have other info that is not in the ontology, included it here verbatim.")
+    ontology_elements_used: list[str] = Field(description="The elements of the ontology that were used to create the RDFS format. each line should represent either an entity (with properties) or a relationship used from the ontology.")
+
 
 class UpdateAgent:
-    def __init__(self, ontology: KnowledgeOntology, mytools: list):
+    def __init__(self, ontology: KnowledgeOntology, graph_database):
         self.ontology = ontology
-        self.update_agent = Agent(
-            name="Knowledge Graph Update Agent",
-            role="Update the knowledge graph",
+        self.graph_database = graph_database
+        self.rdfs_agent = Agent(
+            name="RDFS Agent",
+            role="Translate the knowledge into a structured format based on the ontology.",
             model=my_high_precision_model,
-            tools=mytools,
-
             instructions=dedent(f"""
-                The user is providing you unstrucutred knowledge. 
                 Translate the knowledge into a structured format based on the ontology.
                 Ontology:[{self.ontology}]
-                Return the results in RDFS format.
+                Return the results in turtle RDFS format. Include entities with their properties and relationships.
+                ALWAYS use the properties verbatim that were used from the ontology.
+                ALWAYS use the entities and relationships verbatim that were used from the ontology.
+                NEVER make up information. 
+                Only use the information provided to you. DO NOT use your own knowledge to make up information.
                 Ideally, every RDFS entity should have sources.
-                When you are done, add every entity and relationship to the graph using the tools available to you.
-                First add the entities, then add the relationships.
-                Make sure to add every single one of them.
+                If you have an entity that can't be expressed in the ontology, include it in the other_information field.
+                Use ":" as prefix for the entities and relationships. use "a" to describe an entity that is a type of another entity.
                 Today is {datetime.now().strftime("%Y-%m-%d")}
+                The following is an example of the RDFS format:
+                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+                @prefix : <http://example.org/ontology#> .
+                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+                # --- Define the entities ---
+
+                :Mars a :Planet ;
+                    :commonName "Mars" .
+
+                # --- Define the Observation (the relationship node) and its properties ---
+
+                :Opposition_Event_2025 a :AstronomicalObservation ;
+                    :observationID "Opposition_Event_2025" ;
+                    :observationType "Opposition" ;
+                    :magnitude "-2.8"^^xsd:decimal ;
+                    # These properties belong to the event, NOT Mars
+                    :observationDate "2025-12-08"^^xsd:date ;
+                    :visibility "Excellent" .
+
+                # --- Link the entities together ---
+
+                # This single triple connects Mars to its detailed observation event.
+                :Mars :hasObservation :Opposition_Event_2025 .
             """),
             markdown=True,
             debug_mode=False,
-            )
+            output_schema=RDFSResult,
+        )
+        
 
-    def update(self, knowledge: str):
+    def update(self, knowledge: str) -> str:
+        #step 0 - translate the knowledge into rdfs format
+        #step 1 - deduplicate the knowledge using spacy; add alises to entities and relatioinships
+        #step 2 - add the knowledge to the graph using the tools available to you
         logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
-        return self.update_agent.run("Translate the following knowledge into a structured format based on the ontology, then add every entity and every relationship to the graph using the tools available to you.\n \n " + knowledge)
+        rdfs_result = self.rdfs_agent.run("Translate the following knowledge into a structured format based on the ontology\n\n " + knowledge)
+        
+        if not rdfs_result or not rdfs_result.content or not rdfs_result.content.rdfs:
+            logger.system("No RDFS content was generated by the agent.")
+            return "No information was updated."
+            
+        logger.system("\n--- RDFS Content ---")
+        logger.system(rdfs_result.content.rdfs)
+
+        logger.system("\n--- Other Information ---") #TODO: this can be used to improve the ontology
+        logger.system(rdfs_result.content.other_information)      
+        try:
+            entities, relationships = self.ontology.parse_rdfs_with_validation(rdfs_result.content.rdfs)
+        except Exception as e:
+            logger.system(f"An error occurred during RDFS parsing and validation: {e}")
+            return f"Failed to update knowledge due to a parsing error: {e}"
+        logger.system("\n--- Parsed Entities ---")
+        return_str = ""
+        for entity in entities:
+            self.graph_database.add_or_update_entity(entity)
+            logger.system(entity)
+            return_str += f"Added entity: {entity}\n"
+        logger.system("\n--- Parsed Relationships ---")
+        for relationship in relationships:
+            self.graph_database.add_relationship(relationship)
+            logger.system(relationship)
+            return_str += f"Added relationship: {relationship}\n"
+
+        return return_str

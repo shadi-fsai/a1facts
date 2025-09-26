@@ -3,6 +3,20 @@ import os
 import pickle
 import networkx as nx
 from a1facts.graph.networkx_graph_database import NetworkxGraphDatabase
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
+
+# Mock classes for testing
+class MockEntityClass(EntityClass):
+    def __init__(self, name, description, primary_key_name):
+        super().__init__(name, description)
+        self.primary_key_prop = Property(primary_key_name, "str", "pk", True)
+
+class MockProperty:
+    def __init__(self, name):
+        self.property_name = name
 
 @pytest.fixture
 def db_path(tmp_path):
@@ -37,8 +51,10 @@ def test_initialization_from_existing_file(db_path):
 
 def test_add_or_update_entity_add_new(db):
     """Test adding a new entity."""
+    mock_entity_class = MockEntityClass("Company", "A business entity", "id")
     properties = {"id": "company1", "name": "TestCorp", "value": 100}
-    db.add_or_update_entity("Company", "id", properties)
+    entity = RDFSEntity(mock_entity_class, "company1", properties)
+    db.add_or_update_entity(entity)
     
     node_id = ("Company", "company1")
     assert db.graph.has_node(node_id)
@@ -48,11 +64,14 @@ def test_add_or_update_entity_add_new(db):
 
 def test_add_or_update_entity_update_existing(db):
     """Test updating properties of an existing entity without changing the label."""
+    mock_entity_class = MockEntityClass("Person", "A person", "id")
     properties1 = {"id": "p1", "name": "Person 1", "age": 30}
-    db.add_or_update_entity("Person", "id", properties1)
+    entity1 = RDFSEntity(mock_entity_class, "p1", properties1)
+    db.add_or_update_entity(entity1)
     
     properties2 = {"id": "p1", "name": "Person One", "age": 31}
-    db.add_or_update_entity("Person", "id", properties2)
+    entity2 = RDFSEntity(mock_entity_class, "p1", properties2)
+    db.add_or_update_entity(entity2)
     
     node_id = ("Person", "p1")
     node_data = db.graph.nodes[node_id]
@@ -66,14 +85,18 @@ def test_add_or_update_entity_update_with_label_change(db):
     existing primary key creates a new, distinct node, as the label is
     part of the unique identifier.
     """
+    mock_entity_class_A = MockEntityClass("TypeA", "Type A", "id")
     properties = {"id": "e1", "name": "Entity 1"}
-    db.add_or_update_entity("TypeA", "id", properties)
+    entity_A = RDFSEntity(mock_entity_class_A, "e1", properties)
+    db.add_or_update_entity(entity_A)
     
     node_id_A = ("TypeA", "e1")
     assert db.graph.has_node(node_id_A)
     
+    mock_entity_class_B = MockEntityClass("TypeB", "Type B", "id")
     updated_properties = {"id": "e1", "name": "Entity One"}
-    db.add_or_update_entity("TypeB", "id", updated_properties)
+    entity_B = RDFSEntity(mock_entity_class_B, "e1", updated_properties)
+    db.add_or_update_entity(entity_B)
     
     node_id_B = ("TypeB", "e1")
     assert db.graph.has_node(node_id_B)
@@ -86,21 +109,35 @@ def test_add_or_update_entity_update_with_label_change(db):
 def test_add_or_update_entity_missing_pk(db):
     """Test adding an entity with a missing primary key field."""
     initial_node_count = db.graph.number_of_nodes()
+    mock_entity_class = MockEntityClass("Company", "A business entity", "id")
     properties = {"name": "TestCorp"}
-    db.add_or_update_entity("Company", "id", properties)
+    entity = RDFSEntity(mock_entity_class, None, properties)
+    db.add_or_update_entity(entity)
     assert db.graph.number_of_nodes() == initial_node_count
 
 @pytest.fixture
 def populated_db(db):
     """Pre-populate the database with some entities and relationships."""
-    db.add_or_update_entity("Person", "id", {"id": "p1", "name": "Alice"})
-    db.add_or_update_entity("Person", "id", {"id": "p2", "name": "Bob"})
-    db.add_or_update_entity("Company", "id", {"id": "c1", "name": "AlphaInc"})
-    db.add_or_update_entity("Company", "id", {"id": "c2", "name": "BetaCorp"})
+    person_class = MockEntityClass("Person", "A person", "id")
+    company_class = MockEntityClass("Company", "A business entity", "id")
+
+    p1 = RDFSEntity(person_class, "p1", {"id": "p1", "name": "Alice"})
+    p2 = RDFSEntity(person_class, "p2", {"id": "p2", "name": "Bob"})
+    c1 = RDFSEntity(company_class, "c1", {"id": "c1", "name": "AlphaInc"})
+    c2 = RDFSEntity(company_class, "c2", {"id": "c2", "name": "BetaCorp"})
+
+    db.add_or_update_entity(p1)
+    db.add_or_update_entity(p2)
+    db.add_or_update_entity(c1)
+    db.add_or_update_entity(c2)
     
-    db.add_relationship("Person", "id", "p1", "Company", "id", "c1", "WORKS_FOR", {"role": "Engineer"})
-    db.add_relationship("Person", "id", "p2", "Company", "id", "c1", "WORKS_FOR", {"role": "Manager"})
-    db.add_relationship("Company", "id", "c1", "Company", "id", "c2", "PARTNERS_WITH", symmetric=True)
+    works_for = RDFSRelationship(p1, "WORKS_FOR", c1)
+    manages = RDFSRelationship(p2, "WORKS_FOR", c1)
+    partners_with = RDFSRelationship(c1, "PARTNERS_WITH", c2, symmetric=True)
+
+    db.add_relationship(works_for)
+    db.add_relationship(manages)
+    db.add_relationship(partners_with)
     return db
 
 def test_add_relationship(populated_db):
@@ -112,7 +149,6 @@ def test_add_relationship(populated_db):
     assert populated_db.graph.has_edge(person1_id, company1_id)
     edge_data = populated_db.graph.get_edge_data(person1_id, company1_id)
     assert edge_data["type"] == "WORKS_FOR"
-    assert edge_data["role"] == "Engineer"
     
     assert populated_db.graph.has_edge(company1_id, company2_id)
     assert populated_db.graph.has_edge(company2_id, company1_id)
@@ -148,15 +184,6 @@ def test_get_relationship_entities(populated_db):
     partners_of_c2 = populated_db.get_relationship_entities("Company", "id", "c2", "PARTNERS_WITH", "Company", "id")
     assert len(partners_of_c2) == 1
     assert partners_of_c2[0]["name"] == "AlphaInc"
-
-def test_get_relationship_properties(populated_db):
-    """Test getting properties of a specific relationship."""
-    props = populated_db.get_relationship_properties("Person", "id", "p1", "WORKS_FOR", "Company", "id", "c1")
-    assert props["role"] == "Engineer"
-    
-    # Test for non-existent edge
-    no_props = populated_db.get_relationship_properties("Person", "id", "p1", "WORKS_FOR", "Company", "id", "c2")
-    assert no_props is None
 
 def test_get_entity_properties(populated_db):
     """Test getting properties of a single entity."""

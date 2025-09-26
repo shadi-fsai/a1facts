@@ -2,6 +2,21 @@ import pytest
 import yaml
 from unittest.mock import patch, Mock
 from a1facts.knowledge_base import KnowledgeBase
+from a1facts.graph.update_agent import RDFSResult
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
+from a1facts.ontology.entity_class import EntityClass
+from a1facts.ontology.property import Property
+
+# Mock classes for testing - This will be removed
+class MockEntityClass(EntityClass):
+    def __init__(self, name, description, primary_key_name):
+        super().__init__(name, description)
+        self.primary_key_prop = Property(primary_key_name, "str", "pk", True)
+
+class MockProperty:
+    def __init__(self, name):
+        self.property_name = name
 
 @pytest.fixture
 def simple_ontology(tmp_path):
@@ -9,7 +24,8 @@ def simple_ontology(tmp_path):
     ontology_data = {
         'world': {
             'name': 'SimpleCorp',
-            'description': 'A simple ontology for companies, employees, and projects.'
+            'description': 'A simple ontology for companies, employees, and projects.',
+            'main_entities': ['Company', 'Employee', 'Project']
         },
         'entity_classes': {
             'Company': {
@@ -55,10 +71,9 @@ def simple_ontology(tmp_path):
 @pytest.mark.e2e
 @pytest.mark.parametrize("db_backend", ["networkx", "neo4j"])
 @patch('a1facts.graph.query_rewrite_agent.Agent')
-@patch('a1facts.graph.update_agent.Agent')
 @patch('a1facts.enrichment.knowledge_acquirer.Agent')
 def test_repeated_acquisition_for_same_entity(
-    MockAcquirerAgent, MockUpdateAgent, MockQueryRewriteAgent, 
+    MockAcquirerAgent, MockQueryRewriteAgent,
     simple_ontology, tmp_path, db_backend, request
 ):
     """
@@ -90,6 +105,9 @@ def test_repeated_acquisition_for_same_entity(
 
     # 2. Repeatedly acquire knowledge using ingest_knowledge
     num_acquisitions = 10
+    employee_class = kb.ontology.find_entity_class("Employee")
+    company_class = kb.ontology.find_entity_class("Company")
+    project_class = kb.ontology.find_entity_class("Project")
     for i in range(num_acquisitions):
         # Combine all knowledge into a single ingestion call
         combined_knowledge = f"""
@@ -100,30 +118,27 @@ def test_repeated_acquisition_for_same_entity(
         """
         
         combined_structured_knowledge = f"""
-            @prefix simple: <http://a1facts.com/ontology/SimpleCorp#> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+            :JohnDoe a :Employee ;
+                :name "John Doe" ;
+                :role "Engineer" .
 
-            simple:JohnDoe rdf:type simple:Employee ;
-                simple:name "John Doe" ;
-                simple:role "Engineer" .
-            
-            simple:Company_{i} rdf:type simple:Company ;
-                simple:name "Company_{i}" .
+            :Company_{i} a :Company ;
+                :name "Company_{i}" .
 
-            simple:Project_{i} rdf:type simple:Project ;
-                simple:name "Project_{i}" .
+            :Project_{i} a :Project ;
+                :name "Project_{i}" .
 
-            simple:JohnDoe simple:WORKS_FOR simple:Company_{i} .
+            :JohnDoe :WORKS_FOR :Company_{i} .
         """
         
-        with patch.object(kb.graph, '_rewrite_query', return_value=combined_structured_knowledge):
-            kb.ingest_knowledge(combined_knowledge)
+        # Mock the rdfs_agent to return the structured knowledge, so that the
+        # rest of the ingestion pipeline (parsing, DB update) is executed.
+        with patch('a1facts.graph.update_agent.Agent') as MockRdfsAgent:
+            mock_rdfs_response = RDFSResult(rdfs=combined_structured_knowledge, other_information="", ontology_elements_used=[])
+            MockRdfsAgent.return_value.run.return_value = Mock(content=mock_rdfs_response)
 
-        # Manually perform the combined update since the agent is mocked
-        kb.graph.graph_database.add_or_update_entity("Employee", "name", {"name": "John Doe", "role": "Engineer"})
-        kb.graph.graph_database.add_or_update_entity("Company", "name", {"name": f"Company_{i}"})
-        kb.graph.graph_database.add_or_update_entity("Project", "name", {"name": f"Project_{i}"})
-        kb.graph.graph_database.add_relationship("Employee", "name", "John Doe", "Company", "name", f"Company_{i}", "WORKS_FOR", {})
+            with patch.object(kb.graph, '_rewrite_query', return_value=combined_structured_knowledge):
+                kb.ingest_knowledge(combined_knowledge)
 
     # 3. Verify entity uniqueness
     all_employees = kb.graph.graph_database.get_all_entities_by_label("Employee")

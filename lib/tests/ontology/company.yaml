@@ -1,6 +1,10 @@
 world:
   name: Company Knowledge Graph
   description: Financial and Market Intelligence knowledge graph.
+  main_entities: 
+    - Company
+    - Market
+    - Leader
 
 entity_classes:
   Company:
@@ -178,80 +182,64 @@ relationships:
     domain: Company
     range: Market
     description: Connects a Company to a Market it operates within.
-    properties: []
   competes_with:
     domain: Company
     range: Company
     description: A symmetric relationship between two competing Companies.
     symmetric: true
-    properties: []
   produces:
     domain: Company
     range: Product_Service
     description: Links a Company to a Product or Service it offers.
-    properties: []
   is_subject_of:
     domain: Company
     range: Corporate_Event
     description: Links a Company to an event concerning it.
-    properties: []
   reports:
     domain: Corporate_Event
     range: Financial_Metric
     description: Connects an event (like an earnings call) to the financial metrics disclosed.
-    properties: []
   is_led_by:
     domain: Company
     range: Leader
     description: Connects a Company to a Leader in a leadership role.
-    properties: []
   has_role:
     domain: Leader
     range: Leadership_Role
     description: Connects a Leader to their various roles (past and present).
-    properties: []
   held_at:
     domain: Leadership_Role
     range: Company
     description: Connects a Leadership_Role to the Company where it is held.
-    properties: []
   possesses:
     domain: Company
     range: Competitive_Advantage
     description: Links a Company to its Competitive Advantage (Moat).
-    properties: []
   is_exposed_to:
     domain: Company
     range: Risk_Factor
     description: Connects a Company to a Risk Factor.
-    properties: []
   acquires:
     domain: Company
     range: Company
     description: Relates an acquiring Company to a target Company.
-    properties: []
   divests:
     domain: Company
     range: Product_Service
     description: Relates a Company to a Product or Service it has sold off.
-    properties: []
   has_policy:
     domain: Company
     range: Capital_Allocation_Policy
     description: Links a Company to its capital deployment strategy.
-    properties: []
   utilizes:
     domain: Company
     range: Financial_Instrument
     description: Connects a Company to a financial instrument like debt.
-    properties: []
   has_adviser:
     domain: Company
     range: Leader
     description: Connects a Company to a Leader serving as an adviser.
-    properties: []
   involves_leader:
     domain: Corporate_Event
     range: Leader
     description: Connects a Corporate_Event to a Leader involved in it.
-    properties: []

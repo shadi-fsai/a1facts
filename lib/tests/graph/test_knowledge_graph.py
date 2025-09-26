@@ -27,7 +27,7 @@ def test_initialization(MockRewrite, MockUpdate, MockQuery, MockNeo4j, MockNetwo
     MockNetworkx.assert_called_once()
     MockNeo4j.assert_not_called()
     MockQuery.assert_called_with(mock_ontology, ["get_tool_1"])
-    MockUpdate.assert_called_with(mock_ontology, ["update_tool_1"])
+    MockUpdate.assert_called_with(mock_ontology, MockNetworkx.return_value)
     MockRewrite.assert_called_with(mock_ontology, [])
     assert kg_networkx.graph_database == MockNetworkx.return_value
 
@@ -81,8 +81,7 @@ def test_update_knowledge_method(MockRewrite, MockUpdate, MockQuery, mock_ontolo
     
     # Set return values
     kg.rewrite_agent.rewrite_query.return_value = "Rewritten Knowledge"
-    update_result = Mock()
-    update_result.content = "Update Result"
+    update_result = "Update Result"
     kg.update_agent.update.return_value = update_result
     
     with patch.object(kg, '_get_class_entity_pairs') as mock_get_pairs:

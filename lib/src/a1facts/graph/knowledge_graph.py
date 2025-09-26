@@ -30,27 +30,35 @@ class KnowledgeGraph:
         """
         logger.system(f"Initializing KnowledgeGraph: {ontology.ontology_file} with use_neo4j: {use_neo4j}")
         self.ontology = ontology
+        self.graph_database = None
         if use_neo4j:
             self.graph_database = Neo4jGraphDatabase(uri=neo4j_uri, user=neo4j_user, password=neo4j_password)
         else:
             self.graph_database = NetworkxGraphDatabase(graph_file=graph_file)
         
+        logger.system(f"Successfully initialized graph database.")
+        
         self.get_tools = self.ontology.get_tools_get_entity_and_relationship(self.graph_database.get_all_entities_by_label, 
-        self.graph_database.get_entity_properties, self.graph_database.get_relationship_properties, self.graph_database.get_relationship_entities)
+        self.graph_database.get_entity_properties, self.graph_database.get_relationship_entities)
         self.add_or_update_tools = self.ontology.get_tools_add_or_update_entity_and_relationship(self.graph_database.add_or_update_entity, self.graph_database.add_relationship)        
         self.query_agent = QueryAgent(self.ontology,self.get_tools ) 
-        self.update_agent = UpdateAgent(self.ontology,self.add_or_update_tools)
+        self.update_agent = UpdateAgent(self.ontology, self.graph_database)
         self.rewrite_agent = QueryRewriteAgent(self.ontology,[])
         self.class_entity_pairs = {}
         cprint(f"KnowledgeGraph initialized", "green")
 
 
     def _get_class_entity_pairs(self):
-        for entity_class in self.ontology.entity_classes:
+        for entity_class_name in self.ontology.main_entities:
+            entity_class = self.ontology.find_entity_class(entity_class_name)
+            if not entity_class:
+                logger.warning(f"Main entity '{entity_class_name}' not found in ontology entity classes.")
+                continue
+
             self.class_entity_pairs[entity_class.entity_class_name] = []
             entities = self.graph_database.get_all_entities_by_label(entity_class.entity_class_name)
             for entity in entities:
-                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])      
+                self.class_entity_pairs[entity_class.entity_class_name].append(entity[entity_class.primary_key_prop.property_name])
 
     def _rewrite_query(self, query: str):
         self._get_class_entity_pairs()
@@ -84,13 +92,13 @@ class KnowledgeGraph:
             str: The content of the agent's response.
         """
         logger.system(f"Updating knowledge graph with knowledge: {knowledge}")
-        rewrite_knowledge = self._rewrite_query(knowledge)
+        rewrite_knowledge = self._rewrite_query(knowledge) #entity deduplication
         logger.system(f"Rewritten knowledge: {rewrite_knowledge}")
         result = self.update_agent.update(rewrite_knowledge)
-        logger.system(f"Result: {result.content}")
+        logger.system(f"Result: {result}")
         self.graph_database.save()
         logger.system(f"Graph database saved")
-        return result.content
+        return result
 
     def close(self):
         if self.graph_database is not None:

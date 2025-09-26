@@ -4,6 +4,8 @@ import pickle
 from colored import cprint
 from a1facts.utils.logger import logger
 from io import open
+from a1facts.ontology.rdfs_entity import RDFSEntity
+from a1facts.ontology.rdfs_relationship import RDFSRelationship
 
 
 class NetworkxGraphDatabase(BaseGraphDatabase):
@@ -30,7 +32,10 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
                 index[label].add(node)
         return index
 
-    def add_or_update_entity(self, label, primary_key_field, properties):
+    def add_or_update_entity(self, entity: RDFSEntity):
+        label = entity.entity_class.entity_class_name
+        primary_key_field = entity.entity_class.primary_key_prop.property_name
+        properties = entity.properties
         logger.system(f"NWX: Adding or updating {label} entity with primary key {primary_key_field} and properties {properties}")
         if primary_key_field not in properties:
             logger.system(f"NWX: Primary key '{primary_key_field}' not found in properties.")
@@ -54,13 +59,23 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
         self.nodes_by_label[label].add(node_id)
 
 
-    def add_relationship(self, start_node_label, start_pk_field, start_node_pk_val, end_node_label, end_pk_field, end_node_pk_val, relationship_type, properties=None, symmetric=False):
+    def add_relationship(self, relationship: RDFSRelationship):
+        start_node_label = relationship.domain_entity.entity_class.entity_class_name
+        start_pk_field = relationship.domain_entity.entity_class.primary_key_prop.property_name
+        start_node_pk_val = relationship.domain_entity.properties[start_pk_field]
+        end_node_label = relationship.range_entity.entity_class.entity_class_name
+        end_pk_field = relationship.range_entity.entity_class.primary_key_prop.property_name
+        end_node_pk_val = relationship.range_entity.properties[end_pk_field]
+        relationship_type = relationship.relationship
+
+        symmetric = relationship.symmetric
+
         logger.system(f"NWX: Adding {relationship_type} relationship between {start_node_label} {start_node_pk_val} and {end_node_label} {end_node_pk_val}")
         
         start_node_id = (start_node_label, start_node_pk_val)
         end_node_id = (end_node_label, end_node_pk_val)
         
-        edge_properties = properties.copy() if properties else {}
+        edge_properties = {}
         edge_properties['type'] = relationship_type
 
         self.graph.add_edge(start_node_id, end_node_id, **edge_properties)
@@ -88,19 +103,6 @@ class NetworkxGraphDatabase(BaseGraphDatabase):
                     self.graph.nodes[neighbor].get('label') == range_label):
                 results.append(self.graph.nodes[neighbor])
         return results
-
-    def get_relationship_properties(self, domain_label, domain_pk_prop, domain_primary_key_value, relationship_type, range_label, range_pk_prop, range_primary_key_value):
-        logger.system(f"NWX: Getting {relationship_type} relationship properties for {domain_label} {domain_primary_key_value} and {range_label} {range_primary_key_value}")
-        start_node_id = (domain_label, domain_primary_key_value)
-        end_node_id = (range_label, range_primary_key_value)
-        
-        if self.graph.has_edge(start_node_id, end_node_id):
-            edge_data = self.graph.get_edge_data(start_node_id, end_node_id)
-            if edge_data.get('type') == relationship_type:
-                return edge_data
-        
-        logger.system(f"NWX: No relationship found for {domain_label} {domain_primary_key_value} and {range_label} {range_primary_key_value}")
-        return None
 
     def get_entity_properties(self, label, pk_prop, primary_key_value):
         logger.system(f"NWX: Getting {label} properties for {primary_key_value}")

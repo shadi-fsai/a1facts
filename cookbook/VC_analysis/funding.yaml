@@ -1,6 +1,10 @@
 world:
   name: Funding Knowledge Graph
   description: Funding knowledge graph.
+  main_entities:
+    - VC
+    - Portfolio_Company
+    - Investment
 
 entity_classes:
   VC:
