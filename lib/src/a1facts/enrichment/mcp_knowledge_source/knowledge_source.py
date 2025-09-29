@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import sys
+from contextlib import AsyncExitStack
 from a1facts.enrichment.knowledge_source import KnowledgeSource
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
@@ -20,7 +21,7 @@ class MCPKnowledgeSource(KnowledgeSource):
         self.session = None
         self.local_tools = []
         self.query_agent = None
-        self.stdio_cm = None
+        self.exit_stack = None
 
         self.loop = asyncio.new_event_loop()
         self.thread = Thread(target=self.loop.run_forever, daemon=True)
@@ -32,6 +33,8 @@ class MCPKnowledgeSource(KnowledgeSource):
             cwd=source_config['run_cwd'],
             env=None,
         )
+        
+        print(f"[DEBUG] Server params for {self.name}: command={server_params.command}, args={server_params.args}, cwd={server_params.cwd}")
 
         if 'all_tools' in source_config and source_config['all_tools']:
             self.all_tools = True
@@ -49,35 +52,115 @@ class MCPKnowledgeSource(KnowledgeSource):
         self.close()
 
     def close(self):
-        if self.session:
-            future = asyncio.run_coroutine_threadsafe(self.session.close(), self.loop)
-            future.result(timeout=1)
-            self.session = None
-        if self.stdio_cm:
-            future = asyncio.run_coroutine_threadsafe(self.stdio_cm.__aexit__(None, None, None), self.loop)
-            future.result(timeout=1)
-            self.stdio_cm = None
-        
-        if self.loop.is_running():
-            self.loop.call_soon_threadsafe(self.loop.stop)
-        self.thread.join(timeout=1)
+        # Close exit stack first while event loop is still running
+        if self.exit_stack and self.loop and not self.loop.is_closed():
+            try:
+                # Schedule the cleanup on the event loop
+                async def cleanup():
+                    await self.exit_stack.aclose()
+                    self.exit_stack = None
+
+                future = asyncio.run_coroutine_threadsafe(cleanup(), self.loop)
+                future.result(timeout=5)
+            except Exception as e:
+                # AsyncExitStack cleanup can fail in threading context, but that's OK
+                # The important thing is that the MCP session worked during operation
+                print(f"Warning: MCP cleanup error (expected in threading): {e}")
+                self.exit_stack = None
+
+    def close(self):
+        # Close exit stack first while event loop is still running
+        if self.exit_stack and self.loop and not self.loop.is_closed():
+            try:
+                # Schedule the cleanup on the event loop
+                async def cleanup():
+                    await self.exit_stack.aclose()
+                    self.exit_stack = None
+
+                future = asyncio.run_coroutine_threadsafe(cleanup(), self.loop)
+                future.result(timeout=5)
+            except Exception as e:
+                # AsyncExitStack cleanup can fail in threading context, but that's OK
+                # The important thing is that the MCP session worked during operation
+                print(f"Warning: MCP cleanup error (expected in threading): {e}")
+                self.exit_stack = None
+
+        # Stop event loop and join thread
+        if self.loop and self.loop.is_running():
+            # Ask the loop to stop
+            try:
+                self.loop.call_soon_threadsafe(self.loop.stop)
+            except Exception:
+                pass
+
+        if self.thread and self.thread.is_alive():
+            # Give the thread a little more time to finish cleanly
+            self.thread.join(timeout=5)
+
+        # After the loop has stopped and the thread joined, close the loop from the main thread
+        try:
+            if self.loop and not self.loop.is_closed():
+                self.loop.close()
+        except Exception:
+            pass
+            self.thread.join(timeout=2)
+
+        # Clear references to help garbage collection
+        self.session = None
+        self.local_tools = []
+        self.query_agent = None
 
     async def _init_mcp(self, server_params):
         """Initializes the MCP session and creates local tools."""
-        self.session = await self._initialize_session(server_params)
-        self.local_tools = await self._create_local_tools()
-        self.query_agent = self._create_query_agent()
-        if sys.platform == "win32":
-            await asyncio.sleep(0.2)
+        print(f"[DEBUG] Starting MCP initialization for {self.name}")
+        try:
+            self.session = await self._initialize_session(server_params)
+            print(f"[DEBUG] Session initialized for {self.name}")
+            
+            self.local_tools = await self._create_local_tools()
+            print(f"[DEBUG] Local tools created for {self.name}: {len(self.local_tools)} tools")
+            
+            self.query_agent = self._create_query_agent()
+            print(f"[DEBUG] Query agent created for {self.name}")
+            
+            if sys.platform == "win32":
+                await asyncio.sleep(0.2)
+                
+            print(f"[DEBUG] MCP initialization completed for {self.name}")
+        except Exception as e:
+            print(f"[ERROR] MCP initialization failed for {self.name}: {e}")
+            raise
 
     async def _initialize_session(self, server_params):
-        self.stdio_cm = stdio_client(server_params)
-        read, write = await self.stdio_cm.__aenter__()
-        session = ClientSession(read, write, sampling_callback=None)
-        await session.initialize()
-        # We don't close the session here; it will be kept alive for the tools.
-        # A __del__ method could be added to properly close it when the object is destroyed.
-        return session
+        """Initialize MCP session using proper AsyncExitStack context management"""
+        print(f"[DEBUG] Initializing MCP session for {self.name}")
+        self.exit_stack = AsyncExitStack()
+        
+        try:
+            print(f"[DEBUG] Starting stdio client for {self.name}")
+            # Use proper async context management for stdio client
+            stdio_transport = await self.exit_stack.enter_async_context(
+                stdio_client(server_params)
+            )
+            read, write = stdio_transport
+            print(f"[DEBUG] Stdio client started for {self.name}")
+            
+            print(f"[DEBUG] Creating client session for {self.name}")
+            # Use proper async context management for ClientSession
+            session = await self.exit_stack.enter_async_context(
+                ClientSession(read, write, sampling_callback=None)
+            )
+            print(f"[DEBUG] Client session created for {self.name}")
+            
+            # Now session.initialize() will work properly
+            print(f"[DEBUG] Initializing session for {self.name}")
+            await session.initialize()
+            print(f"[DEBUG] Session initialized successfully for {self.name}")
+            
+            return session
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize MCP session for {self.name}: {e}")
+            raise
 
     async def _create_local_tools(self):
         remote_tools_response = await self.session.list_tools()

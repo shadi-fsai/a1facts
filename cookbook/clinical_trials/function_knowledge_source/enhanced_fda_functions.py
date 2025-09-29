@@ -14,10 +14,9 @@ KEY IMPROVEMENTS:
 import requests
 import json
 import re
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+import datetime
+from typing import Dict as DictType, List as ListType, Optional as OptionalType
 import time
-from collections import defaultdict, Counter
 
 def normalize_product_name(product_name: str) -> str:
     """
@@ -50,7 +49,7 @@ def normalize_product_name(product_name: str) -> str:
     
     return normalized
 
-def enhanced_search_fda_adverse_events(drug_name: str, max_results: int = 100) -> Dict:
+def enhanced_search_fda_adverse_events(drug_name: str, max_results: int = 100) -> DictType:
     """
     Enhanced FDA adverse event search with data normalization and processing.
     
@@ -61,6 +60,8 @@ def enhanced_search_fda_adverse_events(drug_name: str, max_results: int = 100) -
     - Temporal trend analysis
     - Severity categorization
     """
+    from collections import Counter, defaultdict
+    
     # Normalize drug name for better matching
     normalized_drug = normalize_product_name(drug_name)
     
@@ -204,7 +205,7 @@ def enhanced_search_fda_adverse_events(drug_name: str, max_results: int = 100) -
             "normalized_drug": normalized_drug
         }
 
-def search_fda_drug_approvals(drug_name: str, max_results: int = 50) -> Dict:
+def search_fda_drug_approvals(drug_name: str, max_results: int = 50) -> DictType:
     """
     Search FDA drug approval database - ENHANCED CAPABILITY!
     Much more comprehensive than basic string search.
@@ -252,11 +253,13 @@ def search_fda_drug_approvals(drug_name: str, max_results: int = 50) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "FDA Drugs@FDA", "query": drug_name}
 
-def search_fda_device_events(device_name: str, max_results: int = 100) -> Dict:
+def search_fda_device_events(device_name: str, max_results: int = 100) -> DictType:
     """
     Search FDA medical device adverse events - NEW CAPABILITY!
     Expands beyond drugs to medical devices.
     """
+    from collections import Counter
+    
     url = "https://api.fda.gov/device/event.json"
     
     params = {
@@ -327,11 +330,13 @@ def search_fda_device_events(device_name: str, max_results: int = 100) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "FDA MAUDE", "query": device_name}
 
-def search_fda_food_recalls(product_name: str, max_results: int = 50) -> Dict:
+def search_fda_food_recalls(product_name: str, max_results: int = 50) -> DictType:
     """
     Search FDA food recall database - NEW CAPABILITY!
     Expands coverage to food safety recalls.
     """
+    from collections import Counter
+    
     url = "https://api.fda.gov/food/enforcement.json"
     
     params = {
@@ -379,14 +384,14 @@ def search_fda_food_recalls(product_name: str, max_results: int = 50) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "FDA Food Recalls", "query": product_name}
 
-def analyze_adverse_event_trends(drug_name: str, months_back: int = 24) -> Dict:
+def analyze_adverse_event_trends(drug_name: str, months_back: int = 24) -> DictType:
     """
     Analyze temporal trends in adverse events - NEW CAPABILITY!
     Critical for safety signal detection.
     """
     # Calculate date range
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=months_back * 30)
+    start_date = end_date - datetime.timedelta(days=months_back * 30)
     
     # Format dates for FDA API (YYYYMMDD)
     start_date_str = start_date.strftime("%Y%m%d")
@@ -467,11 +472,13 @@ def analyze_adverse_event_trends(drug_name: str, months_back: int = 24) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "FDA FAERS Trends", "drug": drug_name}
 
-def get_fda_warning_letters(company_name: str, max_results: int = 20) -> Dict:
+def get_fda_warning_letters(company_name: str, max_results: int = 20) -> DictType:
     """
     Search FDA warning letters to companies - NEW CAPABILITY!
     Important for regulatory compliance intelligence.
     """
+    from collections import Counter
+    
     url = "https://api.fda.gov/other/enforcement.json"
     
     params = {
@@ -519,7 +526,7 @@ def get_fda_warning_letters(company_name: str, max_results: int = 20) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "FDA Enforcement", "company": company_name}
 
-def compare_drug_safety_profiles(drug_names: List[str], max_results_per_drug: int = 100) -> Dict:
+def compare_drug_safety_profiles(drug_names: ListType[str], max_results_per_drug: int = 100) -> DictType:
     """
     Compare safety profiles across multiple drugs - NEW CAPABILITY!
     Critical for competitive safety analysis.
@@ -625,7 +632,7 @@ def _format_fda_date(date_field: str) -> str:
     
     return date_field
 
-def get_fda_api_usage_info() -> Dict:
+def get_fda_api_usage_info() -> DictType:
     """
     Get FDA API usage and rate limit information - NEW CAPABILITY!
     Useful for monitoring API health and limits.

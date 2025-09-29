@@ -13,6 +13,7 @@ from colored import cprint
 from a1facts.utils.logger import logger
 import pickle
 import os
+import asyncio
 import hashlib
 
 
@@ -64,9 +65,7 @@ class KnowledgeAcquirer:
                     logger.system(f"Using cached acquisition instructions")
                     return cached_data['instructions']
             except (pickle.UnpicklingError, EOFError, KeyError) as e:
-                # Handle cases where the pickle file is corrupt or has unexpected format
                 print(f"Cache file {cache_file} is invalid, regenerating. Error: {e}")
-        # Cache miss or invalid cache file
         instructions = self.ontology.rewrite_agent.rewrite_query(self.get_template())
         with open(cache_file, 'wb') as f:
             pickle.dump({
@@ -76,10 +75,38 @@ class KnowledgeAcquirer:
         logger.system(f"Acquisition instructions cached")
         return instructions
 
-    def acquire(self, query: str):
-        result = self.agent.run(query)
+    async def acquire_async(self, query: str):
+        result = await self.agent.arun(query)
         cprint(f"KnowledgeAcquirer result: {result.content}", "green")
         return result.content
+
+    def acquire(self, query: str):
+        """
+        Acquire knowledge safely without killing event loops.
+        Supports multiple MCP sources running in their own threads.
+        """
+        try:
+            loop = None
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                # No event loop in current thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            if loop.is_running():
+                # If already running (e.g. Jupyter, or nested agent),
+                # schedule on that loop
+                future = asyncio.run_coroutine_threadsafe(self.acquire_async(query), loop)
+                return future.result(timeout=60)
+            else:
+                return loop.run_until_complete(self.acquire_async(query))
+
+        except Exception as e:
+            logger.warning(f"Async acquire failed: {e}, falling back to sync")
+            result = self.agent.run(query)
+            cprint(f"KnowledgeAcquirer result: {result.content}", "green")
+            return result.content
 
     def load_knowledge_sources(self, knowledge_sources_config_file: str):
         knowledge_sources = []
@@ -169,3 +196,15 @@ Citation: When information is Confirmed by multiple sources, cite those sources 
 Always provide sources for your answer, the sources should be extracted from the properties of the entities in the knowledge graph; you should get them when you get the information from the graph.          
 Current Date: {datetime.now().strftime("%Y-%m-%d")}
 """)
+
+    def close(self):
+        """Close all knowledge sources properly."""
+        logger.system("Closing KnowledgeAcquirer")
+        for source in self.knowledge_sources:
+            if hasattr(source, 'close'):
+                try:
+                    source.close()
+                    logger.system(f"Closed knowledge source: {source.name}")
+                except Exception as e:
+                    logger.warning(f"Error closing knowledge source {source.name}: {e}")
+        logger.system("KnowledgeAcquirer closed")

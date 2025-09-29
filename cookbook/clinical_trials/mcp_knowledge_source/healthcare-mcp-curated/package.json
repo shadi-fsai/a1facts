@@ -1,0 +1,19 @@
+{
+  "name": "healthcare-mcp-curated",
+  "version": "1.0.0",
+  "description": "Curated Healthcare MCP Server with only unique, non-redundant tools",
+  "type": "module",
+  "main": "server/curated-index.js",
+  "scripts": {
+    "start": "node server/curated-index.js",
+    "dev": "node --inspect server/curated-index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "node-fetch": "^3.3.2",
+    "dicom-parser": "^1.8.21"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

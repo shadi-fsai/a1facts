@@ -7,8 +7,8 @@ Drug-Gene Interaction Database MCP server for A1Facts clinical trials intelligen
 import asyncio
 import json
 import sys
-from mcp.server.models import InitializeResult
-from mcp.server import NotificationOptions, Server
+from mcp.server import NotificationOptions, Server, InitializationOptions
+from mcp.types import InitializeResult
 from mcp.server.stdio import stdio_server
 from mcp.types import (
     Resource,
@@ -229,7 +229,7 @@ class DGIdbMCPServer:
             await self.server.run(
                 read_stream,
                 write_stream,
-                InitializeResult(
+                InitializationOptions(
                     server_name="dgidb-mcp",
                     server_version="1.0.0",
                     capabilities=self.server.get_capabilities(

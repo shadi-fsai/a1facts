@@ -190,7 +190,7 @@ def search_pubmed_general(query: str, max_results: int = 10) -> Dict:
                     publication = {
                         "pmid": pmid_text,
                         "title": title_text,
-                        "abstract": abstract_text[:500] + "..." if len(abstract_text) > 500 else abstract_text,
+                        "abstract": abstract_text[:500] + "..." if abstract_text and len(abstract_text) > 500 else (abstract_text or "No abstract available"),
                         "study_type": extract_study_type(title_text, abstract_text),
                         "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid_text}/"
                     }

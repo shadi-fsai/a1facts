@@ -15,13 +15,13 @@ from Bio import Entrez
 import time
 import json
 import re
-from typing import Dict, List, Optional
-from datetime import datetime
+import datetime
+from typing import Dict as DictType, List as ListType, Optional as OptionalType
 
 # Set email for NCBI API (required by NCBI)
 Entrez.email = "research@a1facts.com"
 
-def enhanced_search_pubmed_clinical_trials(query: str, max_results: int = 20) -> Dict:
+def enhanced_search_pubmed_clinical_trials(query: str, max_results: int = 20) -> DictType:
     """
     Advanced PubMed search using BioPython with MeSH terms and related articles.
     
@@ -91,7 +91,7 @@ def enhanced_search_pubmed_clinical_trials(query: str, max_results: int = 20) ->
     except Exception as e:
         return {"error": str(e), "source": "PubMed via BioPython", "query": query}
 
-def get_related_articles(pmid: str, max_related: int = 10) -> Dict:
+def get_related_articles(pmid: str, max_related: int = 10) -> DictType:
     """
     Find related articles using BioPython's elink - NEW CAPABILITY!
     This function doesn't exist in your current setup.
@@ -147,7 +147,7 @@ def get_related_articles(pmid: str, max_related: int = 10) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "PubMed elink", "pmid": pmid}
 
-def search_mesh_terms(term: str) -> Dict:
+def search_mesh_terms(term: str) -> DictType:
     """
     Search MeSH database for controlled vocabulary terms - NEW CAPABILITY!
     Essential for precision medical searching.
@@ -186,7 +186,7 @@ def search_mesh_terms(term: str) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "MeSH Database", "query": term}
 
-def get_database_info() -> Dict:
+def get_database_info() -> DictType:
     """
     Get PubMed database information - NEW CAPABILITY!
     Useful for understanding search capabilities and database status.
@@ -208,7 +208,7 @@ def get_database_info() -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "PubMed einfo"}
 
-def search_by_author(author_name: str, max_results: int = 20) -> Dict:
+def search_by_author(author_name: str, max_results: int = 20) -> DictType:
     """
     Search publications by specific author - ENHANCED CAPABILITY!
     Much more robust than basic string matching.
@@ -261,7 +261,7 @@ def search_by_author(author_name: str, max_results: int = 20) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "PubMed Author Search", "author": author_name}
 
-def search_by_journal(journal_name: str, keywords: str = "", max_results: int = 20) -> Dict:
+def search_by_journal(journal_name: str, keywords: str = "", max_results: int = 20) -> DictType:
     """
     Search publications in specific journal - ENHANCED CAPABILITY!
     More precise journal matching and optional keyword filtering.
@@ -325,7 +325,7 @@ def search_by_journal(journal_name: str, keywords: str = "", max_results: int = 
     except Exception as e:
         return {"error": str(e), "source": "PubMed Journal Search", "journal": journal_name}
 
-def search_drug_mechanism_of_action(drug_name: str, max_results: int = 15) -> Dict:
+def search_drug_mechanism_of_action(drug_name: str, max_results: int = 15) -> DictType:
     """
     Search for mechanism of action studies for specific drugs - NEW CAPABILITY!
     Focused on MOA research critical for competitive intelligence.
@@ -386,7 +386,7 @@ def search_drug_mechanism_of_action(drug_name: str, max_results: int = 15) -> Di
     except Exception as e:
         return {"error": str(e), "source": "PubMed MOA Search", "drug": drug_name}
 
-def search_drug_safety_profile(drug_name: str, max_results: int = 20) -> Dict:
+def search_drug_safety_profile(drug_name: str, max_results: int = 20) -> DictType:
     """
     Search for drug safety and adverse event publications - NEW CAPABILITY!
     Critical for competitive safety intelligence.
@@ -447,7 +447,7 @@ def search_drug_safety_profile(drug_name: str, max_results: int = 20) -> Dict:
     except Exception as e:
         return {"error": str(e), "source": "PubMed Safety Search", "drug": drug_name}
 
-def get_clinical_trial_publications(nct_id: str) -> Dict:
+def get_clinical_trial_publications(nct_id: str) -> DictType:
     """
     Find publications related to specific clinical trial NCT ID - NEW CAPABILITY!
     Links clinical trials to their published results.

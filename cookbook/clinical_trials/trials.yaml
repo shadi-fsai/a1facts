@@ -1,7 +1,10 @@
 world:
-  name: Clinical Trials Knowledge Graph
-  description: An ontology for tracking clinical trial information, including drugs,
-    targets, sponsors, and outcomes.
+  name: Enhanced Clinical Trials Intelligence Graph
+  description: A comprehensive ontology for pharmaceutical competitive intelligence, including clinical trials, drugs, targets, sponsors, outcomes, safety analysis, mechanism research, and regulatory intelligence with MCP server integration.
+  main_entities:
+    - ClinicalTrial
+    - Drug
+    - Sponsor
 
 entity_classes:
   ClinicalTrial:
@@ -106,41 +109,335 @@ entity_classes:
       type: str
       description: The source of the information.
 
-      
+  # ===== MCP SERVER ENTITIES =====
+
+  MedicalCalculation:
+    description: Medical calculations performed by MCP healthcare server (BMI, BSA, creatinine clearance, pediatric dosing).
+    properties:
+    - name: calculation_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the medical calculation.
+    - name: calculation_type
+      type: str
+      description: Type of calculation (BMI, BSA, creatinine_clearance, pediatric_dosing).
+    - name: input_values
+      type: str
+      description: Input parameters used in the calculation.
+    - name: result
+      type: str
+      description: Calculated result value.
+    - name: units
+      type: str
+      description: Units of the result.
+    - name: source
+      type: str
+      description: Source of the calculation (Healthcare MCP server).
+
+  MedicalTerminology:
+    description: Medical terminology lookups from MCP healthcare server (ICD-10 codes, medical definitions).
+    properties:
+    - name: term_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the terminology entry.
+    - name: term
+      type: str
+      description: The medical term or code.
+    - name: term_type
+      type: str
+      description: Type of term (ICD-10, medical_definition, abbreviation).
+    - name: definition
+      type: str
+      description: Full definition or explanation of the term.
+    - name: source
+      type: str
+      description: Source of the terminology data (Healthcare MCP server).
+
+  HealthTopic:
+    description: Consumer-friendly health topic explanations from MCP healthcare server.
+    properties:
+    - name: topic_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the health topic.
+    - name: topic_name
+      type: str
+      description: Name of the health topic.
+    - name: explanation
+      type: str
+      description: Layperson-friendly explanation of the topic.
+    - name: related_conditions
+      type: str
+      description: Comma-separated list of related medical conditions.
+    - name: source
+      type: str
+      description: Source of the health information (Healthcare MCP server).
+
+  PreprintPublication:
+    description: Scientific preprint publications from medRxiv MCP server.
+    properties:
+    - name: preprint_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the preprint.
+    - name: title
+      type: str
+      description: Title of the preprint publication.
+    - name: authors
+      type: str
+      description: Authors of the preprint.
+    - name: abstract
+      type: str
+      description: Abstract of the preprint.
+    - name: publication_date
+      type: date
+      description: Date the preprint was published.
+    - name: doi
+      type: str
+      description: Digital Object Identifier for the preprint.
+    - name: source
+      type: str
+      description: Source of the preprint (medRxiv MCP server).
+
+  MedicalReference:
+    description: Medical reference materials from NCBI Bookshelf MCP server.
+    properties:
+    - name: reference_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the reference material.
+    - name: title
+      type: str
+      description: Title of the reference material.
+    - name: content_type
+      type: str
+      description: Type of content (book, chapter, article, guideline).
+    - name: summary
+      type: str
+      description: Summary or key excerpts from the reference.
+    - name: publication_year
+      type: int
+      description: Year of publication.
+    - name: source
+      type: str
+      description: Source of the reference (NCBI Bookshelf MCP server).
+
+  MedicalImage:
+    description: Medical imaging information from DICOM MCP server.
+    properties:
+    - name: image_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the medical image information.
+    - name: modality
+      type: str
+      description: Imaging modality (CT, MRI, X-ray, ultrasound).
+    - name: description
+      type: str
+      description: Description of the imaging technique or findings.
+    - name: clinical_use
+      type: str
+      description: Clinical applications and uses of this imaging type.
+    - name: source
+      type: str
+      description: Source of the imaging information (DICOM MCP server).
+
+  # ===== ENHANCED FUNCTION SOURCE ENTITIES =====
+
+  EnhancedFDARecord:
+    description: Enhanced FDA database records with comprehensive drug safety and approval information.
+    properties:
+    - name: record_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the FDA record.
+    - name: drug_name
+      type: str
+      description: Name of the drug or medical product.
+    - name: record_type
+      type: str
+      description: Type of FDA record (approval, adverse_event, recall, labeling).
+    - name: event_date
+      type: date
+      description: Date of the FDA event or record.
+    - name: description
+      type: str
+      description: Detailed description of the FDA record.
+    - name: severity
+      type: str
+      description: Severity level for adverse events or recalls.
+    - name: source
+      type: str
+      description: Source of the FDA data (Enhanced FDA functions).
+
+  EnhancedPubMedArticle:
+    description: Enhanced PubMed articles with comprehensive metadata and analysis.
+    properties:
+    - name: article_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the article (PMID).
+    - name: title
+      type: str
+      description: Title of the publication.
+    - name: authors
+      type: str
+      description: Authors of the article.
+    - name: journal
+      type: str
+      description: Journal name and publication details.
+    - name: publication_date
+      type: date
+      description: Date of publication.
+    - name: abstract
+      type: str
+      description: Abstract of the article.
+    - name: keywords
+      type: str
+      description: Key terms and MeSH headings.
+    - name: source
+      type: str
+      description: Source of the article data (Enhanced PubMed functions).
+
+  DrugGeneInteraction:
+    description: Drug-gene interaction data from DGIdb MCP server for mechanism-based intelligence.
+    properties:
+    - name: interaction_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the drug-gene interaction.
+    - name: drug_name
+      type: str
+      description: Name of the drug involved in the interaction.
+    - name: gene_name
+      type: str
+      description: Name of the gene involved in the interaction.
+    - name: interaction_type
+      type: str
+      description: Type of interaction (inhibitor, activator, substrate).
+    - name: evidence_level
+      type: str
+      description: Level of evidence supporting the interaction.
+    - name: source
+      type: str
+      description: Source of the interaction data (DGIdb MCP server).
+
+  ResearchTrend:
+    description: Research trend analysis from BioRxiv MCP server for emerging scientific directions.
+    properties:
+    - name: trend_id
+      type: str
+      primary_key: true
+      description: Unique identifier for the research trend.
+    - name: topic
+      type: str
+      description: Research topic or keyword being tracked.
+    - name: trend_strength
+      type: str
+      description: Strength of the trend (strong, moderate, emerging, declining).
+    - name: publication_count
+      type: int
+      description: Number of publications in this trend.
+    - name: analysis_period
+      type: str
+      description: Time period of the trend analysis.
+    - name: source
+      type: str
+      description: Source of the trend data (BioRxiv MCP server).
+
+
 relationships:
   is_sponsored_by:
     domain: ClinicalTrial
     range: Sponsor
     description: Links a ClinicalTrial to its Sponsor.
-    properties: []
   investigates:
     domain: ClinicalTrial
     range: Drug
     description: Connects a ClinicalTrial to the Drug it is studying.
-    properties: []
   targets:
     domain: Drug
     range: BiologicalTarget
     description: Links a Drug to the BiologicalTarget it is designed to act on.
-    properties: []
   had_event:
     domain: ClinicalTrial
     range: AdverseEvent
     description: Connects a ClinicalTrial to an AdverseEvent observed during the study.
-    properties: []
   has_endpoint:
     domain: ClinicalTrial
     range: Endpoint
     description: Connects a ClinicalTrial to its various defined Endpoints.
-    properties: []
   announces_data_in:
     domain: ClinicalTrial
     range: DataRelease
     description: Connects a ClinicalTrial to a specific event where its data was released.
-    properties: []
   reports_on:
     domain: DataRelease
     range: Endpoint
     description: Connects a DataRelease to the specific Endpoint(s) it contains data
       for.
-    properties: []
+
+  # ===== MCP SERVER RELATIONSHIPS =====
+
+  has_medical_calculation:
+    domain: ClinicalTrial
+    range: MedicalCalculation
+    description: Connects clinical trials to medical calculations (e.g., BMI requirements).
+
+  uses_medical_terminology:
+    domain: ClinicalTrial
+    range: MedicalTerminology
+    description: Links clinical trials to medical terminology used in the study.
+
+  explains_health_topic:
+    domain: HealthTopic
+    range: ClinicalTrial
+    description: Connects health topics to related clinical trials.
+
+  cites_preprint:
+    domain: ClinicalTrial
+    range: PreprintPublication
+    description: Links clinical trials to relevant preprint publications.
+
+  references_medical_literature:
+    domain: Drug
+    range: MedicalReference
+    description: Connects drugs to medical reference materials about their mechanism.
+
+  uses_medical_imaging:
+    domain: ClinicalTrial
+    range: MedicalImage
+    description: Links clinical trials that use specific medical imaging modalities.
+
+  # ===== ENHANCED FUNCTION SOURCE RELATIONSHIPS =====
+
+  has_fda_record:
+    domain: Drug
+    range: EnhancedFDARecord
+    description: Connects drugs to their comprehensive FDA regulatory records.
+
+  has_pubmed_article:
+    domain: Drug
+    range: EnhancedPubMedArticle
+    description: Links drugs to relevant scientific publications.
+
+  has_drug_gene_interaction:
+    domain: Drug
+    range: DrugGeneInteraction
+    description: Connects drugs to their gene interaction profiles.
+
+  influences_research_trend:
+    domain: Drug
+    range: ResearchTrend
+    description: Links drugs to research trends they influence.
+
+  has_safety_analysis:
+    domain: Drug
+    range: EnhancedFDARecord
+    description: Connects drugs to safety analysis records.
+
+  has_literature_analysis:
+    domain: Drug
+    range: EnhancedPubMedArticle
+    description: Links drugs to literature analysis results.

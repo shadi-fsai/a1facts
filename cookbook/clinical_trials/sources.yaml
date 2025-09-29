@@ -1,1 +1,77 @@
 knowledge_sources:
+  # ===== FUNCTION KNOWLEDGE SOURCES (35 Functions Total) =====
+
+  CLINICALTRIALS_GOV:
+    name: clinicaltrials_gov_api
+    type: function
+    description: Official ClinicalTrials.gov database API for comprehensive trial registry data (6 functions)
+    functions_package: function_knowledge_source.clinicaltrials_functions
+    override_reliability: A
+    override_credibility: "1"
+
+  FDA_DATABASES_ENHANCED:
+    name: fda_drug_safety_enhanced
+    type: function
+    description: Enhanced FDA databases with professional data processing, normalization, statistical analysis, and temporal trends (9 functions vs 6 basic)
+    functions_package: function_knowledge_source.enhanced_fda_functions
+    override_reliability: A
+    override_credibility: "1"
+
+  PUBMED_RESEARCH_ENHANCED:
+    name: pubmed_clinical_research_enhanced
+    type: function
+    description: Enhanced PubMed database with BioPython professional XML parsing, MeSH terms, related article discovery, and mechanism/safety analysis (9 functions vs 5 basic)
+    functions_package: function_knowledge_source.enhanced_pubmed_functions
+    override_reliability: A
+    override_credibility: "1"
+
+  FDA_DATABASES_BASIC:
+    name: fda_drug_safety_basic
+    type: function
+    description: Original FDA databases with basic API access for adverse events, approvals, recalls, and labeling (6 functions)
+    functions_package: function_knowledge_source.fda_functions
+    override_reliability: A
+    override_credibility: "1"
+
+  PUBMED_RESEARCH_BASIC:
+    name: pubmed_clinical_research_basic
+    type: function
+    description: Original PubMed database with basic API access for literature searches and author queries (5 functions)
+    functions_package: function_knowledge_source.pubmed_functions
+    override_reliability: A
+    override_credibility: "1"
+
+  # ===== UNIQUE MCP KNOWLEDGE SOURCES (12 Tools Total - No Redundancy) =====
+
+  HEALTHCARE_MCP_CURATED:
+    name: healthcare_mcp_curated
+    type: mcp
+    description: Curated healthcare MCP with unique tools - BMI calculator, ICD-10 terminology lookup, health topics, medRxiv preprints, NCBI bookshelf, DICOM metadata extraction (6 unique tools)
+    run_command: node
+    run_args: ["server/index.js"]
+    run_cwd: "./mcp_knowledge_source/healthcare-mcp-server"
+    tools: ["calculate_bmi", "lookup_icd_code", "health_topics", "medrxiv_search", "ncbi_bookshelf_search", "extract_dicom_metadata"]
+    override_reliability: A
+    override_credibility: "1"
+
+  DGIDB_MCP:
+    name: dgidb_mcp_server
+    type: mcp
+    description: Drug-gene interaction database for mechanism-based pharmaceutical intelligence and target identification (3 Python tools) - UNIQUE CAPABILITY
+    run_command: python
+    run_args: ["__main__.py"]
+    run_cwd: "./mcp_knowledge_source/dgidb-mcp"
+    tools: ["search_drug_interactions", "get_gene_info", "analyze_mechanism"]
+    override_reliability: A
+    override_credibility: "1"
+
+  BIORXIV_MCP:
+    name: biorxiv_mcp_server
+    type: mcp
+    description: BioRxiv preprint server for early pharmaceutical research intelligence and trend analysis (3 Python tools) - UNIQUE CAPABILITY
+    run_command: python
+    run_args: ["__main__.py"]
+    run_cwd: "./mcp_knowledge_source/biorxiv-mcp"
+    tools: ["search_preprints", "get_preprint_details", "track_research_trends"]
+    override_reliability: B
+    override_credibility: "2"

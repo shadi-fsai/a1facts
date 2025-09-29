@@ -5,10 +5,8 @@ BioRxiv preprint server for early pharmaceutical research intelligence
 """
 
 import asyncio
-import json
-import sys
-from mcp.server.models import InitializeResult
-from mcp.server import NotificationOptions, Server
+from mcp.server import NotificationOptions, Server, InitializationOptions
+from mcp.types import InitializeResult
 from mcp.server.stdio import stdio_server
 from mcp.types import (
     Resource,
@@ -137,7 +135,9 @@ class BioRxivMCPServer:
                 end_date = datetime.now().strftime("%Y-%m-%d") 
                 url = f"{base_url}/{start_date}/{end_date}"
             
-            response = requests.get(url, params=params, timeout=15)
+            # Run synchronous HTTP request in thread pool to avoid blocking event loop
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, lambda: requests.get(url, params=params, timeout=15))
             response.raise_for_status()
             data = response.json()
             
@@ -191,7 +191,9 @@ class BioRxivMCPServer:
             # bioRxiv details API
             url = f"https://api.biorxiv.org/details/biorxiv/{doi}"
             
-            response = requests.get(url, timeout=10)
+            # Run synchronous HTTP request in thread pool
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, lambda: requests.get(url, timeout=10))
             response.raise_for_status()
             data = response.json()
             
@@ -313,7 +315,7 @@ class BioRxivMCPServer:
             await self.server.run(
                 read_stream,
                 write_stream,
-                InitializeResult(
+                InitializationOptions(
                     server_name="biorxiv-mcp",
                     server_version="1.0.0",
                     capabilities=self.server.get_capabilities(
