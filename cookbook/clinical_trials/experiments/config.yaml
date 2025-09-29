@@ -1,0 +1,35 @@
+# Evaluation Configuration
+evaluation:
+  # LLM Judge settings
+  judge_model: "gpt-4o-mini"
+  min_tool_rating: 3
+  min_response_rating: 3
+
+  # Test settings
+  max_queries: 30  # Test all 30 queries
+  sample_size: 5   # Test first 5 for quick runs
+  timeout_seconds: 60
+
+  # Agent settings
+  agent_model: "gpt-4o-mini"
+  debug_mode: false
+
+  # MCP server settings (ensure these are running)
+  mcp_servers:
+    - healthcare-mcp-server
+    - dgidb-mcp
+    - biorxiv-mcp
+
+# Quality thresholds
+thresholds:
+  tool_selection: 3  # 1-5 scale
+  response_quality: 3 # 1-5 scale
+
+# Test categories
+categories:
+  - clinical_trials: [1, 2, 3, 4, 5, 8, 9, 11, 12, 13, 14, 16]
+  - drug_information: [2, 6, 9, 11, 13, 14]
+  - medical_calculations: [3]
+  - terminology: [4]
+  - literature: [1, 5, 6, 8, 12, 15, 16]
+  - imaging: [10]
